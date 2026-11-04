@@ -1,0 +1,38 @@
+# أسرار ومفاتيح (ممنوع تمامًا في الريبو العام)
+.env
+.env.*
+*.key
+*.pem
+*.p12
+serviceAccount*.json
+*-credentials.json
+*firebase-adminsdk*.json
+secrets/
+.clasprc.json
+.clasp.json
+
+# بيانات حقيقية وتصديرات (البيانات في Firestore فقط)
+data/
+exports/
+*.xlsx
+*.xls
+*.csv
+*.zip
+# مسموح فقط ببيانات اختبار وهمية
+!packages/logic/tests/fixtures/**
+
+# أدوات وبناء
+node_modules/
+dist/
+build/
+.firebase/
+firebase-debug.log
+*.log
+coverage/
+.vite/
+
+# أنظمة تشغيل ومحررات
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

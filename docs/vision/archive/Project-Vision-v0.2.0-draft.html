@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="doc-id" content="VISION">
+<meta name="doc-version" content="0.2.0">
+<meta name="doc-status" content="draft">
+<title>الرؤية العامة v0.2.0 (مسودة) — Badawy GPS Platform</title>
+<style>
+:root{--bg:#f6f1e7;--card:#fffdf8;--ink:#1d2a2e;--mute:#5d6b6f;--line:#ddd3bf;--acc:#0f6b66;--acc2:#b4541a;--ok:#2f7a3d;--bad:#a8322d;--chip:#e9e1cf}
+@media (prefers-color-scheme:dark){:root{--bg:#12181a;--card:#1a2326;--ink:#e8e4d8;--mute:#9aa7a9;--line:#2f3b3e;--acc:#4fc3bb;--acc2:#e0894f;--ok:#6cc27a;--bad:#e5726d;--chip:#243034}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.85 "Segoe UI",Tahoma,system-ui,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+main{max-width:880px;margin:auto;padding:18px 16px 60px}
+h1{font-size:1.8rem;line-height:1.4;margin:.2em 0}
+h2{font-size:1.25rem;margin:2.1em 0 .5em;padding-inline-start:12px;border-inline-start:5px solid var(--acc)}
+h3{font-size:1.02rem;margin:1.3em 0 .3em;color:var(--acc)}
+.sub{color:var(--mute);margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0}
+.warn{border-inline-start:5px solid var(--acc2)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:start;vertical-align:top}
+th{background:var(--chip)}
+code{background:var(--chip);padding:1px 6px;border-radius:5px;font:.88em Consolas,monospace;direction:ltr;unicode-bidi:embed}
+pre{background:var(--chip);padding:12px;border-radius:10px;overflow-x:auto;direction:ltr;text-align:left;font:.84rem/1.6 Consolas,monospace}
+.tag{display:inline-block;padding:0 8px;border-radius:99px;font-size:.8rem;border:1px solid currentColor}
+.d{color:var(--ok)}.o{color:var(--acc2)}.x{color:var(--bad)}
+.layer{border:1px solid var(--line);border-inline-start:6px solid var(--acc);background:var(--card);border-radius:10px;padding:8px 14px;margin:8px 0}
+.layer b{display:block}
+footer{color:var(--mute);font-size:.85rem;margin-top:3em}
+</style>
+</head>
+<body>
+<main>
+<h1>الرؤية العامة للمشروع</h1>
+<p class="sub">Badawy Group — GPS Tracking &amp; Reporting Platform</p>
+<div class="card">
+<b>الإصدار:</b> <code>0.2.0</code> · <b>الحالة:</b> مسودة (Draft) · <b>التاريخ:</b> 31/10/2026 · <b>يحل محل:</b> <code>0.1.0</code><br>
+<b>دورة حياة الملف:</b> مسودة <code>0.x</code> ← نسخة نهائية متفق عليها <code>1.0.0</code> (Frozen). بعد 1.0.0 أي تغيير بيتم بقرار موثّق (ADR) وإصدار جديد. <b>مفيش شغل بناء قبل 1.0.0.</b>
+</div>
+
+<h2>1) سجل التغييرات (Changelog)</h2>
+<div class="scroll"><table>
+<tr><th>الإصدار</th><th>التاريخ</th><th>التغيير</th></tr>
+<tr><td><code>0.2.0</code></td><td>31/10/2026</td><td>معمارية Firebase Spark + GitHub Actions بدل Apps Script-only؛ متطلبات 65 عربية و15–20 مستخدم؛ ريبو نضيف؛ سياسة الإصدارات؛ سجل القرارات والـ spikes.</td></tr>
+<tr><td><code>0.1.0</code></td><td>30/10/2026</td><td>أول مسودة: الوضع الحالي، 4 طبقات، keep/merge/drop.</td></tr>
+</table></div>
+
+<h2>2) المتطلبات (ثابتة حتى الآن)</h2>
+<ul>
+<li>الأسطول: <b>65 عربية</b> (منهم عربيات نقل بنقلات، والباقي مشاوير). المستخدمين: <b>15–20</b> بأدوار.</li>
+<li>كل حاجة <b>مجانية ومستدامة</b>، <b>من غير كارت</b> ومن غير أي احتمال فاتورة.</li>
+<li>واجهة على GitHub Pages، وCRUD كامل، وإضافة ميزة لاحقًا تكون سهلة.</li>
+<li>الريبو <b>عام</b>؛ الأسرار والبيانات مستحيل تتسرب.</li>
+<li>Google Sheets يفضل نسخة احتياطية لو الموقع وقع.</li>
+</ul>
+
+<h2>3) الوضع الحالي (ملخص)</h2>
+<p>مشروع Apps Script واحد (~5800 سطر): <code>main.gs</code> 2506، Statements 871، Issues 702، Manual edits 536، Errand 524، Dashboard 399، وملفات صغيرة. فيه قواعد شغل مجرّبة (النقلة = خلاطة ← كسارة ← تفريغ ← خلاطة، يوم من 6 الصبح، صيانة 20 دقيقة، زيارة مشاوير 10 دقايق، بصمة التعديلات…) وهي <b>أصل المشروع</b> وتتنقل بنفس الأرقام.</p>
+
+<h2>4) المعمارية المقترحة</h2>
+<div class="card warn"><b>ليه اتغيّرت عن 0.1.0؟</b> مع 65 عربية: حصص Apps Script العادي (90 دقيقة triggers/يوم، 20 ألف UrlFetch/يوم، 30 تنفيذ متزامن) هتبقى العنق. وGitHub Pages عام فمينفعش نحط عليه بيانات حية. وTraccar على HTTP فالمتصفح مينفعش يكلمه.</div>
+<pre>المتصفح (GitHub Pages, ثابت)  ──Auth + قراءة/كتابة بصلاحيات──►  Firebase Spark
+                                                                (Firestore + Auth + Rules)
+                                                                     ▲
+GitHub Actions (cron, Node) ── يسحب من Traccar (HTTP) ── يحسب ── يكتب التغييرات بس
+Apps Script ── واتساب/Gmail + نسخة Sheets احتياطية + قوائم الشيت القديمة</pre>
+<div class="layer"><b>Data layer</b>Repository interface واحد (<code>get/list/create/update/delete</code>). تنفيذ أساسي: Firestore. تنفيذ احتياطي: Sheets. تغيير المخزن = تغيير ملف واحد.</div>
+<div class="layer"><b>Logic layer</b>دوال نقية بدون شبكة أو تخزين (نقلات، مشاوير، حالة، تعديلات). بتشتغل في Node داخل Actions، وتتختبر بأرقام التحقق (116=19، 118=29…).</div>
+<div class="layer"><b>API/Worker layer</b>الـ Worker بيكتب snapshots جاهزة؛ الكتابة من الواجهة بتمر عبر قواعد Firestore؛ الإرسال (واتساب/Gmail) عبر Apps Script.</div>
+<div class="layer"><b>UI layer</b>GitHub Pages + نظام تصميم موحد (tokens) + RTL + فاتح/داكن.</div>
+
+<h3>حدود الحصص (من الوثائق الرسمية، 31/10/2026 — تتراجع قبل الاعتماد)</h3>
+<div class="scroll"><table>
+<tr><th>الخدمة</th><th>الحد المجاني</th><th>تأثيره علينا</th></tr>
+<tr><td>Firestore (Spark)</td><td>~1 جيجا، 50 ألف قراءة و20 ألف كتابة/يوم؛ الزيادة بتوقف الخدمة مش بتحاسب</td><td>snapshot واحد لكل عرض + كتابة التغييرات بس</td></tr>
+<tr><td>Firebase Auth</td><td>50 ألف مستخدم نشط/شهر (بالإيميل)</td><td>بعيد جدًا عن 20 مستخدم</td></tr>
+<tr><td>GitHub Actions</td><td>دقايق غير محدودة لريبو عام (runners عادية)</td><td>تشغيل cron مجاني</td></tr>
+<tr><td>Apps Script (حساب عادي)</td><td>90 د triggers/يوم، 20 ألف UrlFetch، 30 متزامن</td><td>خارج الشغل التقيل</td></tr>
+<tr><td>Sheets</td><td>10 مليون خلية للملف</td><td>احتياطي فقط + تقسيم شهري</td></tr>
+</table></div>
+<p><b>ممنوع</b> علشان نفضل بلا كارت: Cloud Functions، Storage، Extensions (محتاجين Blaze). Blaze مفيش فيه حد صرف صارم، فمرفوض.</p>
+
+<h2>5) الأمان والريبو العام</h2>
+<ul>
+<li>ريبو <b>جديد من الصفر</b>؛ القديم يتأرشف خاص. لو فيه أسرار اتحطت قبل كده: تغيير توكن Traccar.</li>
+<li>أسرار في GitHub Secrets وScript Properties فقط. <b>عنوان Traccar</b> (حاليًا ظاهر في <code>main.gs</code>) يتنقل لـ Secret.</li>
+<li>ممنوع في الريبو: إحداثيات المواقع الفعلية، أرقام الأجهزة، أرقام واتساب/إيميلات، توكنات، أي تصدير بيانات.</li>
+<li>Firestore Rules: رفض الكل كأساس + صلاحية لكل دور؛ تسجيل ذاتي مقفول؛ الإدارة تنشئ المستخدمين.</li>
+<li>Secret Scanning + Push Protection + pre-commit + <code>.gitignore</code>.</li>
+</ul>
+
+<h2>6) سياسة الإصدارات (Version Control على كل حاجة)</h2>
+<div class="scroll"><table>
+<tr><th>الشيء</th><th>الإصدار</th><th>إزاي</th></tr>
+<tr><td>الكود (Git)</td><td>SemVer <code>vX.Y.Z</code></td><td>Tags + GitHub Releases + <code>CHANGELOG.md</code>؛ فرع <code>main</code> محمي، تغيير عبر PR، Conventional Commits، فروع قصيرة.</td></tr>
+<tr><td>الوثائق (هذا الملف وغيره)</td><td><code>doc-id</code> + <code>doc-version</code> + <code>doc-status</code></td><td>مسودة <code>0.x</code> ← <code>1.0.0</code> Frozen؛ كل ملف فيه Changelog؛ النسخ القديمة تفضل في <code>/docs/archive</code>.</td></tr>
+<tr><td>القرارات</td><td>ADR-NNN</td><td>ملف لكل قرار (السياق، القرار، البدائل، النتيجة، الحالة)؛ القرار ما بيتعدلش، بيتلغى بقرار أحدث.</td></tr>
+<tr><td>الـ API</td><td><code>apiVersion</code> في كل رد</td><td>تغيير غير متوافق = إصدار رئيسي جديد.</td></tr>
+<tr><td>مخطط البيانات</td><td><code>schemaVersion</code> في كل مستند</td><td>ملفات migration مرقمة ومنفذة بـ CI، قابلة للإعادة.</td></tr>
+<tr><td>قواعد الشغل</td><td><code>rulesVersion</code></td><td>كل تقرير بيسجل أي إصدار قواعد ولّده، عشان الأرقام القديمة تفضل قابلة للتفسير.</td></tr>
+<tr><td>نظام التصميم</td><td>SemVer للـ tokens</td><td>تغيير لون/مسافة = إصدار.</td></tr>
+<tr><td>قواعد Firestore والفهارس</td><td>في الريبو</td><td>بتتنشر من CI فقط، مفيش تعديل يدوي من الكونسول.</td></tr>
+<tr><td>الـ framework (حالة التقدم)</td><td><code>frameworkVersion</code></td><td>بيتحدّث مع كل مهمة تخلص: الحالة + الخطوة الجاية.</td></tr>
+</table></div>
+<p>النشر: Pages من tag فقط، والرجوع لنسخة سابقة = إعادة نشر tag قديم.</p>
+
+<h3>هيكل الريبو الجديد (مقترح)</h3>
+<pre>/docs  (vision, framework, adr/, archive/)
+/packages/logic        ← قواعد نقية + tests
+/apps/worker           ← Node (Actions)
+/apps/web              ← GitHub Pages
+/firebase              ← rules, indexes, migrations
+/appsscript            ← واتساب/Gmail + نسخة Sheets
+/.github/workflows  CHANGELOG.md  CODEOWNERS</pre>
+
+<h2>7) سجل القرارات</h2>
+<div class="scroll"><table>
+<tr><th>#</th><th>القرار</th><th>الحالة</th></tr>
+<tr><td>D-001</td><td>الواجهة على GitHub Pages</td><td class="d">متفق</td></tr>
+<tr><td>D-002</td><td>التخلي عن Looker Studio</td><td class="d">متفق</td></tr>
+<tr><td>D-003</td><td>Sheets احتياطي فقط</td><td class="d">متفق</td></tr>
+<tr><td>D-004</td><td>Firebase على Spark بدون كارت (Auth + Firestore)</td><td class="o">مقترح، ينتظر spike S-2</td></tr>
+<tr><td>D-005</td><td>GitHub Actions كـ Worker بدل Apps Script للشغل التقيل</td><td class="o">مقترح، ينتظر S-1 وS-4</td></tr>
+<tr><td>D-006</td><td>Apps Script للإرسال والنسخة الاحتياطية فقط</td><td class="o">مقترح</td></tr>
+<tr><td>D-007</td><td>ريبو عام جديد + قواعد الأسرار</td><td class="d">متفق</td></tr>
+<tr><td>D-008</td><td>Version control على كل المكونات (القسم 6)</td><td class="d">متفق</td></tr>
+<tr><td>D-009</td><td>Repository interface للبيانات</td><td class="o">مقترح</td></tr>
+<tr><td>D-010</td><td>رفض Blaze نهائيًا</td><td class="o">مقترح (بسبب غياب سقف صرف صارم)</td></tr>
+</table></div>
+
+<h3>Spikes لازم تتحقق قبل اعتماد D-004 وD-005</h3>
+<ol>
+<li><b>S-1:</b> هل Traccar (HTTP) بيرد على runners بتاعة GitHub؟</li>
+<li><b>S-2:</b> كتابة Firestore بـ Admin SDK على Spark، وتطبيق Rules.</li>
+<li><b>S-3:</b> مكان كاش نقاط المسار (بدل Drive).</li>
+<li><b>S-4:</b> دقة وتأخير جدولة cron، وقياس زمن تحليل 65 عربية.</li>
+</ol>
+
+<h2>8) قرارات لسه مفتوحة</h2>
+<ol>
+<li>التخلي عن تقرير النقلات من ملفات Excel؟</li>
+<li>محتوى الداشبورد بالظبط، وهل عربيات المشاوير تدخل فيها؟</li>
+<li>الأدوار والصلاحيات: إدارة، مهندس، سائق، مدير خلاطة، أمن — وإيه اللي كل دور يشوفه ويعدله؟</li>
+<li>وتيرة تحديث البيانات (كل كام دقيقة) بما يتماشى مع حدود الكتابة.</li>
+<li>الاتجاه البصري: عربي RTL فقط؟ هوية الشركة؟ فاتح/داكن؟</li>
+<li>Petro: داخل الموقع أو مستقل؟</li>
+<li>قرار التوقيت الصيفي UTC+2 / UTC+3 (مؤجل لـ 24/4/2027).</li>
+<li>مصير عربيات النقل بين 10 و65: هل أي عربية جديدة نقل أم مشاوير، ومن يحدد النوع؟</li>
+</ol>
+
+<h2>9) خريطة المراحل (معاينة، تتثبت في 1.0.0)</h2>
+<p>M0 الأساس والريبو والـ framework ← M1 نظام التصميم ← M2 Spikes ← M3 Data+Logic+اختبارات ← M4 Worker وAPI ← M5 داشبورد وحالة GPS ← M6 نقلات ومشاوير وتعديلات ← M7 مشاكل وبيانات ← M8 احتياطي وتسليم.</p>
+
+<footer>VISION · v0.2.0 · draft — أي قرار يتسجل في سجل القرارات (القسم 7) وفي الـ Changelog (القسم 1).</footer>
+</main>
+</body>
+</html>
