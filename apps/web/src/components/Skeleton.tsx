@@ -1,0 +1,3 @@
+export function Skeleton({ width = '100%', height = '16px' }: { width?: string; height?: string }) {
+  return <span className="sk" style={{ width, height }} />;
+}
