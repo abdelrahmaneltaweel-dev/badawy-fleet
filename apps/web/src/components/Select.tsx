@@ -38,7 +38,7 @@ export function Select({
         className="custom-select-trigger"
         onClick={() => setOpen(!open)}
         aria-haspopup="listbox"
-        aria-expanded={open}
+        aria-expanded={open ? 'true' : 'false'}
       >
         <span>{selectedOption ? selectedOption.label : placeholder}</span>
         <span style={{ fontSize: '0.74rem', color: 'var(--mute)' }}>▼</span>
@@ -46,10 +46,8 @@ export function Select({
 
       {open && (
         <>
-          {/* Backdrop for Mobile Bottom Sheet */}
           <div className="bottom-sheet-backdrop" onClick={() => setOpen(false)} />
 
-          {/* Desktop Dropdown & Mobile Bottom Sheet */}
           <div className="custom-select-popover" role="listbox">
             <div className="bottom-sheet-handle" />
             <div style={{ padding: '0 8px 8px', fontSize: '0.84rem', fontWeight: 700, color: 'var(--mute)' }}>
@@ -59,7 +57,7 @@ export function Select({
               <div
                 key={opt.value}
                 role="option"
-                aria-selected={opt.value === value}
+                aria-selected={opt.value === value ? 'true' : 'false'}
                 className={`select-option ${opt.value === value ? 'selected' : ''}`}
                 onClick={() => {
                   onChange(opt.value);

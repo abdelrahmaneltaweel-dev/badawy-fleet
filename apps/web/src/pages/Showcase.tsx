@@ -61,7 +61,7 @@ export default function Showcase() {
             label="اسم السائق أو رقم العربية"
             placeholder="مثال: 116 أو أحمد..."
             value={inputVal}
-            onInput={(e) => setInputVal((e.target as HTMLInputElement).value)}
+            onInput={(e) => setInputVal((e.currentTarget as HTMLInputElement).value)}
           />
           <div>
             <div style={{ fontSize: '0.84rem', fontWeight: 600, marginBottom: '6px' }}>اختر العربية (ADR-027)</div>

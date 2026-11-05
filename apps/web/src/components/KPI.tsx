@@ -19,7 +19,6 @@ export function KPI({
   sparkline,
   sparkColor = 'var(--acc)'
 }: KPIProps) {
-  // Generate smooth SVG Sparkline
   let sparkPath = '';
   if (sparkline && sparkline.length > 1) {
     const min = Math.min(...sparkline);
@@ -30,8 +29,11 @@ export function KPI({
       (i * width) / (sparkline.length - 1),
       height - 4 - ((v - min) / (max - min || 1)) * (height - 8)
     ]);
-    sparkPath = `M${points[0][0]},${points[0][1]}` +
-      points.slice(1).map(p => ` L${p[0]},${p[1]}`).join('');
+    const first = points[0];
+    if (first) {
+      sparkPath = `M${first[0]},${first[1]}` +
+        points.slice(1).map(p => ` L${p[0]},${p[1]}`).join('');
+    }
   }
 
   return (

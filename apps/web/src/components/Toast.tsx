@@ -11,10 +11,12 @@ export function ToastContainer() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    let timer: number;
+    let timer: number | undefined = undefined;
     const handler: ToastListener = (msg) => {
       setToastMessage(msg);
-      window.clearTimeout(timer);
+      if (timer !== undefined) {
+        window.clearTimeout(timer);
+      }
       timer = window.setTimeout(() => {
         setToastMessage(null);
       }, 2600);
@@ -23,7 +25,9 @@ export function ToastContainer() {
     listeners.add(handler);
     return () => {
       listeners.delete(handler);
-      window.clearTimeout(timer);
+      if (timer !== undefined) {
+        window.clearTimeout(timer);
+      }
     };
   }, []);
 

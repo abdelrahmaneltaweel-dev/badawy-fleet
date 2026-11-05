@@ -115,7 +115,7 @@ export function RingProgress({
 }) {
   return (
     <div style={{ textAlign: 'center' }}>
-      <div className="ring-gauge" style={{ ['--percent' as string]: percent }}>
+      <div className="ring-gauge" style={{ '--percent': percent } as any}>
         <div className="ring-gauge-circle" />
         <div className="donut-center">
           <b>{percent}%</b>

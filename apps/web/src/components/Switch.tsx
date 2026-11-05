@@ -11,7 +11,7 @@ export function Switch({ checked, onChange, label, disabled = false }: SwitchPro
       <button
         type="button"
         role="switch"
-        aria-checked={checked}
+        aria-checked={checked ? 'true' : 'false'}
         className="sw"
         disabled={disabled}
         onClick={() => !disabled && onChange(!checked)}
