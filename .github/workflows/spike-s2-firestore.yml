@@ -1,0 +1,29 @@
+name: "Spike S-2: Test Firestore Admin & Rules"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-firestore:
+    name: Test Firestore on Spark
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          cd apps/worker
+          npm install
+
+      - name: Run Firestore Spark Test
+        run: |
+          cd apps/worker
+          node s2-firestore-test.js
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
