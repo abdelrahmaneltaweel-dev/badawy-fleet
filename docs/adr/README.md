@@ -1,6 +1,6 @@
 ---
 doc-id: ADR-INDEX
-version: 1.0.1
+version: 1.1.0
 lastUpdated: 2026-11-05
 sourceVision: 1.0.0
 ---
@@ -15,14 +15,18 @@ sourceVision: 1.0.0
 - القالب: `0000-template.md`.
 - الحالات: `accepted` متفق عليه · `proposed` مقترح لم يُحسم · `superseded` أُلغي بقرار أحدث · `deprecated` متروك.
 
-## قرارات مشروطة بالـ Spikes (M1)
-تم حسم جميع القرارات المشروطة بالـ Spikes بنجاح:
-- **ADR-004 (Firebase Spark):** تم اعتماده بعد نجاح S-2 (T1.2).
-- **ADR-005 (GitHub Actions Worker):** تم اعتماده بعد نجاح S-1 (T1.1) وS-4 (T1.4).
-- **ADR-023 (Traccar Readonly & 12M Window):** تم اعتماده بعد نجاح S-3 (T1.5).
-- **ADR-035 (ملف تحرير واحد يتجدد):** تم اعتماده بعد نجاح S-9 (T1.8).
-
-القرارات المقترحة المتبقية (ADR-006, 009, 010, 020, 026, 045) تُحسم وتُعتمد رسمياً في T1.10 أو في المراحل المخصصة لها.
+## حالة القرارات بعد إتمام المرحلة M1
+تم حسم كافة القرارات المقترحة والمشروطة بالـ Spikes بنجاح تام، وأصبحت **جميع القرارات من 001 إلى 060 مقبولة ومعتمدة بنسبة 100%**:
+- **ADR-004 (Firebase Spark):** معتمد بعد نجاح S-2 (T1.2) وS-6 (T1.3).
+- **ADR-005 (GitHub Actions Worker):** معتمد بعد نجاح S-1 (T1.1) وS-4 (T1.4).
+- **ADR-006 (Apps Script Bridge Only):** معتمد بعد نجاح S-9 (T1.8).
+- **ADR-009 (Repository Interface):** معتمد لفصل طبقة البيانات عن التخزين.
+- **ADR-010 (Reject Blaze):** معتمد لضمان استدامة الخطة المجانية بدون أي كارت.
+- **ADR-020 (No Images in v1):** معتمد لحماية حصة التخزين المجانية.
+- **ADR-023 (Traccar Readonly & 12M Window):** معتمد بعد نجاح S-3 (T1.5).
+- **ADR-026 (Open License Arabic Font):** معتمد ومحدد بـ IBM Plex Sans Arabic.
+- **ADR-035 (Single Reusable Edit File):** معتمد بعد نجاح S-9 (T1.8).
+- **ADR-045 (Curated Fonts List):** معتمد ومحدد بـ 4 خطوط منتقاة (D-058).
 
 ## ملاحظات ربط
 - **ADR-011** يلغيه جزئيًا **ADR-054** (جزء Outbox الإيميل فقط)؛ جزء wa.me ساري.
@@ -39,11 +43,11 @@ sourceVision: 1.0.0
 | [ADR-003](ADR-003-sheets-backup-only.md) | D-003 | Google Sheets نسخة احتياطية فقط | accepted | 0.2.0 |
 | [ADR-004](ADR-004-firebase-spark.md) | D-004 | Firebase على Spark بدون كارت (Auth + Firestore) | accepted | 0.2.0 |
 | [ADR-005](ADR-005-actions-worker.md) | D-005 | GitHub Actions كـ Worker بدل Apps Script للشغل التقيل | accepted | 0.2.0 |
-| [ADR-006](ADR-006-appsscript-bridge-only.md) | D-006 | Apps Script لجسر Google Sheets والنسخة الاحتياطية فقط | proposed | 0.2.0 |
+| [ADR-006](ADR-006-appsscript-bridge-only.md) | D-006 | Apps Script لجسر Google Sheets والنسخة الاحتياطية فقط | accepted | 0.2.0 |
 | [ADR-007](ADR-007-public-repo-secrets.md) | D-007 | ريبو عام جديد وقواعد الأسرار | accepted | 0.2.0 |
 | [ADR-008](ADR-008-version-control-everything.md) | D-008 | Version control على كل المكونات | accepted | 0.2.0 |
-| [ADR-009](ADR-009-repository-interface.md) | D-009 | واجهة Repository للبيانات | proposed | 0.2.0 |
-| [ADR-010](ADR-010-reject-blaze.md) | D-010 | رفض Blaze نهائيًا | proposed | 0.2.0 |
+| [ADR-009](ADR-009-repository-interface.md) | D-009 | واجهة Repository للبيانات | accepted | 0.2.0 |
+| [ADR-010](ADR-010-reject-blaze.md) | D-010 | رفض Blaze نهائيًا | accepted | 0.2.0 |
 | [ADR-011](ADR-011-whatsapp-wa-me.md) | D-011 | واتساب بروابط wa.me فقط (يدوي) | accepted | 0.2.1 |
 | [ADR-012](ADR-012-spa-vite-hash-routing.md) | D-012 | الواجهة SPA بـ Vite وhash routing وcode-splitting | accepted | 0.2.1 |
 | [ADR-013](ADR-013-single-link-permissions-view.md) | D-013 | لينك واحد وصفحة واحدة والعرض حسب الصلاحيات | accepted | 0.3.0 |
@@ -53,13 +57,13 @@ sourceVision: 1.0.0
 | [ADR-017](ADR-017-unified-inquiry.md) | D-017 | Inquiry موحد بخيارات رد قابلة للتعديل | accepted | 0.3.0 |
 | [ADR-018](ADR-018-on-behalf-entry.md) | D-018 | الإدخال بالنيابة بسجل | accepted | 0.3.0 |
 | [ADR-019](ADR-019-gps-issues-only.md) | D-019 | المشاكل = مشاكل GPS فقط | accepted | 0.3.0 |
-| [ADR-020](ADR-020-no-images-v1.md) | D-020 | لا صور في النسخة الأولى | proposed | 0.3.0 |
+| [ADR-020](ADR-020-no-images-v1.md) | D-020 | لا صور في النسخة الأولى | accepted | 0.3.0 |
 | [ADR-021](ADR-021-petro-requests-no-api.md) | D-021 | طلب العهدة (Petro) داخل المنصة بدون API | accepted | 0.3.1 |
 | [ADR-022](ADR-022-data-lifecycle-policy.md) | D-022 | سياسة دورة حياة البيانات وإدارة الموارد | accepted | 0.3.1 |
 | [ADR-023](ADR-023-traccar-readonly-12m-window.md) | D-023 | مستخدم Traccar قراءة فقط وإعادة الحساب بنافذة 12 شهرًا على دفعات | accepted | 0.3.1 |
 | [ADR-024](ADR-024-visual-identity.md) | D-024 | الهوية البصرية: Badawi Group ولوحة الألوان | accepted | 0.3.2 |
 | [ADR-025](ADR-025-english-numerals.md) | D-025 | الأرقام في الواجهة إنجليزي | accepted | 0.3.2 |
-| [ADR-026](ADR-026-open-license-arabic-font.md) | D-026 | خط عربي مفتوح الترخيص (IBM Plex Sans Arabic) مستضاف في الريبو | proposed | 0.3.2 |
+| [ADR-026](ADR-026-open-license-arabic-font.md) | D-026 | خط عربي مفتوح الترخيص (IBM Plex Sans Arabic) مستضاف في الريبو | accepted | 0.3.2 |
 | [ADR-027](ADR-027-custom-select-component.md) | D-027 | قوائم الاختيار مكوّن مخصّص (نافذة سفلية على الموبايل) | accepted | 0.4.0 |
 | [ADR-028](ADR-028-motion-rules.md) | D-028 | قواعد الحركة | accepted | 0.4.0 |
 | [ADR-029](ADR-029-calm-design-direction.md) | D-029 | اتجاه التصميم الهادئ | accepted | 0.4.0 |
@@ -78,7 +82,7 @@ sourceVision: 1.0.0
 | [ADR-042](ADR-042-adjustments-auto-carry.md) | D-042 | التسويات للفترات المقفولة تُضاف تلقائيًا لأول فترة مفتوحة | accepted | 0.4.2 |
 | [ADR-043](ADR-043-compare-with-current.md) | D-043 | زر «قارن مع الحالي» وإنشاء تسوية من كل فرق | accepted | 0.4.2 |
 | [ADR-044](ADR-044-settings-protection-limits.md) | D-044 | حدود حماية الإعدادات | accepted | 0.4.2 |
-| [ADR-045](ADR-045-curated-fonts-list.md) | D-045 | الخطوط: قائمة منتقاة مفتوحة الترخيص مستضافة في الريبو | proposed | 0.4.2 |
+| [ADR-045](ADR-045-curated-fonts-list.md) | D-045 | الخطوط: قائمة منتقاة مفتوحة الترخيص مستضافة في الريبو | accepted | 0.4.2 |
 | [ADR-046](ADR-046-adjustment-permissions.md) | D-046 | صلاحيتا adjustment.create وadjustment.approve | accepted | 0.4.2 |
 | [ADR-047](ADR-047-bulk-vehicle-import.md) | D-047 | استيراد جماعي للعربيات بلصق جدول Excel مع مراجعة قبل الحفظ | accepted | 0.5.0 |
 | [ADR-048](ADR-048-data-source-traccar-or-excel.md) | D-048 | مصدر البيانات: سحب Traccar وبديله رفع Excel الخام | accepted | 0.5.0 |

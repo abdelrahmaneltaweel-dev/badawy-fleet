@@ -1,27 +1,28 @@
 ---
 adr-id: ADR-009
 decision-id: D-009
-status: proposed
+status: accepted
 introducedIn: 0.2.0
 decisionDate: 2026-10-31
 sourceVision: 1.0.0
-lastUpdated: 2026-11-04
+lastUpdated: 2026-11-05
 ---
 
 # ADR-009: واجهة Repository للبيانات
 
-**الحالة:** مقترح (Proposed)
+**الحالة:** مقبول (Accepted)
 
 ## السياق (Context)
-القسم 4 يفصل طبقة البيانات عن المنطق والواجهة.
+ضرورة فصل كود المنطق والواجهة عن آلية التخزين الفيزيائي لقاعدة البيانات، لتمكين التبديل بين Firestore والنسخة الاحتياطية بسهولة.
 
 ## القرار (Decision)
-Repository interface واحدة (get/list/create/update/delete). التنفيذ الأساسي Firestore والاحتياطي Sheets.
+اعتماد واجهة نمط المستودع (Repository Interface) موحدة لعمليات البيانات (`get`, `list`, `create`, `update`, `delete`). التنفيذ الأساسي يكون عبر Firestore والتنفيذ الثانوي الاحتياطي عبر Google Sheets.
 
-## النتائج (Consequences)
-تغيير المخزن = تغيير ملف واحد.
+## نتائج التحقق (Consequences)
+- عزل تام لطبقة البيانات: تغيير أو تحديث آلية التخزين لا يتطلب تعديل أي سطر في طبقة المنطق (logic) أو واجهة المستخدم (UI).
+- تم اعتماد القرار ونقله رسمياً من "مقترح" إلى "مقبول".
 
 ## المراجع
-الرؤية §4 · T3.8
-
-> مستخلص من سجل القرارات في `docs/vision/Project-Vision-v1.0.0.html` (القسم 7). الملف لا يُعدَّل بعد قبوله؛ التغيير بقرار أحدث يلغيه.
+- الرؤية §4
+- M3 (T3.8)
+- ADR-003, ADR-004

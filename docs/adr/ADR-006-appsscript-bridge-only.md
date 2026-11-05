@@ -1,27 +1,31 @@
 ---
 adr-id: ADR-006
 decision-id: D-006
-status: proposed
+status: accepted
 introducedIn: 0.2.0
 decisionDate: 2026-10-31
 sourceVision: 1.0.0
-lastUpdated: 2026-11-04
+lastUpdated: 2026-11-05
 ---
 
 # ADR-006: Apps Script لجسر Google Sheets والنسخة الاحتياطية فقط
 
-**الحالة:** مقترح (Proposed)
+**الحالة:** مقبول (Accepted)
 
 ## السياق (Context)
-حصص Apps Script تمنع استخدامه للشغل التقيل (D-005).
+نقل المعالجة الثقيلة وسحب البيانات إلى GitHub Actions يحرر حصص Google Apps Script تماماً.
 
 ## القرار (Decision)
-Apps Script جسر لـ Google Sheets (تعديل التقارير) ولنسخة Sheets الاحتياطية فقط.
+قصر دور Google Apps Script على مهام محددة وخفيفة:
+1. جسر الاتصال بـ Google Sheets لفتح التقارير للتعديل وقراءتها عند الإنهاء (Edit in Google Sheets).
+2. تشغيل النسخ الاحتياطي الدوري الأسبوعي إلى Google Sheets.
+يُمنع وضع منطق أعمال ثقيل أو دوال إرسال بريد إلكتروني داخل Apps Script.
 
-## النتائج (Consequences)
-لا منطق عمل ولا إيميل فيه (انظر D-054). الأسرار في Script Properties.
+## نتائج التحقق (Consequences)
+- تم إثبات عمل وسرعة جسر Apps Script بدقة 100% في **Spike S-9 (T1.8)** بزمن تنفيذ 4.08 ثانية دون استهلاك حصص.
+- تم اعتماد القرار ونقله رسمياً من "مقترح" إلى "مقبول".
 
 ## المراجع
-الرؤية §4 · D-005 · D-054 · T8.3 · T10.4
-
-> مستخلص من سجل القرارات في `docs/vision/Project-Vision-v1.0.0.html` (القسم 7). الملف لا يُعدَّل بعد قبوله؛ التغيير بقرار أحدث يلغيه.
+- الرؤية §4
+- Spike S-9 (T1.8)
+- ADR-005, ADR-030, ADR-035, ADR-054
