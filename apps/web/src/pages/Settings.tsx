@@ -1,5 +1,7 @@
-import { useState } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
 import { getStoredTheme, applyTheme, type ThemeMode } from '../theme';
+import { subscribePWA, type PWAState } from '../pwa';
+import { Button } from '../components/Button';
 
 interface ThemeOption {
   mode: ThemeMode;
@@ -14,6 +16,11 @@ const THEME_OPTIONS: ThemeOption[] = [
 
 export default function Settings() {
   const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredTheme);
+  const [pwaState, setPwaState] = useState<PWAState | null>(null);
+
+  useEffect(() => {
+    return subscribePWA(setPwaState);
+  }, []);
 
   const handleThemeChange = (mode: ThemeMode) => {
     setThemeMode(mode);
@@ -25,6 +32,24 @@ export default function Settings() {
       <div style={{ background: 'var(--card)', padding: '16px', borderRadius: 'var(--r)', border: '1px solid var(--line)', boxShadow: 'var(--sh-sm)' }}>
         <h2 style={{ margin: '0 0 6px', fontSize: '1.15rem', color: 'var(--ink)' }}>سجل الإعدادات (Settings Registry)</h2>
         <p style={{ margin: 0, color: 'var(--mute)', fontSize: '0.86rem' }}>إدارة المظهر، الصلاحيات، الفترات، والأسعار (ADR-040)</p>
+      </div>
+
+      {/* قسم تطبيق الموبايل PWA */}
+      <div style={{ background: 'var(--card)', padding: '16px', borderRadius: 'var(--r)', border: '1px solid var(--line)', boxShadow: 'var(--sh-sm)' }}>
+        <h3 style={{ margin: '0 0 8px', fontSize: '1rem', color: 'var(--ink)' }}>📱 تطبيق الهاتف (PWA)</h3>
+        <p style={{ margin: '0 0 12px', color: 'var(--mute)', fontSize: '0.84rem' }}>
+          يمكنك تثبيت منصة بدوي كتطبيق مستقل على هاتفك للعمل وتصفح النقلات حتى بدون اتصال بالإنترنت (ADR-014).
+        </p>
+
+        {pwaState?.canInstall ? (
+          <Button variant="primary" onClick={pwaState.install} style={{ minHeight: '38px' }}>
+            📲 تثبيت التطبيق الآن على الهاتف
+          </Button>
+        ) : (
+          <span style={{ fontSize: '0.82rem', color: 'var(--ok)', fontWeight: 600 }}>
+            ✅ التطبيق مثبت أو المتصفح يدعم العمل دون اتصال.
+          </span>
+        )}
       </div>
 
       {/* قسم المظهر والـ Theme Tokens */}

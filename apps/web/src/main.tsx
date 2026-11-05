@@ -1,12 +1,14 @@
 import { render } from 'preact';
 import { App } from './app';
 import { initTheme } from './theme';
+import { initPWA } from './pwa';
 import './styles/tokens.css';
 import './styles/components.css';
 import './styles/layout.css';
 
-// Initialize Theme early (ADR-029)
+// Initialize Theme & PWA early (ADR-014, ADR-029)
 initTheme();
+initPWA();
 
 const rootElement = document.getElementById('app');
 if (rootElement) {
