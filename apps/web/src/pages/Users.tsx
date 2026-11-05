@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'preact/hooks';
-import { authService, type UserProfile } from '../services/auth';
-import type { UserRole, PermissionKey } from '@badawi/logic';
+import { authService, type UserProfile, type UserRole, type PermissionKey } from '../services/auth';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Field } from '../components/Field';
@@ -245,7 +244,7 @@ export default function Users() {
                 ].map((perm) => {
                   const defaultHas = authService.getDefaultPermissions(selectedUserForPerms.role).includes(perm.key);
                   const isExplicitlyAllowed = selectedUserForPerms.customAllow?.includes(perm.key);
-                  const active = defaultHas || isExplicitlyAllowed;
+                  const active = Boolean(defaultHas || isExplicitlyAllowed);
 
                   return (
                     <div key={perm.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: 'var(--soft)', borderRadius: 'var(--r-xs)' }}>

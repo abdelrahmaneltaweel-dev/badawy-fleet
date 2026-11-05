@@ -15,7 +15,11 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@badawi/logic": ["../../packages/logic/src/index.ts"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "../../packages/logic/src"]
 }

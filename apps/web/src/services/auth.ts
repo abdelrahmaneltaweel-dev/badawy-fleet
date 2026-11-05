@@ -11,6 +11,8 @@ import {
   hasPermission
 } from '@badawi/logic';
 
+export type { UserRole, PermissionKey };
+
 export interface UserProfile {
   uid: string;
   email: string;
@@ -79,7 +81,7 @@ const authListeners = new Set<AuthListener>();
 let currentUser: UserProfile | null = (() => {
   try {
     const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : SEED_USERS[0]; // Default to Super Admin for seamless development
+    return raw ? JSON.parse(raw) : SEED_USERS[0];
   } catch {
     return SEED_USERS[0];
   }
@@ -125,7 +127,6 @@ export const authService = {
       const found = users.find((u) => u.email.toLowerCase() === cleanEmail);
 
       if (!found) {
-        // Allow creating/logging in with any email as demo driver or custom user
         const newUser: UserProfile = {
           uid: 'u-' + Date.now().toString(36),
           email: cleanEmail,
@@ -173,9 +174,6 @@ export const authService = {
     return getStoredUsers();
   },
 
-  /**
-   * Create new user from admin panel without logging out the Super Admin (Spike S-6 / ADR-013)
-   */
   createUserFromAdmin(user: {
     displayName: string;
     email: string;
