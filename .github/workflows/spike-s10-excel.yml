@@ -1,0 +1,23 @@
+name: "Spike S-10: Test Excel Raw Upload & Parsing"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-excel-parsing:
+    name: "Benchmark Excel Raw Parser & Worker"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies & run benchmark
+        run: |
+          cd apps/worker
+          npm install
+          node s10-excel-benchmark.js
