@@ -1,0 +1,25 @@
+name: "Spike S-1: Test Traccar Connectivity"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-traccar:
+    name: Test Traccar HTTP Connection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run Traccar Connectivity Test
+        run: node apps/worker/s1-traccar-test.js
+        env:
+          TRACCAR_URL: ${{ secrets.TRACCAR_URL }}
+          TRACCAR_TOKEN: ${{ secrets.TRACCAR_TOKEN }}
+          TRACCAR_USER: ${{ secrets.TRACCAR_USER }}
+          TRACCAR_PASS: ${{ secrets.TRACCAR_PASS }}
