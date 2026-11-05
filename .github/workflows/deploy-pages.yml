@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy GitHub Pages
 
 on:
   push:
@@ -13,62 +13,39 @@ permissions:
 
 concurrency:
   group: 'pages'
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build Site
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Build Web Application
-        id: build_step
+      - name: Build Web App
         run: |
-          if [ -f apps/web/package.json ]; then
-            echo "Building Vite application in apps/web..."
-            npm --prefix apps/web ci
-            npm --prefix apps/web run build
-            mkdir -p apps/web/dist/brand
-            cp -r brand/* apps/web/dist/brand/ 2>/dev/null || true
-            echo "output_dir=apps/web/dist" >> "$GITHUB_OUTPUT"
-          elif [ -f apps/web/index.html ]; then
-            echo "Staging static apps/web with brand assets..."
-            mkdir -p apps/web/brand
-            cp -r brand/* apps/web/brand/ 2>/dev/null || true
-            echo "output_dir=apps/web" >> "$GITHUB_OUTPUT"
-          else
-            echo "Staging fallback preview..."
-            mkdir -p _site
-            mkdir -p _site/brand
-            cp -r brand/* _site/brand/ 2>/dev/null || true
-            if [ -f design/previews/Design-System-Preview-v0.3.0-draft.html ]; then
-              cp design/previews/Design-System-Preview-v0.3.0-draft.html _site/index.html
-            else
-              echo "<!DOCTYPE html><html lang='ar' dir='rtl'><head><meta charset='utf-8'><title>Badawi Fleet Platform</title></head><body><h1>منصة أسطول بدوي</h1></body></html>" > _site/index.html
-            fi
-            echo "output_dir=_site" >> "$GITHUB_OUTPUT"
-          fi
+          cd apps/web
+          npm install
+          npm run build
+          # نسخ مجلد brand إلى مجلد البناء النهائي
+          cp -r brand dist/brand 2>/dev/null || true
 
-      - name: Upload Pages artifact
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ steps.build_step.outputs.output_dir }}
+          path: 'apps/web/dist'
 
-  deploy:
-    name: Deploy to Pages
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
