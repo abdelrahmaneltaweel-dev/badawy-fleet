@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'preact/hooks';
 import { useRouter } from './router';
+import { getStoredTheme, applyTheme, type ThemeMode } from './theme';
 
-// Code-Splitting: تحميل كل صفحة ديناميكياً عند الانتقال إليها فقط
 const routes = [
   { path: '/', component: () => import('./pages/Dashboard') },
   { path: '/fleet', component: () => import('./pages/Fleet') },
@@ -12,6 +13,16 @@ const routes = [
 
 export function App() {
   const { currentPath, Component, loading } = useRouter(routes);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredTheme);
+
+  useEffect(() => {
+    applyTheme(themeMode);
+  }, [themeMode]);
+
+  const toggleTheme = () => {
+    const nextMode: ThemeMode = themeMode === 'light' ? 'dark' : themeMode === 'dark' ? 'auto' : 'light';
+    setThemeMode(nextMode);
+  };
 
   const navItems = [
     { path: '/', label: 'الرئيسية', icon: '📊' },
@@ -34,15 +45,41 @@ export function App() {
         justifyContent: 'space-between',
         position: 'sticky',
         top: 0,
-        zIndex: 10
+        zIndex: 10,
+        boxShadow: 'var(--sh-sm)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img src="./brand/mark.png" alt="Badawi Group" style={{ height: '28px' }} />
           <b style={{ fontSize: '1.05rem', color: 'var(--acc)' }}>Badawi Fleet</b>
         </div>
-        <span style={{ fontSize: '0.8rem', background: 'var(--soft)', padding: '4px 10px', borderRadius: '99px' }}>
-          خطة Spark (مجاني)
-        </span>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* زر تبديل الثيم السريع */}
+          <button
+            onClick={toggleTheme}
+            title={`المظهر الحالي: ${themeMode === 'auto' ? 'تلقائي' : themeMode === 'dark' ? 'داكن' : 'فاتح'}`}
+            style={{
+              background: 'var(--soft)',
+              border: '1px solid var(--line)',
+              borderRadius: 'var(--r-sm)',
+              padding: '6px 10px',
+              color: 'var(--ink)',
+              cursor: 'pointer',
+              fontSize: '0.84rem',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <span>{themeMode === 'dark' ? '🌙' : themeMode === 'light' ? '☀️' : '🖥️'}</span>
+            <span style={{ fontSize: '0.78rem' }}>{themeMode === 'auto' ? 'تلقائي' : themeMode === 'dark' ? 'داكن' : 'فاتح'}</span>
+          </button>
+
+          <span style={{ fontSize: '0.78rem', background: 'var(--soft)', color: 'var(--mute)', padding: '6px 10px', borderRadius: 'var(--r-full)' }}>
+            Spark
+          </span>
+        </div>
       </header>
 
       {/* Main Content Area */}
@@ -64,11 +101,11 @@ export function App() {
         right: '12px',
         background: 'var(--card)',
         border: '1px solid var(--line)',
-        borderRadius: '24px',
+        borderRadius: 'var(--r-xl)',
         display: 'flex',
         justifyContent: 'space-around',
         padding: '8px 4px',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+        boxShadow: 'var(--sh-float)',
         zIndex: 20
       }}>
         {navItems.map(item => {
@@ -87,8 +124,9 @@ export function App() {
                 fontWeight: isActive ? 700 : 500,
                 gap: '2px',
                 padding: '4px 8px',
-                borderRadius: '12px',
-                background: isActive ? 'var(--soft)' : 'transparent'
+                borderRadius: 'var(--r-sm)',
+                background: isActive ? 'var(--soft)' : 'transparent',
+                transition: 'background var(--dur-fast) var(--e), color var(--dur-fast) var(--e)'
               }}
             >
               <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
