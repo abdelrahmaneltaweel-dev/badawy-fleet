@@ -1,0 +1,29 @@
+name: "Spike S-6: Test User Management & Rules Cost"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-users:
+    name: Test User Management on Spark
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          cd apps/worker
+          npm install
+
+      - name: Run Users Test
+        run: |
+          cd apps/worker
+          node s6-users-test.js
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
