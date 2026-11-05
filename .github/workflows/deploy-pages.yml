@@ -35,13 +35,19 @@ jobs:
             echo "Building Vite application in apps/web..."
             npm --prefix apps/web ci
             npm --prefix apps/web run build
+            mkdir -p apps/web/dist/brand
+            cp -r brand/* apps/web/dist/brand/ 2>/dev/null || true
             echo "output_dir=apps/web/dist" >> "$GITHUB_OUTPUT"
           elif [ -f apps/web/index.html ]; then
-            echo "Using static apps/web/index.html"
+            echo "Staging static apps/web with brand assets..."
+            mkdir -p apps/web/brand
+            cp -r brand/* apps/web/brand/ 2>/dev/null || true
             echo "output_dir=apps/web" >> "$GITHUB_OUTPUT"
           else
-            echo "Staging current design preview for Pages..."
+            echo "Staging fallback preview..."
             mkdir -p _site
+            mkdir -p _site/brand
+            cp -r brand/* _site/brand/ 2>/dev/null || true
             if [ -f design/previews/Design-System-Preview-v0.3.0-draft.html ]; then
               cp design/previews/Design-System-Preview-v0.3.0-draft.html _site/index.html
             else
