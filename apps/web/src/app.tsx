@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'preact/hooks';
 import { useRouter } from './router';
 import { getStoredTheme, applyTheme, type ThemeMode } from './theme';
+import { authService, type UserProfile } from './services/auth';
 import { ToastContainer, showToast } from './components/Toast';
 import { Icon, type IconName } from './components/Icon';
 import { Switch } from './components/Switch';
 import { PWAUpdateBanner } from './components/PWAUpdateBanner';
+import Login from './pages/Login';
 
 const routes = [
   { path: '/', component: () => import('./pages/Dashboard') },
@@ -12,6 +14,7 @@ const routes = [
   { path: '/reports', component: () => import('./pages/Reports') },
   { path: '/inquiries', component: () => import('./pages/Inquiries') },
   { path: '/petro', component: () => import('./pages/Petro') },
+  { path: '/users', component: () => import('./pages/Users') },
   { path: '/settings', component: () => import('./pages/Settings') },
   { path: '/showcase', component: () => import('./pages/Showcase') }
 ];
@@ -21,11 +24,13 @@ interface NavItem {
   label: string;
   icon: IconName;
   badge?: number;
+  permission?: string;
 }
 
 export function App() {
   const { currentPath, Component, loading } = useRouter(routes);
   const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredTheme);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(authService.getCurrentUser());
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     try {
       return localStorage.getItem('badawi-sidebar-col') === '1';
@@ -38,6 +43,10 @@ export function App() {
     applyTheme(themeMode);
   }, [themeMode]);
 
+  useEffect(() => {
+    return authService.subscribe(setCurrentUser);
+  }, []);
+
   const toggleTheme = () => {
     const nextMode: ThemeMode = themeMode === 'light' ? 'dark' : themeMode === 'dark' ? 'auto' : 'light';
     setThemeMode(nextMode);
@@ -49,19 +58,31 @@ export function App() {
     try {
       localStorage.setItem('badawi-sidebar-col', next ? '1' : '0');
     } catch {
-      // Ignore storage errors
+      // Ignore
     }
   };
 
-  const navItems: NavItem[] = [
+  const handleLogout = async () => {
+    await authService.logout();
+    showToast('تم تسجيل الخروج بنجاح');
+  };
+
+  const allNavItems: NavItem[] = [
     { path: '/', label: 'الرئيسية', icon: 'home' },
     { path: '/fleet', label: 'الأسطول', icon: 'truck' },
-    { path: '/reports', label: 'التقارير', icon: 'doc' },
+    { path: '/reports', label: 'التقارير', icon: 'doc', permission: 'report.view' },
     { path: '/inquiries', label: 'الاستفسارات', icon: 'chat', badge: 3 },
-    { path: '/petro', label: 'طلبات العهدة', icon: 'wallet' },
+    { path: '/petro', label: 'طلبات العهدة', icon: 'wallet', permission: 'petro.request' },
+    { path: '/users', label: 'المستخدمون', icon: 'user', permission: 'users.manage' },
     { path: '/showcase', label: 'المكونات', icon: 'showcase' },
     { path: '/settings', label: 'الإعدادات', icon: 'set' }
   ];
+
+  // Filter navigation items according to current user permissions (ADR-013)
+  const navItems = allNavItems.filter((item) => {
+    if (!item.permission) return true;
+    return authService.can(item.permission as any);
+  });
 
   const handleNavClick = () => {
     try {
@@ -69,21 +90,27 @@ export function App() {
         navigator.vibrate(8);
       }
     } catch {
-      // Ignore vibration error
+      // Ignore
     }
   };
 
+  // If not authenticated, display login view
+  if (!currentUser) {
+    return (
+      <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+        <ToastContainer />
+        <Login onLoginSuccess={setCurrentUser} />
+      </div>
+    );
+  }
+
   return (
     <div className={`app-layout ${isCollapsed ? 'col' : ''}`}>
-      {/* PWA Update Notification Banner */}
       <PWAUpdateBanner />
-
-      {/* Toast Notification Mount */}
       <ToastContainer />
 
       {/* Desktop Collapsible Sidebar (ADR-029) */}
       <aside className="side" id="side">
-        {/* Brand & Collapse Button */}
         <div className="sdg brand">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img src="./brand/mark.png" alt="Badawi Group" style={{ height: '30px' }} />
@@ -101,7 +128,6 @@ export function App() {
           </button>
         </div>
 
-        {/* Quick Search */}
         <div className="sdg">
           <button
             type="button"
@@ -114,7 +140,6 @@ export function App() {
           </button>
         </div>
 
-        {/* Nav List */}
         <div className="sdg mid">
           <div className="sg lb">القائمة</div>
           {navItems.map((item) => {
@@ -135,29 +160,23 @@ export function App() {
           })}
         </div>
 
-        {/* Petro Wallet Quick Card (ADR-021) */}
-        <div className="promo2">
-          <div className="promo2-header">
-            <span className="promo2-icon">
-              <Icon name="wallet" size={18} />
-            </span>
-            <div>
-              <small>رصيد محفظة Petro</small>
-              <b>34,200 ج.م</b>
+        {/* Petro Quick Widget */}
+        {authService.can('petro.request') && (
+          <div className="promo2">
+            <div className="promo2-header">
+              <span className="promo2-icon">
+                <Icon name="wallet" size={18} />
+              </span>
+              <div>
+                <small>رصيد محفظة Petro</small>
+                <b>34,200 ج.م</b>
+              </div>
+            </div>
+            <div className="pbar">
+              <div className="pbar-fill" style={{ width: '68%' }} />
             </div>
           </div>
-          <div className="pbar">
-            <div className="pbar-fill" style={{ width: '68%' }} />
-          </div>
-          <button
-            type="button"
-            className="btn btn-warning"
-            style={{ width: '100%', minHeight: '34px', fontSize: '0.82rem', marginTop: '6px' }}
-            onClick={() => showToast('فتح طلب عهدة جديد (ADR-021)')}
-          >
-            طلب عهدة جديد
-          </button>
-        </div>
+        )}
 
         {/* Theme Mode Quick Switch */}
         <div className="sdg" style={{ borderTop: '1px solid var(--line)', borderBottom: 0 }}>
@@ -177,28 +196,39 @@ export function App() {
           </div>
         </div>
 
-        {/* Super Admin Profile */}
-        <div className="usr">
-          <div className="av">SA</div>
-          <div className="usr-tx">
-            <b>Super Admin</b>
-            <small>مسؤول الأسطول</small>
+        {/* Current User Profile Card */}
+        <div className="usr" style={{ justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="av">
+              {currentUser.displayName.slice(0, 2).toUpperCase()}
+            </div>
+            <div className="usr-tx">
+              <b>{currentUser.displayName}</b>
+              <small>{authService.getRoleLabel(currentUser.role)}</small>
+            </div>
           </div>
+          <button
+            type="button"
+            className="ib lb"
+            onClick={handleLogout}
+            title="تسجيل الخروج"
+            aria-label="تسجيل الخروج"
+          >
+            <span style={{ fontSize: '1rem' }}>🚪</span>
+          </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <div className="main-content">
-        {/* Sticky Top Bar Header */}
         <header className="top-bar">
           <div>
-            <h1>صباح الخير 👋</h1>
-            <p>منصة متابعة أسطول شركة أبناء بدوي (65 عربية)</p>
+            <h1>مرحباً، {currentUser.displayName} 👋</h1>
+            <p>الدور: {authService.getRoleLabel(currentUser.role)}</p>
           </div>
 
           <div className="top-sp" />
 
-          {/* Date Filter Pill */}
           <button
             type="button"
             className="pill-btn"
@@ -208,7 +238,6 @@ export function App() {
             <span>1 – 30 أكتوبر 2026</span>
           </button>
 
-          {/* Notifications */}
           <button
             type="button"
             className="pill-btn dot"
@@ -218,7 +247,6 @@ export function App() {
             <Icon name="bell" size={16} />
           </button>
 
-          {/* Quick Theme Switch */}
           <button
             type="button"
             className="pill-btn"
@@ -228,13 +256,11 @@ export function App() {
             <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={16} />
           </button>
 
-          {/* Spark Plan Badge */}
           <span style={{ fontSize: '0.78rem', background: 'var(--soft)', color: 'var(--mute)', padding: '6px 12px', borderRadius: 'var(--r-full)', fontWeight: 600 }}>
-            خطة Spark (مجاني)
+            Spark
           </span>
         </header>
 
-        {/* Dynamic Page Component */}
         <main style={{ minHeight: '400px' }}>
           {loading ? (
             <div style={{ display: 'grid', placeItems: 'center', height: '240px', color: 'var(--mute)' }}>

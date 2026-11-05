@@ -9,6 +9,7 @@ export interface FieldProps extends JSX.HTMLAttributes<HTMLInputElement> {
   type?: string;
   disabled?: boolean;
   readOnly?: boolean;
+  required?: boolean;
 }
 
 export function Field({
@@ -22,6 +23,7 @@ export function Field({
   value,
   disabled,
   readOnly,
+  required,
   ...props
 }: FieldProps) {
   const inputId = id || (label ? `fld-${label}` : undefined);
@@ -37,6 +39,7 @@ export function Field({
           value={value}
           disabled={disabled}
           readOnly={readOnly}
+          required={required}
           {...props}
         />
       </div>
