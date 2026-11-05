@@ -4,6 +4,7 @@ import { getStoredTheme, applyTheme, type ThemeMode } from './theme';
 import { ToastContainer, showToast } from './components/Toast';
 import { Icon, type IconName } from './components/Icon';
 import { Switch } from './components/Switch';
+import { PWAUpdateBanner } from './components/PWAUpdateBanner';
 
 const routes = [
   { path: '/', component: () => import('./pages/Dashboard') },
@@ -74,6 +75,9 @@ export function App() {
 
   return (
     <div className={`app-layout ${isCollapsed ? 'col' : ''}`}>
+      {/* PWA Update Notification Banner */}
+      <PWAUpdateBanner />
+
       {/* Toast Notification Mount */}
       <ToastContainer />
 
