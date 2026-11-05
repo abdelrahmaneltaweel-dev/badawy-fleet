@@ -1,0 +1,153 @@
+/* Calm Direction Design Tokens - Badawi Fleet Platform v0.3.0 */
+
+:root {
+  /* Brand Core Colors (ADR-024) */
+  --brand-navy: #0F3A5C;
+  --brand-blue: #1F7391;
+  --brand-sky: #5FB4D3;
+  --brand-sky-light: #8FCFE3;
+
+  /* Theme Surfaces & Layout (Light Mode - Calm Direction) */
+  --bg: #D8DDE6;
+  --g: #F5F6FA;
+  --gb: #E3E5EA;
+  --card: #FFFFFF;
+  --soft: #EAEDF3;
+  --line: #E3E5EA;
+  --ring: transparent;
+
+  /* Typography & Ink */
+  --ink: #14171F;
+  --mute: #6B7280;
+
+  /* Accent (Calm Blue) */
+  --acc: #2A6495;
+  --acc-ink: #FFFFFF;
+  --acc-soft: rgba(42, 100, 149, 0.12);
+  --acc-hover: #22537C;
+  --acc2: #D9921A;
+  --tl: #2A6495;
+
+  /* Status Colors */
+  --ok: #2E9B6A;
+  --ok-soft: rgba(46, 155, 106, 0.14);
+  --bad: #D8514F;
+  --bad-soft: rgba(216, 81, 79, 0.14);
+  --warn: #D9921A;
+  --warn-soft: rgba(217, 146, 26, 0.14);
+
+  /* Vehicle Type Donut & Chart Visual Tokens */
+  --dn1: #2A6495; /* جرار (Tractor) */
+  --dn2: #7FA6CC; /* نقل (Truck) */
+  --dn3: #C4D3E6; /* ملاكي (Private) */
+  --bar: #C5D3E6;
+
+  /* Shadows */
+  --sh-sm: 0 1px 2px rgba(20, 23, 31, 0.04);
+  --sh: 0 1px 2px rgba(20, 23, 31, 0.04);
+  --sh-md: 0 4px 14px rgba(20, 23, 31, 0.08);
+  --sh-lg: 0 10px 28px rgba(20, 23, 31, 0.14);
+  --sh-float: 0 12px 32px rgba(15, 58, 92, 0.18);
+
+  /* Radii */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r: 14px;
+  --r-lg: 20px;
+  --r-xl: 26px;
+  --r-full: 9999px;
+
+  /* Motion & Transitions (ADR-028) */
+  --e: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 0.15s;
+  --dur-norm: 0.25s;
+  --dur-slow: 0.4s;
+
+  /* Fonts */
+  --font-family: "IBM Plex Sans Arabic", "Tajawal", "Segoe UI", Tahoma, system-ui, -apple-system, sans-serif;
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  /* Theme Surfaces & Layout (Dark Mode) */
+  --bg: #0E1218;
+  --g: #161B23;
+  --gb: #232A36;
+  --card: #1C232D;
+  --soft: #1E2530;
+  --line: #232A36;
+  --ring: rgba(0, 0, 0, 0.4);
+
+  /* Typography & Ink */
+  --ink: #E6E9EF;
+  --mute: #8B93A1;
+
+  /* Accent (Soft Sky Blue) */
+  --acc: #7DB4E6;
+  --acc-ink: #0B1B2B;
+  --acc-soft: rgba(125, 180, 230, 0.16);
+  --acc-hover: #96C4ED;
+  --acc2: #F2B04A;
+  --tl: #7DB4E6;
+
+  /* Status Colors */
+  --ok: #4CC38A;
+  --ok-soft: rgba(76, 195, 138, 0.16);
+  --bad: #F0706E;
+  --bad-soft: rgba(240, 112, 110, 0.16);
+  --warn: #F2B04A;
+  --warn-soft: rgba(242, 176, 74, 0.16);
+
+  /* Vehicle Type Donut & Chart Visual Tokens */
+  --dn1: #7DB4E6;
+  --dn2: #4F7FAF;
+  --dn3: #2B4560;
+  --bar: #2D4A68;
+
+  /* Shadows */
+  --sh-sm: none;
+  --sh: none;
+  --sh-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --sh-lg: 0 10px 28px rgba(0, 0, 0, 0.45);
+  --sh-float: 0 12px 32px rgba(0, 0, 0, 0.5);
+
+  color-scheme: dark;
+}
+
+/* Global Reset & Base Typography */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-family);
+  font-variant-numeric: tabular-nums; /* ADR-025 English tabular numbers */
+  min-height: 100vh;
+  direction: rtl;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth Theme Transitions */
+html.theme-transition * {
+  transition: background-color var(--dur-norm) ease,
+              color var(--dur-norm) ease,
+              border-color var(--dur-norm) ease,
+              box-shadow var(--dur-norm) ease !important;
+}
+
+/* Respect Reduced Motion (ADR-028) */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
