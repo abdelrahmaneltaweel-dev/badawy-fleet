@@ -10,3 +10,4 @@ export * from './Select';
 export * from './Table';
 export * from './Skeleton';
 export * from './Popover';
+export * from './Icon';

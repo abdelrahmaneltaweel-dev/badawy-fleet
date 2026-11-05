@@ -3,6 +3,7 @@ import { App } from './app';
 import { initTheme } from './theme';
 import './styles/tokens.css';
 import './styles/components.css';
+import './styles/layout.css';
 
 // Initialize Theme early (ADR-029)
 initTheme();

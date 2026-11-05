@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'preact/hooks';
 import { useRouter } from './router';
 import { getStoredTheme, applyTheme, type ThemeMode } from './theme';
-import { ToastContainer } from './components/Toast';
+import { ToastContainer, showToast } from './components/Toast';
+import { Icon, type IconName } from './components/Icon';
+import { Switch } from './components/Switch';
 
 const routes = [
   { path: '/', component: () => import('./pages/Dashboard') },
@@ -13,9 +15,23 @@ const routes = [
   { path: '/showcase', component: () => import('./pages/Showcase') }
 ];
 
+interface NavItem {
+  path: string;
+  label: string;
+  icon: IconName;
+  badge?: number;
+}
+
 export function App() {
   const { currentPath, Component, loading } = useRouter(routes);
   const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredTheme);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('badawi-sidebar-col') === '1';
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     applyTheme(themeMode);
@@ -26,116 +42,220 @@ export function App() {
     setThemeMode(nextMode);
   };
 
-  const navItems = [
-    { path: '/', label: 'الرئيسية', icon: '📊' },
-    { path: '/fleet', label: 'الأسطول', icon: '🚛' },
-    { path: '/reports', label: 'التقارير', icon: '📑' },
-    { path: '/inquiries', label: 'الاستفسارات', icon: '💬' },
-    { path: '/petro', label: 'العهدة', icon: '💳' },
-    { path: '/settings', label: 'الإعدادات', icon: '⚙️' },
-    { path: '/showcase', label: 'المكونات', icon: '🎨' }
+  const toggleSidebar = () => {
+    const next = !isCollapsed;
+    setIsCollapsed(next);
+    try {
+      localStorage.setItem('badawi-sidebar-col', next ? '1' : '0');
+    } catch {
+      // Ignore storage errors
+    }
+  };
+
+  const navItems: NavItem[] = [
+    { path: '/', label: 'الرئيسية', icon: 'home' },
+    { path: '/fleet', label: 'الأسطول', icon: 'truck' },
+    { path: '/reports', label: 'التقارير', icon: 'doc' },
+    { path: '/inquiries', label: 'الاستفسارات', icon: 'chat', badge: 3 },
+    { path: '/petro', label: 'طلبات العهدة', icon: 'wallet' },
+    { path: '/showcase', label: 'المكونات', icon: 'showcase' },
+    { path: '/settings', label: 'الإعدادات', icon: 'set' }
   ];
 
+  const handleNavClick = () => {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(8);
+      }
+    } catch {
+      // Ignore vibration error
+    }
+  };
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
+    <div className={`app-layout ${isCollapsed ? 'col' : ''}`}>
       {/* Toast Notification Mount */}
       <ToastContainer />
 
-      {/* Header */}
-      <header style={{
-        background: 'var(--card)',
-        borderBottom: '1px solid var(--line)',
-        padding: '12px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        position: 'sticky',
-        top: 0,
-        zIndex: 10,
-        boxShadow: 'var(--sh-sm)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src="./brand/mark.png" alt="Badawi Group" style={{ height: '28px' }} />
-          <b style={{ fontSize: '1.05rem', color: 'var(--acc)' }}>Badawi Fleet</b>
-        </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      {/* Desktop Collapsible Sidebar (ADR-029) */}
+      <aside className="side" id="side">
+        {/* Brand & Collapse Button */}
+        <div className="sdg brand">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="./brand/mark.png" alt="Badawi Group" style={{ height: '30px' }} />
+            <span className="brand-title">Badawi Fleet</span>
+          </div>
           <button
-            onClick={toggleTheme}
-            title={`المظهر الحالي: ${themeMode === 'auto' ? 'تلقائي' : themeMode === 'dark' ? 'داكن' : 'فاتح'}`}
-            style={{
-              background: 'var(--soft)',
-              border: '1px solid var(--line)',
-              borderRadius: 'var(--r-sm)',
-              padding: '6px 10px',
-              color: 'var(--ink)',
-              cursor: 'pointer',
-              fontSize: '0.84rem',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
+            type="button"
+            className="ib"
+            id="col"
+            onClick={toggleSidebar}
+            title={isCollapsed ? 'توسيع القائمة' : 'طي القائمة'}
+            aria-label="طي القائمة"
           >
-            <span>{themeMode === 'dark' ? '🌙' : themeMode === 'light' ? '☀️' : '🖥️'}</span>
-            <span style={{ fontSize: '0.78rem' }}>{themeMode === 'auto' ? 'تلقائي' : themeMode === 'dark' ? 'داكن' : 'فاتح'}</span>
+            <Icon name="panel" size={18} />
           </button>
-
-          <span style={{ fontSize: '0.78rem', background: 'var(--soft)', color: 'var(--mute)', padding: '6px 10px', borderRadius: 'var(--r-full)' }}>
-            Spark
-          </span>
         </div>
-      </header>
+
+        {/* Quick Search */}
+        <div className="sdg">
+          <button
+            type="button"
+            className="sq"
+            onClick={() => showToast('البحث السريع (Ctrl+K)')}
+          >
+            <Icon name="search" size={17} />
+            <span className="lb">بحث سريع</span>
+            <kbd className="lb">K</kbd>
+          </button>
+        </div>
+
+        {/* Nav List */}
+        <div className="sdg mid">
+          <div className="sg lb">القائمة</div>
+          {navItems.map((item) => {
+            const isActive = currentPath === item.path;
+            return (
+              <a
+                key={item.path}
+                href={`#${item.path}`}
+                className={`nv ${isActive ? 'on' : ''}`}
+                onClick={handleNavClick}
+                title={item.label}
+              >
+                <Icon name={item.icon} size={18} />
+                <span className="lb">{item.label}</span>
+                {item.badge && <span className="cnt">{item.badge}</span>}
+              </a>
+            );
+          })}
+        </div>
+
+        {/* Petro Wallet Quick Card (ADR-021) */}
+        <div className="promo2">
+          <div className="promo2-header">
+            <span className="promo2-icon">
+              <Icon name="wallet" size={18} />
+            </span>
+            <div>
+              <small>رصيد محفظة Petro</small>
+              <b>34,200 ج.م</b>
+            </div>
+          </div>
+          <div className="pbar">
+            <div className="pbar-fill" style={{ width: '68%' }} />
+          </div>
+          <button
+            type="button"
+            className="btn btn-warning"
+            style={{ width: '100%', minHeight: '34px', fontSize: '0.82rem', marginTop: '6px' }}
+            onClick={() => showToast('فتح طلب عهدة جديد (ADR-021)')}
+          >
+            طلب عهدة جديد
+          </button>
+        </div>
+
+        {/* Theme Mode Quick Switch */}
+        <div className="sdg" style={{ borderTop: '1px solid var(--line)', borderBottom: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Icon name={themeMode === 'dark' ? 'moon' : 'sun'} size={18} />
+              <span className="lb" style={{ fontSize: '0.86rem', fontWeight: 500 }}>
+                {themeMode === 'dark' ? 'الوضع الداكن' : themeMode === 'light' ? 'الوضع الفاتح' : 'مظهر النظام'}
+              </span>
+            </div>
+            <div className="lb">
+              <Switch
+                checked={themeMode === 'dark'}
+                onChange={() => toggleTheme()}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Super Admin Profile */}
+        <div className="usr">
+          <div className="av">SA</div>
+          <div className="usr-tx">
+            <b>Super Admin</b>
+            <small>مسؤول الأسطول</small>
+          </div>
+        </div>
+      </aside>
 
       {/* Main Content Area */}
-      <main style={{ flex: 1, padding: '16px', maxWidth: '1200px', width: '100%', margin: '0 auto', marginBottom: '70px' }}>
-        {loading ? (
-          <div style={{ display: 'grid', placeItems: 'center', height: '200px', color: 'var(--mute)' }}>
-            جاري التحميل...
+      <div className="main-content">
+        {/* Sticky Top Bar Header */}
+        <header className="top-bar">
+          <div>
+            <h1>صباح الخير 👋</h1>
+            <p>منصة متابعة أسطول شركة أبناء بدوي (65 عربية)</p>
           </div>
-        ) : (
-          Component && <Component />
-        )}
-      </main>
 
-      {/* Mobile Floating Bottom Dock (التنقل العائم للموبايل) */}
-      <nav style={{
-        position: 'fixed',
-        bottom: '12px',
-        left: '12px',
-        right: '12px',
-        background: 'var(--card)',
-        border: '1px solid var(--line)',
-        borderRadius: 'var(--r-xl)',
-        display: 'flex',
-        justifyContent: 'space-around',
-        padding: '8px 4px',
-        boxShadow: 'var(--sh-float)',
-        zIndex: 20
-      }}>
-        {navItems.map(item => {
+          <div className="top-sp" />
+
+          {/* Date Filter Pill */}
+          <button
+            type="button"
+            className="pill-btn"
+            onClick={() => showToast('تحديد فترة التقرير')}
+          >
+            <Icon name="cal" size={16} />
+            <span>1 – 30 أكتوبر 2026</span>
+          </button>
+
+          {/* Notifications */}
+          <button
+            type="button"
+            className="pill-btn dot"
+            title="التنبيهات"
+            onClick={() => showToast('لا توجد إشعارات جديدة')}
+          >
+            <Icon name="bell" size={16} />
+          </button>
+
+          {/* Quick Theme Switch */}
+          <button
+            type="button"
+            className="pill-btn"
+            onClick={toggleTheme}
+            title={`المظهر: ${themeMode === 'auto' ? 'تلقائي' : themeMode === 'dark' ? 'داكن' : 'فاتح'}`}
+          >
+            <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={16} />
+          </button>
+
+          {/* Spark Plan Badge */}
+          <span style={{ fontSize: '0.78rem', background: 'var(--soft)', color: 'var(--mute)', padding: '6px 12px', borderRadius: 'var(--r-full)', fontWeight: 600 }}>
+            خطة Spark (مجاني)
+          </span>
+        </header>
+
+        {/* Dynamic Page Component */}
+        <main style={{ minHeight: '400px' }}>
+          {loading ? (
+            <div style={{ display: 'grid', placeItems: 'center', height: '240px', color: 'var(--mute)' }}>
+              جاري التحميل...
+            </div>
+          ) : (
+            Component && <Component />
+          )}
+        </main>
+      </div>
+
+      {/* Mobile Floating Bottom Dock (ADR-014, ADR-029) */}
+      <nav className="dock">
+        {navItems.slice(0, 5).map((item) => {
           const isActive = currentPath === item.path;
           return (
             <a
               key={item.path}
               href={`#${item.path}`}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textDecoration: 'none',
-                color: isActive ? 'var(--acc)' : 'var(--mute)',
-                fontSize: '0.74rem',
-                fontWeight: isActive ? 700 : 500,
-                gap: '2px',
-                padding: '4px 6px',
-                borderRadius: 'var(--r-sm)',
-                background: isActive ? 'var(--soft)' : 'transparent',
-                transition: 'background var(--dur-fast) var(--e), color var(--dur-fast) var(--e)'
-              }}
+              className={isActive ? 'on' : ''}
+              onClick={handleNavClick}
             >
-              <span style={{ fontSize: '1.05rem' }}>{item.icon}</span>
+              <Icon name={item.icon} size={20} />
               <span>{item.label}</span>
+              {item.badge && <span className="dot-badge" />}
             </a>
           );
         })}
