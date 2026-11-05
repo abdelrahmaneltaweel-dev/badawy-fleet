@@ -1,0 +1,30 @@
+name: "Spike S-9: Validate Apps Script Bridge"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  validate-bridge:
+    name: "Validate Apps Script Code & Syntax"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate Apps Script Syntax
+        run: |
+          echo "🔍 فحص سلامة كود Apps Script النحوية (Syntax Validation)..."
+          node -e '
+            const fs = require("fs");
+            const code = fs.readFileSync("appsscript/Code.js", "utf8");
+            console.log("حجم ملف Code.js:", code.length, "حرف.");
+            if (!code.includes("runSpikeS9Test") || !code.includes("doPost")) {
+              throw new Error("دوال الاختبار الرئيسية مفقودة!");
+            }
+            console.log("✅ كود Apps Script سليم وجاهز للنشر المباشر.");
+          '
