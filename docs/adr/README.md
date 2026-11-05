@@ -1,7 +1,7 @@
 ---
 doc-id: ADR-INDEX
-version: 1.0.0
-lastUpdated: 2026-11-04
+version: 1.0.1
+lastUpdated: 2026-11-05
 sourceVision: 1.0.0
 ---
 
@@ -16,13 +16,13 @@ sourceVision: 1.0.0
 - الحالات: `accepted` متفق عليه · `proposed` مقترح لم يُحسم · `superseded` أُلغي بقرار أحدث · `deprecated` متروك.
 
 ## قرارات مشروطة بالـ Spikes (M1)
-| القرار | ينتظر | المهمة |
-|---|---|---|
-| ADR-004 (Firebase Spark) | S-2 | T1.2 |
-| ADR-005 (GitHub Actions Worker) | S-1 وS-4 | T1.1 وT1.4 |
-| ADR-035 (ملف تحرير واحد يتجدد) | S-9 | T1.8 |
+تم حسم جميع القرارات المشروطة بالـ Spikes بنجاح:
+- **ADR-004 (Firebase Spark):** تم اعتماده بعد نجاح S-2 (T1.2).
+- **ADR-005 (GitHub Actions Worker):** تم اعتماده بعد نجاح S-1 (T1.1) وS-4 (T1.4).
+- **ADR-023 (Traccar Readonly & 12M Window):** تم اعتماده بعد نجاح S-3 (T1.5).
+- **ADR-035 (ملف تحرير واحد يتجدد):** تم اعتماده بعد نجاح S-9 (T1.8).
 
-القرارات المقترحة الأخرى (ADR-006, 009, 010, 020, 023, 026, 045) تُحسم أو تُعتمد صراحةً عند T1.10 أو في المهمة المعنية.
+القرارات المقترحة المتبقية (ADR-006, 009, 010, 020, 026, 045) تُحسم وتُعتمد رسمياً في T1.10 أو في المراحل المخصصة لها.
 
 ## ملاحظات ربط
 - **ADR-011** يلغيه جزئيًا **ADR-054** (جزء Outbox الإيميل فقط)؛ جزء wa.me ساري.
@@ -37,8 +37,8 @@ sourceVision: 1.0.0
 | [ADR-001](ADR-001-github-pages-ui.md) | D-001 | الواجهة على GitHub Pages | accepted | 0.2.0 |
 | [ADR-002](ADR-002-drop-looker-studio.md) | D-002 | التخلي عن Looker Studio | accepted | 0.2.0 |
 | [ADR-003](ADR-003-sheets-backup-only.md) | D-003 | Google Sheets نسخة احتياطية فقط | accepted | 0.2.0 |
-| [ADR-004](ADR-004-firebase-spark.md) | D-004 | Firebase على Spark بدون كارت (Auth + Firestore) | proposed | 0.2.0 |
-| [ADR-005](ADR-005-actions-worker.md) | D-005 | GitHub Actions كـ Worker بدل Apps Script للشغل التقيل | proposed | 0.2.0 |
+| [ADR-004](ADR-004-firebase-spark.md) | D-004 | Firebase على Spark بدون كارت (Auth + Firestore) | accepted | 0.2.0 |
+| [ADR-005](ADR-005-actions-worker.md) | D-005 | GitHub Actions كـ Worker بدل Apps Script للشغل التقيل | accepted | 0.2.0 |
 | [ADR-006](ADR-006-appsscript-bridge-only.md) | D-006 | Apps Script لجسر Google Sheets والنسخة الاحتياطية فقط | proposed | 0.2.0 |
 | [ADR-007](ADR-007-public-repo-secrets.md) | D-007 | ريبو عام جديد وقواعد الأسرار | accepted | 0.2.0 |
 | [ADR-008](ADR-008-version-control-everything.md) | D-008 | Version control على كل المكونات | accepted | 0.2.0 |
@@ -56,7 +56,7 @@ sourceVision: 1.0.0
 | [ADR-020](ADR-020-no-images-v1.md) | D-020 | لا صور في النسخة الأولى | proposed | 0.3.0 |
 | [ADR-021](ADR-021-petro-requests-no-api.md) | D-021 | طلب العهدة (Petro) داخل المنصة بدون API | accepted | 0.3.1 |
 | [ADR-022](ADR-022-data-lifecycle-policy.md) | D-022 | سياسة دورة حياة البيانات وإدارة الموارد | accepted | 0.3.1 |
-| [ADR-023](ADR-023-traccar-readonly-12m-window.md) | D-023 | مستخدم Traccar قراءة فقط وإعادة الحساب بنافذة 12 شهرًا على دفعات | proposed | 0.3.1 |
+| [ADR-023](ADR-023-traccar-readonly-12m-window.md) | D-023 | مستخدم Traccar قراءة فقط وإعادة الحساب بنافذة 12 شهرًا على دفعات | accepted | 0.3.1 |
 | [ADR-024](ADR-024-visual-identity.md) | D-024 | الهوية البصرية: Badawi Group ولوحة الألوان | accepted | 0.3.2 |
 | [ADR-025](ADR-025-english-numerals.md) | D-025 | الأرقام في الواجهة إنجليزي | accepted | 0.3.2 |
 | [ADR-026](ADR-026-open-license-arabic-font.md) | D-026 | خط عربي مفتوح الترخيص (IBM Plex Sans Arabic) مستضاف في الريبو | proposed | 0.3.2 |
@@ -68,7 +68,7 @@ sourceVision: 1.0.0
 | [ADR-032](ADR-032-report-edit-permission.md) | D-032 | صلاحية report.edit | accepted | 0.4.0 |
 | [ADR-033](ADR-033-reports-settings-control.md) | D-033 | التحكم الكامل من الإعدادات للتقارير | accepted | 0.4.0 |
 | [ADR-034](ADR-034-report-viewer-layers.md) | D-034 | عارض التقارير يطبّق التخطيط المحفوظ بطبقات | accepted | 0.4.0 |
-| [ADR-035](ADR-035-single-reusable-edit-file.md) | D-035 | ملف تحرير واحد يتجدد بدل ملف جديد لكل جلسة | proposed | 0.4.0 |
+| [ADR-035](ADR-035-single-reusable-edit-file.md) | D-035 | ملف تحرير واحد يتجدد بدل ملف جديد لكل جلسة | accepted | 0.4.0 |
 | [ADR-036](ADR-036-period-close-freeze.md) | D-036 | إغلاق الفترات المعتمدة وتجميد قيمها | accepted | 0.4.0 |
 | [ADR-037](ADR-037-table-numbering-sticky-column.md) | D-037 | عمود الترقيم والمجموع وتثبيت العمود الأول في الجداول الكبيرة على الموبايل | accepted | 0.4.0 |
 | [ADR-038](ADR-038-freeze-option-super-admin.md) | D-038 | خيار التجميد إعداد للـ Super Admin فقط | accepted | 0.4.1 |

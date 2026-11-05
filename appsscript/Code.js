@@ -90,6 +90,9 @@ function runSpikeS9Test() {
     results.step2_keysProtectionAndHiding = sheet.isColumnHiddenByUser(CONFIG.HIDDEN_KEY_COL_INDEX);
     Logger.log("2. إخفاء وحماية عمود المفاتيح: " + (results.step2_keysProtectionAndHiding ? "ناجح" : "فشل"));
 
+    // تثبيت التغييرات قبل محاكاة التعديل
+    SpreadsheetApp.flush();
+
     // 3. محاكاة تعديلات قام بها المستخدم في الشيت:
     // أ) تعديل قيمة النقلات للعربية 118 من 4 إلى 8
     // ب) تغيير خلفية خلية
@@ -97,13 +100,17 @@ function runSpikeS9Test() {
     sheet.getRange("E3").setValue(8);
     sheet.getRange("E3").setBackground("#FEF0D9"); // أصفر تحذيري
     
-    // إضافة صف يدوي في نهاية الجدول
+    // إضافة صف يدوي في نهاية الجدول (العمود B: 130)
     const newRowIndex = testRows.length + 2;
     sheet.getRange(newRowIndex, 2, 1, 5).setValues([["130", "28/10", "حوش عيسى", 5, "=E" + newRowIndex + "*85"]]);
+
+    // تثبيت التعديلات والصف الجديد قبل الفرز
+    SpreadsheetApp.flush();
 
     // 4. محاكاة فرز الجدول حسب عدد النقلات تنازلياً (لاختبار صمود عمود المفاتيح)
     const fullDataRange = sheet.getRange(2, 1, testRows.length + 1, 6);
     fullDataRange.sort({ column: 5, ascending: false });
+    SpreadsheetApp.flush();
     Logger.log("3. تم تنفيذ فرز كامل للجدول لاختبار صمود المفاتيح.");
 
     // 5. استخراج البيانات والتنسيقات والفروق بعد التعديل والفرز
@@ -118,22 +125,22 @@ function runSpikeS9Test() {
     let formulaExtracted = false;
 
     for (let i = 0; i < postSortValues.length; i++) {
-      const key = postSortValues[i][0];
-      const veh = postSortValues[i][1];
-      const trips = postSortValues[i][4];
-      const formula = postSortFormulas[i][5];
+      const key = String(postSortValues[i][0] || "").trim();
+      const veh = String(postSortValues[i][1] || "").trim();
+      const trips = Number(postSortValues[i][4]);
+      const formula = String(postSortFormulas[i][5] || "");
 
       // فحص ارتباط المفتاح بالعربية بعد الفرز
       if (key && !key.startsWith(veh + "|")) {
         sortedCorrectlyWithKeys = false;
       }
 
-      // فحص كشف تعديل القيمة للعربية 118
+      // فحص كشف تعديل القيمة للعربية 118 إلى 8
       if (key === "118|2026-10-28" && trips === 8) {
         modifiedValueDetected = true;
       }
 
-      // فحص كشف الصف اليدوي الجديد (الذي ليس له مفتاح سابق)
+      // فحص كشف الصف اليدوي الجديد (الذي ليس له مفتاح سابق في العمود A)
       if (!key && veh === "130") {
         manualRowDetected = true;
       }
