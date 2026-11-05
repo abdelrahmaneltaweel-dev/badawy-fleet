@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'preact/hooks';
 import { useRouter } from './router';
 import { getStoredTheme, applyTheme, type ThemeMode } from './theme';
+import { ToastContainer } from './components/Toast';
 
 const routes = [
   { path: '/', component: () => import('./pages/Dashboard') },
@@ -8,7 +9,8 @@ const routes = [
   { path: '/reports', component: () => import('./pages/Reports') },
   { path: '/inquiries', component: () => import('./pages/Inquiries') },
   { path: '/petro', component: () => import('./pages/Petro') },
-  { path: '/settings', component: () => import('./pages/Settings') }
+  { path: '/settings', component: () => import('./pages/Settings') },
+  { path: '/showcase', component: () => import('./pages/Showcase') }
 ];
 
 export function App() {
@@ -30,11 +32,15 @@ export function App() {
     { path: '/reports', label: 'التقارير', icon: '📑' },
     { path: '/inquiries', label: 'الاستفسارات', icon: '💬' },
     { path: '/petro', label: 'العهدة', icon: '💳' },
-    { path: '/settings', label: 'الإعدادات', icon: '⚙️' }
+    { path: '/settings', label: 'الإعدادات', icon: '⚙️' },
+    { path: '/showcase', label: 'المكونات', icon: '🎨' }
   ];
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
+      {/* Toast Notification Mount */}
+      <ToastContainer />
+
       {/* Header */}
       <header style={{
         background: 'var(--card)',
@@ -54,7 +60,6 @@ export function App() {
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* زر تبديل الثيم السريع */}
           <button
             onClick={toggleTheme}
             title={`المظهر الحالي: ${themeMode === 'auto' ? 'تلقائي' : themeMode === 'dark' ? 'داكن' : 'فاتح'}`}
@@ -123,13 +128,13 @@ export function App() {
                 fontSize: '0.74rem',
                 fontWeight: isActive ? 700 : 500,
                 gap: '2px',
-                padding: '4px 8px',
+                padding: '4px 6px',
                 borderRadius: 'var(--r-sm)',
                 background: isActive ? 'var(--soft)' : 'transparent',
                 transition: 'background var(--dur-fast) var(--e), color var(--dur-fast) var(--e)'
               }}
             >
-              <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+              <span style={{ fontSize: '1.05rem' }}>{item.icon}</span>
               <span>{item.label}</span>
             </a>
           );
