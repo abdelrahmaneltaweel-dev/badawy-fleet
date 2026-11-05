@@ -1,0 +1,20 @@
+name: "Spike S-4: Benchmark 65 Vehicles & Cron"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  benchmark-fleet:
+    name: Fleet 65 Vehicles Benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run Fleet Benchmark & Cron Analysis
+        run: node apps/worker/s4-cron-benchmark.js
