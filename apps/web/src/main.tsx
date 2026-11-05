@@ -5,8 +5,9 @@ import { initPWA } from './pwa';
 import './styles/tokens.css';
 import './styles/components.css';
 import './styles/layout.css';
+import './styles/motion.css';
 
-// Initialize Theme & PWA early (ADR-014, ADR-029)
+// Initialize Theme & PWA early (ADR-014, ADR-028, ADR-029)
 initTheme();
 initPWA();
 

@@ -421,8 +421,6 @@
     margin: 0 auto 12px;
   }
 }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
 .select-option {
   padding: 10px 14px;
@@ -490,7 +488,7 @@ table.data-table tbody tr:hover td {
   }
 }
 
-/* Status Badge */
+/* Status Badge with Calm Pulse (ADR-028) */
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -508,6 +506,15 @@ table.data-table tbody tr:hover td {
   height: 7px;
   border-radius: 50%;
   background: currentColor;
+  position: relative;
+}
+.status-badge.online .status-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: currentColor;
+  animation: calmPulse 2.4s ease-out infinite;
 }
 
 /* Progress Bar */

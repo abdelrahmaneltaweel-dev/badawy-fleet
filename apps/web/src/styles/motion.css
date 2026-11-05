@@ -1,0 +1,87 @@
+/* Badawi Fleet Motion & Interaction Design - ADR-028 */
+
+/* Motion Variables */
+:root {
+  --e-calm: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 0.15s;
+  --dur-norm: 0.25s;
+  --dur-slow: 0.4s;
+}
+
+/* Calm Click Ripple */
+.rip {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.18;
+  transform: scale(0);
+  animation: calmRipple 0.5s var(--e-calm) forwards;
+  pointer-events: none;
+}
+@keyframes calmRipple {
+  to {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* Online Pulse Animation */
+@keyframes calmPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  70%, 100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* Fade In Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Slide Up Keyframes */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reveal Utilities */
+.animate-fade-in {
+  animation: fadeIn var(--dur-norm) var(--e-calm) both;
+}
+
+.animate-slide-up {
+  animation: slideUp var(--dur-norm) var(--e-calm) both;
+}
+
+/* Full Reduced Motion Override (ADR-028) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Manual Motion Override from Settings (ADR-040) */
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] ::before,
+html[data-motion="reduced"] ::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}

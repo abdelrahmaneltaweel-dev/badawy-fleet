@@ -24,18 +24,21 @@ export default function Showcase() {
   const [inputVal, setInputVal] = useState('');
 
   return (
-    <div style={{ display: 'grid', gap: '16px' }}>
+    <div style={{ display: 'grid', gap: '16px' }} className="animate-fade-in">
       <Card title="معرض المكوّنات المعتمدة (Showcase)" subtitle="تحقق شامل لجميع المكونات طبقاً لمعاينة v0.3.0">
         <p style={{ margin: 0, color: 'var(--mute)', fontSize: '0.86rem' }}>
-          كل المكونات مبنية وفق المعايير الهادئة وتدعم الفاتح والداكن والموبايل بسلاسة كاملة.
+          كل المكونات مبنية وفق المعايير الهادئة وتدعم الفاتح والداكن والحركة الهادئة والموبايل بسلاسة كاملة.
         </p>
       </Card>
 
-      {/* Buttons & Chips */}
-      <Card title="1. الأزرار والشرائح (Buttons & Chips)">
+      {/* Buttons & Chips with Ripple & Press */}
+      <Card title="1. الأزرار والشرائح (Buttons with Calm Ripple - ADR-028)">
+        <p style={{ margin: '0 0 10px', color: 'var(--mute)', fontSize: '0.82rem' }}>
+          اضغط على أي زر لتجربة تأثير التموج الهادئ (Ripple Effect) والاهتزاز اللمسي:
+        </p>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <Button variant="primary" onClick={() => showToast('تم النقر على الزر الأساسي')}>أساسي (Primary)</Button>
-          <Button variant="secondary" onClick={() => showToast('زر ثانوي')}>ثانوي (Secondary)</Button>
+          <Button variant="primary" onClick={() => showToast('تم النقر على الزر الأساسي (Ripple)')}>أساسي (Primary)</Button>
+          <Button variant="secondary" onClick={() => showToast('زر ثانوي هادئ')}>ثانوي (Secondary)</Button>
           <Button variant="outline">مفرغ (Outline)</Button>
           <Button variant="warning">تحذير (Warning)</Button>
           <Button variant="danger">حذف (Danger)</Button>
@@ -149,13 +152,13 @@ export default function Showcase() {
       </Card>
 
       {/* Table (ADR-037) */}
-      <Card title="5. الجدول المستجيب (Responsive Table with Sticky Column)">
+      <Card title="5. الجدول المستجيب وشارة النبض (Responsive Table with Pulse Badge)">
         <Table>
           <thead>
             <tr>
               <th className="col-sticky">العربية</th>
               <th>النوع</th>
-              <th>الحالة</th>
+              <th>الحالة (مع النبض الهادئ)</th>
               <th>إنجاز اليوم</th>
               <th>آخر إشارة</th>
             </tr>
