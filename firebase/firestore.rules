@@ -1,0 +1,158 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // Helper Functions (Consumes 0 Firestore Read Quota via Auth Custom Claims)
+    // Ref: Spike S-6 (T1.3) & ADR-013
+    // =========================================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isRole(role) {
+      return isAuthenticated() && request.auth.token.role == role;
+    }
+
+    function isSuperAdmin() {
+      return isRole('super_admin');
+    }
+
+    function isManagement() {
+      return isRole('management');
+    }
+
+    function isMixerManager() {
+      return isRole('mixer_manager');
+    }
+
+    function isGarageSecurity() {
+      return isRole('garage_security');
+    }
+
+    function isDriver() {
+      return isRole('driver');
+    }
+
+    function isUser(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    // Default Deny All (ADR-013)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 1. Vehicles: Read by all authenticated users; Write by Super Admin only (ADR-016)
+    match /vehicles/{vehicleId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // 2. Drivers: Super Admin and Management read all; Driver reads only own profile; Write by Super Admin only
+    match /drivers/{driverId} {
+      allow read: if isSuperAdmin() || isManagement() || (isDriver() && isUser(driverId));
+      allow write: if isSuperAdmin();
+    }
+
+    // 3. Assignments: Read by all authenticated users; Write by Super Admin only (ADR-016)
+    match /assignments/{assignmentId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // 4. Sites: Read by all authenticated users; Write by Super Admin only
+    match /sites/{siteId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // 5. Inquiries: Targeted role/user access; Field-level update guard (ADR-017, ADR-018)
+    match /inquiries/{inquiryId} {
+      allow read: if isSuperAdmin() 
+                  || (isDriver() && resource.data.targetUserId == request.auth.uid)
+                  || (isMixerManager() && resource.data.targetRole == 'mixer_manager')
+                  || (isGarageSecurity() && resource.data.targetRole == 'garage_security');
+      allow create: if isSuperAdmin();
+      // Target user can only submit their response when status is pending
+      allow update: if isSuperAdmin() || (
+        resource.data.status == 'pending' &&
+        request.resource.data.status in ['pending', 'answered'] &&
+        (
+          (isDriver() && resource.data.targetUserId == request.auth.uid) ||
+          (isMixerManager() && resource.data.targetRole == 'mixer_manager') ||
+          (isGarageSecurity() && resource.data.targetRole == 'garage_security')
+        ) &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['responseCode', 'responseNote', 'status', 'updatedAt'])
+      );
+      allow delete: if isSuperAdmin();
+    }
+
+    // 6. Issues: GPS issues managed by Super Admin / Worker (ADR-019)
+    match /issues/{issueId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // 7. Statements: Mixer, Garage, and Driver supporting statements (ADR-018, ADR-060)
+    match /statements/{statementId} {
+      allow read: if isSuperAdmin() || isManagement()
+                  || (isMixerManager() && resource.data.source == 'mixer')
+                  || (isGarageSecurity() && resource.data.source == 'garage')
+                  || (isDriver() && resource.data.source == 'driver' && resource.data.enteredBy == request.auth.uid);
+      allow create: if isSuperAdmin() || (
+        isAuthenticated() &&
+        request.resource.data.enteredBy == request.auth.uid &&
+        request.resource.data.approved == false &&
+        (
+          (isMixerManager() && request.resource.data.source == 'mixer') ||
+          (isGarageSecurity() && request.resource.data.source == 'garage') ||
+          (isDriver() && request.resource.data.source == 'driver')
+        )
+      );
+      allow update: if isSuperAdmin() || (
+        resource.data.enteredBy == request.auth.uid &&
+        resource.data.approved == false &&
+        request.resource.data.approved == false
+      );
+      allow delete: if isSuperAdmin();
+    }
+
+    // 8. Daily Summaries: Pre-calculated summaries by Worker/Super Admin (ADR-005, ADR-023)
+    match /daily_summaries/{summaryId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // 9. Petro Requests (ADR-021, ADR-056)
+    match /petro_requests/{requestId} {
+      allow read: if isSuperAdmin() || isManagement();
+      allow write: if isSuperAdmin();
+    }
+
+    // 10. Settings: Cached in PWA; Write by Super Admin only (ADR-040, ADR-044)
+    match /settings/{settingId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // 11. Audit Logs: Append-only by Super Admin; No update or delete allowed (ADR-018, ADR-056)
+    match /audit_logs/{logId} {
+      allow read: if isSuperAdmin();
+      allow create: if isSuperAdmin();
+      allow update, delete: if false;
+    }
+
+    // 12. Period Snapshots: Frozen periods are permanently locked (ADR-036, ADR-038)
+    match /period_snapshots/{periodId} {
+      allow read: if isSuperAdmin() || isManagement();
+      allow create: if isSuperAdmin();
+      allow update: if isSuperAdmin() && (
+        !resource.data.frozen || request.resource.data.frozen == false
+      );
+      allow delete: if false;
+    }
+  }
+}
