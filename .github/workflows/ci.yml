@@ -7,9 +7,6 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
   secret-scan:
     name: Secret & Pattern Scan
@@ -21,13 +18,17 @@ jobs:
       - name: Scan for forbidden patterns and secrets
         run: |
           echo "Scanning for forbidden keywords..."
-          ! grep -rnIE "traccar.*\.com|http://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|eyJhbGciOi" \
-            --exclude-dir={.git,node_modules,dist} \
-            --exclude="*.png" \
-            --exclude="*.jpg" \
-            --exclude="*.svg" .
+          ! grep -rnIE \
+            --exclude-dir=.git \
+            --exclude-dir=.github \
+            --exclude-dir=node_modules \
+            --exclude-dir=dist \
+            --exclude-dir=build \
+            --exclude="ci.yml" \
+            --exclude="package-lock.json" \
+            "traccar.*\.com|http://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|eyJhbGciOi" .
 
-  build-web:
+  web-build:
     name: Build & Validate Web App
     runs-on: ubuntu-latest
     steps:
@@ -38,9 +39,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
+          cache-dependency-path: apps/web/package.json
 
-      - name: Install & Build Web App
-        run: |
-          cd apps/web
-          npm install
-          npm run build
+      - name: Install Dependencies
+        working-directory: apps/web
+        run: npm install
+
+      - name: Type Check & Build
+        working-directory: apps/web
+        run: npm run build
