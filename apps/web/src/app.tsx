@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { useRouter } from './router';
-import { getStoredTheme, applyTheme, ThemeMode } from './theme';
+import { getStoredTheme, applyTheme, type ThemeMode } from './theme';
 
 const routes = [
   { path: '/', component: () => import('./pages/Dashboard') },
