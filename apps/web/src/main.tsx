@@ -1,4 +1,5 @@
 import { render } from 'preact';
+import 'preact/hooks';
 import { App } from './app';
 import { initTheme } from './theme';
 import { initPWA } from './pwa';
