@@ -15,3 +15,4 @@ export * from './repository/firestore.js';
 export * from './repository/sheets.js';
 export * from './repository/factory.js';
 export * from './analysis/index.js';
+export * from './overrides/index.js';
