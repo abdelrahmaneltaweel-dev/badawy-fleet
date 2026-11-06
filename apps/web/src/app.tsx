@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { useRouter } from './router';
-import { getStoredTheme, applyTheme, type ThemeMode } from './theme';
+import { appearanceService } from './services/appearance';
 import { authService, type UserProfile } from './services/auth';
 import { ToastContainer, showToast } from './components/Toast';
 import { Icon, type IconName } from './components/Icon';
@@ -29,7 +29,9 @@ interface NavItem {
 
 export function App() {
   const { currentPath, Component, loading } = useRouter(routes);
-  const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredTheme);
+  const [themeMode, setThemeMode] = useState<'auto' | 'light' | 'dark'>(
+    appearanceService.getPreferences().themeMode
+  );
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(authService.getCurrentUser());
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     try {
@@ -40,16 +42,17 @@ export function App() {
   });
 
   useEffect(() => {
-    applyTheme(themeMode);
-  }, [themeMode]);
+    return appearanceService.subscribe((pref) => {
+      setThemeMode(pref.themeMode);
+    });
+  }, []);
 
   useEffect(() => {
     return authService.subscribe(setCurrentUser);
   }, []);
 
   const toggleTheme = () => {
-    const nextMode: ThemeMode = themeMode === 'light' ? 'dark' : themeMode === 'dark' ? 'auto' : 'light';
-    setThemeMode(nextMode);
+    appearanceService.toggleThemeMode();
   };
 
   const toggleSidebar = () => {
@@ -182,14 +185,14 @@ export function App() {
         <div className="sdg" style={{ borderTop: '1px solid var(--line)', borderBottom: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Icon name={themeMode === 'dark' ? 'moon' : 'sun'} size={18} />
+              <Icon name={appearanceService.getResolvedTheme() === 'dark' ? 'moon' : 'sun'} size={18} />
               <span className="lb" style={{ fontSize: '0.86rem', fontWeight: 500 }}>
                 {themeMode === 'dark' ? 'الوضع الداكن' : themeMode === 'light' ? 'الوضع الفاتح' : 'مظهر النظام'}
               </span>
             </div>
             <div className="lb">
               <Switch
-                checked={themeMode === 'dark'}
+                checked={appearanceService.getResolvedTheme() === 'dark'}
                 onChange={() => toggleTheme()}
               />
             </div>
@@ -253,7 +256,7 @@ export function App() {
             onClick={toggleTheme}
             title={`المظهر: ${themeMode === 'auto' ? 'تلقائي' : themeMode === 'dark' ? 'داكن' : 'فاتح'}`}
           >
-            <Icon name={themeMode === 'dark' ? 'sun' : 'moon'} size={16} />
+            <Icon name={appearanceService.getResolvedTheme() === 'dark' ? 'sun' : 'moon'} size={16} />
           </button>
 
           <span style={{ fontSize: '0.78rem', background: 'var(--soft)', color: 'var(--mute)', padding: '6px 12px', borderRadius: 'var(--r-full)', fontWeight: 600 }}>

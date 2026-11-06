@@ -14,13 +14,27 @@
 
   <title>منصة أسطول أبناء بدوي</title>
 
-  <!-- Anti-Flicker Inline Script: Resolves Theme before first paint -->
+  <!-- Comprehensive Anti-Flicker Inline Script: Resolves Theme, Font & Size before first paint -->
   <script>
     (function() {
       try {
-        var mode = localStorage.getItem('badawi-theme') || 'auto';
+        var rawPref = localStorage.getItem('badawi_user_appearance_pref_v1');
+        var pref = rawPref ? JSON.parse(rawPref) : null;
+        var mode = pref ? pref.themeMode : (localStorage.getItem('badawi-theme') || 'auto');
         var dark = mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+
+        if (pref) {
+          if (pref.fontFamily) {
+            document.documentElement.setAttribute('data-font', pref.fontFamily);
+          }
+          if (pref.baseFontSizePx && pref.baseFontSizePx >= 13 && pref.baseFontSizePx <= 18) {
+            document.documentElement.style.setProperty('--font-size-base', pref.baseFontSizePx + 'px');
+          }
+          if (pref.motionReduced) {
+            document.documentElement.setAttribute('data-motion', 'reduced');
+          }
+        }
       } catch (e) {}
     })();
   </script>

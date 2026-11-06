@@ -3,9 +3,12 @@ import {
   SETTINGS_REGISTRY,
   SETTING_SECTION_LABELS,
   type SettingSection,
-  type SettingDefinition
+  type SettingDefinition,
+  type CuratedFontId,
+  type UserPersonalPreferences
 } from '@badawi/logic';
 import { settingsService } from '../services/settings';
+import { appearanceService } from '../services/appearance';
 import { authService } from '../services/auth';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
@@ -25,14 +28,26 @@ export default function Settings() {
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
   const [showRiskModal, setShowRiskModal] = useState<boolean>(false);
 
+  // User Local Appearance Preferences (T3.5)
+  const [userPrefs, setUserPrefs] = useState<UserPersonalPreferences>(
+    appearanceService.getPreferences()
+  );
+
   const canManageSettings = authService.can('settings.manage');
 
   useEffect(() => {
-    return settingsService.subscribe(() => {
+    const unsubSettings = settingsService.subscribe(() => {
       setEffectiveValues(settingsService.getEffectiveValues());
       setHasDraft(settingsService.hasDraft());
       setPublishedVersion(settingsService.getSettings().version);
     });
+
+    const unsubAppearance = appearanceService.subscribe(setUserPrefs);
+
+    return () => {
+      unsubSettings();
+      unsubAppearance();
+    };
   }, []);
 
   const handleFieldChange = (def: SettingDefinition, newValue: unknown) => {
@@ -92,13 +107,14 @@ export default function Settings() {
 
   const currentSectionSettings = SETTINGS_REGISTRY.filter((s) => s.section === activeSection);
   const sections = Object.keys(SETTING_SECTION_LABELS) as SettingSection[];
+  const curatedFonts = appearanceService.getCuratedFonts();
 
   return (
     <div style={{ display: 'grid', gap: '16px' }} className="animate-fade-in">
       {/* Header Card */}
       <Card
-        title="سجل الإعدادات المركزي (Settings Registry)"
-        subtitle={`الإصدار الحالي المنشور: v${publishedVersion} · كل ثابت له إعداد (ADR-040, ADR-044)`}
+        title="سجل الإعدادات والمظهر (Settings & Preferences)"
+        subtitle={`الإصدار المركزي المنشور: v${publishedVersion} · تحكم فوري بالخطوط والمظهر (ADR-040, ADR-045, ADR-058)`}
         action={
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <Button variant="secondary" onClick={() => setShowHistoryModal(true)}>
@@ -115,9 +131,105 @@ export default function Settings() {
         }
       >
         <p style={{ margin: 0, color: 'var(--mute)', fontSize: '0.86rem' }}>
-          الإعدادات تنقسم لنوعين: <b>شكلي (Visual)</b> يُطبق فورياً، و<b>منطقي (Logical)</b> يسري مع سريان التاريخ
-          ويحمي الفترات المقفولة من أي تغيير.
+          يمكنك تخصيص مظهر جهازك الشخصي بحرية تامة فورياً، بينما يدير مسؤول الأسطول الإعدادات العامة لجميع المستخدمين.
         </p>
+      </Card>
+
+      {/* 1. Dedicated Personal Preferences Card (T3.5 - Available to Any User) */}
+      <Card
+        title="🎨 تفضيلاتي الشخصية لهذا الجهاز (Personal Preferences)"
+        subtitle="تُحفظ على جهازك وتطبق فورياً دون التأثير على الآخرين (ADR-044)"
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+          {/* Personal Theme Switcher */}
+          <div style={{ background: 'var(--soft)', padding: '14px', borderRadius: 'var(--r-sm)' }}>
+            <b style={{ fontSize: '0.88rem', display: 'block', marginBottom: '8px' }}>مظهر النظام الشخصي:</b>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {[
+                { mode: 'auto' as const, label: '🖥️ تلقائي' },
+                { mode: 'light' as const, label: '☀️ فاتح' },
+                { mode: 'dark' as const, label: '🌙 داكن' }
+              ].map((opt) => (
+                <button
+                  key={opt.mode}
+                  type="button"
+                  className={`chip ${userPrefs.themeMode === opt.mode ? 'active' : ''}`}
+                  onClick={() => appearanceService.setThemeMode(opt.mode)}
+                  style={{ flex: 1, justifyContent: 'center' }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Personal Curated Font Selector (ADR-058) */}
+          <div style={{ background: 'var(--soft)', padding: '14px', borderRadius: 'var(--r-sm)' }}>
+            <b style={{ fontSize: '0.88rem', display: 'block', marginBottom: '8px' }}>الخط العربي المفضل (ADR-058):</b>
+            <div style={{ display: 'grid', gap: '6px' }}>
+              {curatedFonts.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  className={`chip ${userPrefs.fontFamily === f.id ? 'active' : ''}`}
+                  onClick={() => appearanceService.setFontFamily(f.id as CuratedFontId)}
+                  style={{
+                    fontFamily: f.cssFamily,
+                    justifyContent: 'space-between',
+                    padding: '8px 12px',
+                    borderRadius: 'var(--r-xs)'
+                  }}
+                >
+                  <span>{f.arabicName}</span>
+                  {userPrefs.fontFamily === f.id && <span style={{ color: 'var(--acc)', fontWeight: 700 }}>✓</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Base Font Size Selector with Safety Bounds */}
+          <div style={{ background: 'var(--soft)', padding: '14px', borderRadius: 'var(--r-sm)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <b style={{ fontSize: '0.88rem' }}>حجم الخط الأساسي:</b>
+              <span style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--acc)' }}>
+                {userPrefs.baseFontSizePx}px
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              {[13, 14, 15, 16, 17, 18].map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  className={`chip ${userPrefs.baseFontSizePx === size ? 'active' : ''}`}
+                  onClick={() => appearanceService.setBaseFontSize(size)}
+                  style={{ flex: 1, justifyContent: 'center', padding: '6px 2px' }}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+            <p style={{ margin: '8px 0 0', fontSize: '0.78rem', color: 'var(--mute)' }}>
+              معاينة فورية: منصة بدوي لمتابعة الأسطول (عربية 116 - 8 نقلات).
+            </p>
+          </div>
+
+          {/* Personal Motion Preference */}
+          <div style={{ background: 'var(--soft)', padding: '14px', borderRadius: 'var(--r-sm)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <b style={{ fontSize: '0.88rem', display: 'block', marginBottom: '4px' }}>تفضيل تقليل الحركة:</b>
+              <small style={{ color: 'var(--mute)', display: 'block', marginBottom: '10px' }}>
+                لراحة العين وتوفير طاقة بطارية الهاتف (ADR-028)
+              </small>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>إيقاف الحركات السريعة والتموج:</span>
+              <Switch
+                checked={userPrefs.motionReduced}
+                onChange={(checked) => appearanceService.setMotionReduced(checked)}
+              />
+            </div>
+          </div>
+        </div>
       </Card>
 
       {/* Draft Notification Banner */}
