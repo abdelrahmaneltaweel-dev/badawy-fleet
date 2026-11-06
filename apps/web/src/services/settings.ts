@@ -82,8 +82,12 @@ export const settingsService = {
     return currentDraft ? { ...currentDraft } : {};
   },
 
-  updateDraftValue(key: string, value: unknown): { valid: boolean; error?: string } {
-    const validation = validateSettingValue(key, value);
+  updateDraftValue(
+    key: string,
+    value: unknown,
+    options?: { superAdminConfirmed?: boolean }
+  ): { valid: boolean; error?: string; requiresSuperAdminConfirmation?: boolean } {
+    const validation = validateSettingValue(key, value, options);
     if (!validation.valid) {
       return validation;
     }

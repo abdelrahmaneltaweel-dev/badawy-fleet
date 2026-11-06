@@ -9,5 +9,8 @@
     "dev": "npm run dev --workspace=@badawi/web",
     "build": "npm run build --workspace=@badawi/web",
     "lint": "npm run build --workspace=@badawi/web"
+  },
+  "dependencies": {
+    "read-excel-file": "^9.3.14"
   }
 }

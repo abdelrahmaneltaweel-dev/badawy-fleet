@@ -4,6 +4,7 @@
  */
 
 import type { SettingDefinition, SettingSection } from './types.js';
+import { calculateWriteBudget, type WriteBudgetEstimate } from '../ingestion/budget.js';
 
 export const SETTING_SECTION_LABELS: Record<SettingSection, { label: string; icon: string }> = {
   appearance: { label: 'المظهر والعلامة التجارية', icon: '🎨' },
@@ -13,7 +14,8 @@ export const SETTING_SECTION_LABELS: Record<SettingSection, { label: string; ico
   periods_closing: { label: 'الفترات والإغلاق المالي', icon: '🔒' },
   workflow_inquiries: { label: 'سير العمل والاستفسارات', icon: '💬' },
   petro_wallet: { label: 'محفظة الوقود (Petro)', icon: '⛽' },
-  retention_lifecycle: { label: 'الاحتفاظ وإدارة الموارد', icon: '🗄️' }
+  retention_lifecycle: { label: 'الاحتفاظ وإدارة الموارد', icon: '🗄️' },
+  ingestion_sync: { label: 'المزامنة والاستيعاب (Ingestion)', icon: '🔄' }
 };
 
 export const SETTINGS_REGISTRY: SettingDefinition[] = [
@@ -431,11 +433,29 @@ export const SETTINGS_REGISTRY: SettingDefinition[] = [
     max: 60,
     step: 6,
     unit: 'شهر'
+  },
+
+  // 9. Ingestion & Sync (المزامنة والاستيعاب) - ADR-004, ADR-049
+  {
+    key: 'ingestion.refresh_interval_minutes',
+    section: 'ingestion_sync',
+    type: 'number',
+    label: 'معدل سحب وتحديث بيانات الأسطول (Traccar Ingestion)',
+    description: 'الفترة الفاصلة بالدقائق بين عمليات سحب GPS وتحليل الأسطول التلقائية مع حماية ميزانية الـ 20,000 كتابة (ADR-049)',
+    defaultValue: 15,
+    riskLevel: 'logical',
+    scope: 'global',
+    min: 1,
+    max: 180,
+    step: 1,
+    unit: 'دقيقة'
   }
 ];
 
 export function getSettingDefinition(key: string): SettingDefinition | undefined {
-  return SETTINGS_REGISTRY.find((s) => s.key === key);
+  // Support both dot notation and underscore notation
+  const normalizedKey = key === 'ingestion_refresh_interval_minutes' ? 'ingestion.refresh_interval_minutes' : key;
+  return SETTINGS_REGISTRY.find((s) => s.key === normalizedKey);
 }
 
 export function getDefaultSettingsMap(): Record<string, unknown> {
@@ -446,7 +466,18 @@ export function getDefaultSettingsMap(): Record<string, unknown> {
   return result;
 }
 
-export function validateSettingValue(key: string, value: unknown): { valid: boolean; error?: string } {
+export interface SettingValidationResult {
+  valid: boolean;
+  error?: string;
+  requiresSuperAdminConfirmation?: boolean;
+  budget?: WriteBudgetEstimate;
+}
+
+export function validateSettingValue(
+  key: string,
+  value: unknown,
+  options?: { superAdminConfirmed?: boolean; fleetSize?: number }
+): SettingValidationResult {
   const def = getSettingDefinition(key);
   if (!def) {
     return { valid: false, error: 'إعداد غير معرف في السجل' };
@@ -466,6 +497,20 @@ export function validateSettingValue(key: string, value: unknown): { valid: bool
     }
     if (def.max !== undefined && num > def.max) {
       return { valid: false, error: `الحد الأقصى المسموح به هو ${def.max}` };
+    }
+
+    // Special Guard for Ingestion Refresh Rate (ADR-049 & D-049)
+    if (def.key === 'ingestion.refresh_interval_minutes') {
+      const budget = calculateWriteBudget(num, options?.fleetSize);
+      if (budget.requiresSuperAdminConfirmation && !options?.superAdminConfirmed) {
+        return {
+          valid: false,
+          error: `تنبيه حرج (ADR-049): هذا المعدل يستهلك أكثر من 90% (${budget.worstCaseDailyWrites} كتابة / ${budget.worstCasePercentOfQuota}%) من حصة الـ 20,000 كتابة اليومية. يتطلب تأكيداً صريحاً من الـ Super Admin للمتابعة.`,
+          requiresSuperAdminConfirmation: true,
+          budget
+        };
+      }
+      return { valid: true, budget };
     }
   } else if (def.type === 'select') {
     if (def.options && !def.options.some((opt) => opt.value === value)) {
