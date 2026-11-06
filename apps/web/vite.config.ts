@@ -8,12 +8,27 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // مسار نسبي لدعم GitHub Pages على المسار الفرعي (/badawy-fleet/)
 export default defineConfig({
   base: './',
-  plugins: [preact()],
+  plugins: [
+    preact({
+      prefreshEnabled: false,
+      devToolsEnabled: false
+    })
+  ],
   server: {
     host: '0.0.0.0',
     port: 3000,
     strictPort: true,
     allowedHosts: true,
+  },
+  optimizeDeps: {
+    include: [
+      'preact',
+      'preact/hooks',
+      'preact/compat',
+      'preact/jsx-runtime',
+      'preact/jsx-dev-runtime',
+      'preact/debug'
+    ]
   },
   resolve: {
     alias: {
@@ -28,7 +43,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['preact']
+          vendor: ['preact', 'preact/hooks']
         }
       }
     }

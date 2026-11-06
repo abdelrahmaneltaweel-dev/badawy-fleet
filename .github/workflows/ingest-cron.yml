@@ -1,0 +1,61 @@
+name: Fleet GPS Ingestion Worker
+
+on:
+  schedule:
+    # Run every 30 minutes (ADR-004 Spark Free Plan Quota Protection & ADR-005 Actions Worker)
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run analysis and diff check without writing to Firestore'
+        type: boolean
+        required: false
+        default: false
+      force_all:
+        description: 'Bypass checksum diff and force writing all summaries'
+        type: boolean
+        required: false
+        default: false
+      date:
+        description: 'Operational Date to process (YYYY-MM-DD). Defaults to current date.'
+        type: string
+        required: false
+        default: ''
+
+concurrency:
+  group: fleet-ingestion
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    name: Ingest Fleet GPS & Calculate Diffs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Workspace Dependencies
+        run: npm ci || npm install
+
+      - name: Build Logic Layer (@badawi/logic)
+        run: npm run build --workspace=@badawi/logic
+
+      - name: Run Ingestion Worker
+        env:
+          TRACCAR_URL: ${{ secrets.TRACCAR_URL }}
+          TRACCAR_TOKEN: ${{ secrets.TRACCAR_TOKEN }}
+          TRACCAR_USER: ${{ secrets.TRACCAR_USER }}
+          TRACCAR_PASS: ${{ secrets.TRACCAR_PASS }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          FORCE_ALL: ${{ github.event.inputs.force_all || 'false' }}
+          OPERATIONAL_DATE: ${{ github.event.inputs.date || '' }}
+        run: node apps/worker/ingest.js
