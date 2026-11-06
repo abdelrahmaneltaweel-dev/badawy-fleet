@@ -27,6 +27,7 @@ export type PermissionKey =
   | 'users.manage'
   | 'settings.manage'
   | 'petro.request'
+  | 'audit.view'
   | 'import.upload';
 
 export const ROLE_LABELS: Record<UserRole, string> = {
@@ -54,6 +55,7 @@ export const PERMISSION_LABELS: Record<PermissionKey, string> = {
   'users.manage': 'إدارة المستخدمين والصلاحيات',
   'settings.manage': 'تعديل سجل الإعدادات',
   'petro.request': 'إدارة طلبات العهدة (Petro)',
+  'audit.view': 'عرض سجل المراجعة والتدقيق',
   'import.upload': 'رفع ملفات Excel الخام'
 };
 
@@ -74,11 +76,13 @@ export const ROLE_DEFAULT_PERMISSIONS: Record<UserRole, PermissionKey[]> = {
     'users.manage',
     'settings.manage',
     'petro.request',
+    'audit.view',
     'import.upload'
   ],
   management: [
     'report.view',
-    'report.export'
+    'report.export',
+    'audit.view'
   ],
   mixer_manager: [
     'statement.mixer.create',

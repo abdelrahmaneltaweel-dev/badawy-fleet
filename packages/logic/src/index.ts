@@ -7,3 +7,5 @@ export * from './settings/registry.js';
 export * from './settings/appearance.js';
 export * from './entities/types.js';
 export * from './entities/parser.js';
+export * from './audit/types.js';
+export * from './audit/helpers.js';

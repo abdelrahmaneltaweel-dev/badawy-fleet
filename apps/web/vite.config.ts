@@ -9,6 +9,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   base: './',
   plugins: [preact()],
+  server: {
+    host: '0.0.0.0',
+    port: 3000,
+  },
   resolve: {
     alias: {
       '@badawi/logic': path.resolve(__dirname, '../../packages/logic/src/index.ts')

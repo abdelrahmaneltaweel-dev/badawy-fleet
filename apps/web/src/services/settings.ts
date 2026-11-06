@@ -9,6 +9,7 @@ import {
   getDefaultSettingsMap,
   validateSettingValue
 } from '@badawi/logic';
+import { auditService } from './audit';
 
 const PUBLISHED_SETTINGS_KEY = 'badawi_settings_published_v1';
 const DRAFT_SETTINGS_KEY = 'badawi_settings_draft_v1';
@@ -153,6 +154,17 @@ export const settingsService = {
 
     currentDraft = null;
     notify();
+
+    // ADR-018: Record audit log for publishing new settings
+    auditService.recordAction({
+      action: 'update',
+      collection: 'settings',
+      documentId: `v${newVersion}`,
+      title: `نشر إصدار جديد لسجل الإعدادات (v${newVersion})`,
+      before: history[0]?.values as Record<string, unknown> | null,
+      after: effectiveValues
+    });
+
     return currentState;
   },
 
@@ -169,6 +181,8 @@ export const settingsService = {
       note: 'تم التراجع من هذا الإصدار',
       values: currentState.values
     });
+
+    const previousValues = currentState.values;
 
     currentState = {
       version: targetVersion,
@@ -187,6 +201,17 @@ export const settingsService = {
 
     currentDraft = null;
     notify();
+
+    // ADR-018: Record audit log for settings rollback
+    auditService.recordAction({
+      action: 'override',
+      collection: 'settings',
+      documentId: `v${targetVersion}`,
+      title: `استرجاع سجل الإعدادات إلى الإصدار السابق v${targetVersion}`,
+      before: previousValues as Record<string, unknown>,
+      after: found.values as Record<string, unknown>
+    });
+
     return true;
   },
 

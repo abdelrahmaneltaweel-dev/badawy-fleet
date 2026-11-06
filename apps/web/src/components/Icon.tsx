@@ -16,6 +16,8 @@ export type IconName =
   | 'cal'
   | 'showcase'
   | 'help'
+  | 'shield'
+  | 'refresh'
   | 'inbox';
 
 export interface IconProps extends JSX.SVGAttributes<SVGSVGElement> {
@@ -144,6 +146,18 @@ export function Icon({ name, size = 19, className = '', ...props }: IconProps) {
         <svg {...common}>
           <circle cx="12" cy="12" r="9" />
           <path d="M9.5 9.2a2.5 2.5 0 115 .6c0 1.6-2.5 2-2.5 3.6M12 17h.01" />
+        </svg>
+      );
+    case 'shield':
+      return (
+        <svg {...common}>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      );
+    case 'refresh':
+      return (
+        <svg {...common}>
+          <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
         </svg>
       );
   }

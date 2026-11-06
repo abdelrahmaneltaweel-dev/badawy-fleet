@@ -10,6 +10,7 @@ import type {
   AssignmentRecord,
   VehicleCandidate
 } from '@badawi/logic';
+import { auditService } from './audit';
 
 const VEHICLES_STORAGE_KEY = 'badawi_entities_vehicles_v1';
 const DRIVERS_STORAGE_KEY = 'badawi_entities_drivers_v1';
@@ -91,6 +92,7 @@ export const entitiesService = {
     const list = this.getVehicles();
     const idx = list.findIndex((v) => v.vehicleId === vehicle.vehicleId);
     const now = new Date().toISOString();
+    const beforeData = idx >= 0 ? { ...list[idx] } : null;
 
     let savedVehicle: VehicleDocument;
     if (idx >= 0) {
@@ -119,13 +121,36 @@ export const entitiesService = {
 
     save(VEHICLES_STORAGE_KEY, list);
     notify();
+
+    // ADR-018: Record audit trail with before/after and onBehalfOf if active
+    auditService.recordAction({
+      action: idx >= 0 ? 'update' : 'create',
+      collection: 'vehicles',
+      documentId: savedVehicle.vehicleId,
+      before: beforeData as Record<string, unknown> | null,
+      after: savedVehicle as unknown as Record<string, unknown>
+    });
+
     return savedVehicle;
   },
 
   deleteVehicle(vehicleId: string): boolean {
-    const list = this.getVehicles().filter((v) => v.vehicleId !== vehicleId);
-    save(VEHICLES_STORAGE_KEY, list);
+    const list = this.getVehicles();
+    const target = list.find((v) => v.vehicleId === vehicleId);
+    if (!target) return false;
+
+    const filtered = list.filter((v) => v.vehicleId !== vehicleId);
+    save(VEHICLES_STORAGE_KEY, filtered);
     notify();
+
+    auditService.recordAction({
+      action: 'delete',
+      collection: 'vehicles',
+      documentId: vehicleId,
+      before: target as unknown as Record<string, unknown>,
+      after: null
+    });
+
     return true;
   },
 
@@ -161,6 +186,16 @@ export const entitiesService = {
 
     save(VEHICLES_STORAGE_KEY, list);
     notify();
+
+    auditService.recordAction({
+      action: 'create',
+      collection: 'vehicles',
+      documentId: `bulk-import-${addedCount}`,
+      title: `استيراد جماعي لـ ${addedCount} عربية من جدول Excel`,
+      before: null,
+      after: { totalImported: addedCount }
+    });
+
     return addedCount;
   },
 
@@ -244,6 +279,16 @@ export const entitiesService = {
     list.unshift(newAssignment);
     save(ASSIGNMENTS_STORAGE_KEY, list);
     notify();
+
+    // ADR-016 & ADR-018: Log assignment change
+    auditService.recordAction({
+      action: 'update',
+      collection: 'assignments',
+      documentId: newAssignment.assignmentId,
+      title: `تغيير إسناد السائق للعربية ${vehicleId}`,
+      before: active ? { vehicleId, driverId: active.driverId, startDate: active.startDate } : null,
+      after: { vehicleId, driverId, startDate }
+    });
   },
 
   subscribe(listener: EntityChangeListener): () => void {
