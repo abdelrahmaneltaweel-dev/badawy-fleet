@@ -2,6 +2,7 @@ import { useState, useEffect } from 'preact/hooks';
 import { useRouter } from './router';
 import { appearanceService } from './services/appearance';
 import { authService, type UserProfile } from './services/auth';
+import { auditService } from './services/audit';
 import { ToastContainer, showToast } from './components/Toast';
 import { Icon, type IconName } from './components/Icon';
 import { Switch } from './components/Switch';
@@ -15,6 +16,7 @@ const routes = [
   { path: '/inquiries', component: () => import('./pages/Inquiries') },
   { path: '/petro', component: () => import('./pages/Petro') },
   { path: '/users', component: () => import('./pages/Users') },
+  { path: '/audit', component: () => import('./pages/AuditLog') },
   { path: '/settings', component: () => import('./pages/Settings') },
   { path: '/showcase', component: () => import('./pages/Showcase') }
 ];
@@ -33,6 +35,7 @@ export function App() {
     appearanceService.getPreferences().themeMode
   );
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(authService.getCurrentUser());
+  const [activeOnBehalf, setActiveOnBehalf] = useState<UserProfile | null>(auditService.getActiveOnBehalfUser());
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     try {
       return localStorage.getItem('badawi-sidebar-col') === '1';
@@ -49,6 +52,12 @@ export function App() {
 
   useEffect(() => {
     return authService.subscribe(setCurrentUser);
+  }, []);
+
+  useEffect(() => {
+    return auditService.subscribe(() => {
+      setActiveOnBehalf(auditService.getActiveOnBehalfUser());
+    });
   }, []);
 
   const toggleTheme = () => {
@@ -77,6 +86,7 @@ export function App() {
     { path: '/inquiries', label: 'الاستفسارات', icon: 'chat', badge: 3 },
     { path: '/petro', label: 'طلبات العهدة', icon: 'wallet', permission: 'petro.request' },
     { path: '/users', label: 'المستخدمون', icon: 'user', permission: 'users.manage' },
+    { path: '/audit', label: 'سجل المراجعة', icon: 'shield', permission: 'audit.view' },
     { path: '/showcase', label: 'المكونات', icon: 'showcase' },
     { path: '/settings', label: 'الإعدادات', icon: 'set' }
   ];
@@ -263,6 +273,55 @@ export function App() {
             Spark
           </span>
         </header>
+
+        {/* Global On-Behalf Indicator Banner (ADR-018) */}
+        {activeOnBehalf && (
+          <div
+            style={{
+              background: 'var(--soft)',
+              border: '1px solid var(--accent)',
+              padding: '10px 18px',
+              margin: '12px 20px 0 20px',
+              borderRadius: 'var(--r-md)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              fontSize: '0.86rem',
+              boxShadow: 'var(--sh-sm)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Icon name="shield" size={18} />
+              <span>
+                <b>وضع الإدخال بالنيابة نشط (ADR-018):</b> أنت تعمل الآن بالنيابة عن{' '}
+                <span style={{ color: 'var(--accent)', fontWeight: 700 }}>
+                  {activeOnBehalf.displayName}
+                </span>{' '}
+                ({authService.getRoleLabel(activeOnBehalf.role)})
+              </span>
+            </div>
+            <button
+              type="button"
+              style={{
+                background: 'var(--card)',
+                border: '1px solid var(--line)',
+                padding: '4px 10px',
+                borderRadius: 'var(--r-sm)',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                color: 'var(--tx)',
+                fontWeight: 600
+              }}
+              onClick={() => {
+                auditService.setActiveOnBehalfUser(null);
+                showToast('تم إنهاء وضع الإدخال بالنيابة. العمليات الآن باسمك المباشر.');
+              }}
+            >
+              إنهاء النيابة
+            </button>
+          </div>
+        )}
 
         <main style={{ minHeight: '400px' }}>
           {loading ? (

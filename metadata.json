@@ -1,0 +1,7 @@
+{
+  "name": "Badawi Fleet Platform",
+  "description": "منصة متابعة أسطول شركة أبناء بدوي للمقاولات",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
