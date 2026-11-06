@@ -5,3 +5,5 @@ export * from './auth/permissions.js';
 export * from './settings/types.js';
 export * from './settings/registry.js';
 export * from './settings/appearance.js';
+export * from './entities/types.js';
+export * from './entities/parser.js';
