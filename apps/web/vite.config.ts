@@ -12,11 +12,14 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3000,
+    strictPort: true,
+    allowedHosts: true,
   },
   resolve: {
     alias: {
       '@badawi/logic': path.resolve(__dirname, '../../packages/logic/src/index.ts')
-    }
+    },
+    dedupe: ['preact', 'preact/hooks', 'preact/compat', 'preact/jsx-runtime', 'preact/jsx-dev-runtime', 'preact/debug']
   },
   build: {
     outDir: 'dist',

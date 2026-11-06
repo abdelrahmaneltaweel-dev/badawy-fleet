@@ -142,6 +142,8 @@ export interface AnalysisConfig {
   siteVisitRadiusMeters: number; // نطاق 250 متر لزيارة المشوار
   offlineThresholdMinutes: number; // مهلة الانقطاع لاعتبار الجهاز Offline (60 دقيقة)
   frozenSignalThresholdMinutes: number; // مهلة تجمد الإشارة (30 دقيقة)
+  mixerPassStopMinutes?: number; // وقفة الخلاطة الأقل من 20 دقيقة = مرور على الطريق مش تفريغ/تحميل (7.5)
+  freezeFix?: boolean; // تصحيح السرعة الوهمية للعربيات الصعبة مثل 124 (7.6)
   rulesVersion: string;
 }
 
@@ -156,6 +158,8 @@ export const DEFAULT_ANALYSIS_CONFIG: AnalysisConfig = {
   siteVisitRadiusMeters: 250,
   offlineThresholdMinutes: 60,
   frozenSignalThresholdMinutes: 30,
+  mixerPassStopMinutes: 20,
+  freezeFix: false,
   rulesVersion: '1.0.0'
 };
 

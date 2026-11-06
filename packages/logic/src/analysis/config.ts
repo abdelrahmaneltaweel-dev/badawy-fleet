@@ -42,6 +42,8 @@ export function buildAnalysisConfigFromSettings(
     siteVisitRadiusMeters: getNumber('site_visit_radius_meters', DEFAULT_ANALYSIS_CONFIG.siteVisitRadiusMeters, 50, 1000),
     offlineThresholdMinutes: getNumber('gps_offline_threshold_minutes', DEFAULT_ANALYSIS_CONFIG.offlineThresholdMinutes, 15, 360),
     frozenSignalThresholdMinutes: getNumber('gps_frozen_signal_threshold_minutes', DEFAULT_ANALYSIS_CONFIG.frozenSignalThresholdMinutes, 10, 120),
+    mixerPassStopMinutes: getNumber('mixer_pass_stop_minutes', DEFAULT_ANALYSIS_CONFIG.mixerPassStopMinutes ?? 20, 5, 60),
+    freezeFix: typeof settings['freeze_fix'] === 'boolean' ? settings['freeze_fix'] : DEFAULT_ANALYSIS_CONFIG.freezeFix,
     rulesVersion: getString('rules_version', DEFAULT_ANALYSIS_CONFIG.rulesVersion)
   };
 }
@@ -63,6 +65,8 @@ export function analysisConfigToSettingsMap(
     site_visit_radius_meters: config.siteVisitRadiusMeters,
     gps_offline_threshold_minutes: config.offlineThresholdMinutes,
     gps_frozen_signal_threshold_minutes: config.frozenSignalThresholdMinutes,
+    mixer_pass_stop_minutes: config.mixerPassStopMinutes,
+    freeze_fix: config.freezeFix,
     rules_version: config.rulesVersion
   };
 }
