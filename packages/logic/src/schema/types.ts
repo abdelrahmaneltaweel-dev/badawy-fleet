@@ -151,6 +151,8 @@ export interface StopRecord {
   durationMinutes: number;
 }
 
+export type DataSourceType = 'traccar' | 'excel';
+
 export interface DailySummaryDocument extends BaseDocument {
   summaryId: string; // e.g. "2026-10-28_116"
   date: string; // YYYY-MM-DD
@@ -165,6 +167,7 @@ export interface DailySummaryDocument extends BaseDocument {
   lastMovement: string | null;
   matchingStatus: 'matched' | 'mismatched' | 'pending';
   rulesVersion: string;
+  dataSource?: DataSourceType; // ADR-048: 'traccar' (default) or 'excel'
 }
 
 /**

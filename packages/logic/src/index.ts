@@ -19,3 +19,16 @@ export * from './overrides/index.js';
 export * from './calc/index.js';
 export * from './traccar/index.js';
 export * from './ingestion/index.js';
+export { evaluateSyncHealth } from './ingestion/health.js';
+export { calculateWriteBudget } from './ingestion/budget.js';
+export {
+  parseCsvToRows,
+  detectColumnIndices,
+  parseRawGpsPointsFromRows,
+  processRawGpsInput,
+  generateSyntheticTraccarRows
+} from './ingestion/excelParser.js';
+export {
+  compareSingleVehicleSummary,
+  compareBatchDailySummaries
+} from './ingestion/comparison.js';

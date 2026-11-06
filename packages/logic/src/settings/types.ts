@@ -13,7 +13,8 @@ export type SettingSection =
   | 'periods_closing'
   | 'workflow_inquiries'
   | 'petro_wallet'
-  | 'retention_lifecycle';
+  | 'retention_lifecycle'
+  | 'ingestion_sync';
 
 export type SettingType = 'boolean' | 'number' | 'string' | 'select' | 'color';
 

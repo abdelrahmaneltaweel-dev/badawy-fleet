@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@badawi/logic": "*",
-    "preact": "^10.25.4"
+    "preact": "^10.25.4",
+    "read-excel-file": "^9.3.14"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.9.5",

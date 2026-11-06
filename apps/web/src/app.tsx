@@ -7,6 +7,7 @@ import { ToastContainer, showToast } from './components/Toast';
 import { Icon, type IconName } from './components/Icon';
 import { Switch } from './components/Switch';
 import { PWAUpdateBanner } from './components/PWAUpdateBanner';
+import { SyncHealthIndicator } from './components/SyncHealthIndicator';
 import Login from './pages/Login';
 
 const routes = [
@@ -17,6 +18,7 @@ const routes = [
   { path: '/petro', component: () => import('./pages/Petro') },
   { path: '/users', component: () => import('./pages/Users') },
   { path: '/audit', component: () => import('./pages/AuditLog') },
+  { path: '/excel-upload', component: () => import('./pages/ExcelUpload') },
   { path: '/settings', component: () => import('./pages/Settings') },
   { path: '/showcase', component: () => import('./pages/Showcase') }
 ];
@@ -87,6 +89,7 @@ export function App() {
     { path: '/petro', label: 'طلبات العهدة', icon: 'wallet', permission: 'petro.request' },
     { path: '/users', label: 'المستخدمون', icon: 'user', permission: 'users.manage' },
     { path: '/audit', label: 'سجل المراجعة', icon: 'shield', permission: 'audit.view' },
+    { path: '/excel-upload', label: 'رفع Excel البديل', icon: 'upload', permission: 'report.view' },
     { path: '/showcase', label: 'المكونات', icon: 'showcase' },
     { path: '/settings', label: 'الإعدادات', icon: 'set' }
   ];
@@ -268,6 +271,8 @@ export function App() {
           >
             <Icon name={appearanceService.getResolvedTheme() === 'dark' ? 'sun' : 'moon'} size={16} />
           </button>
+
+          <SyncHealthIndicator />
 
           <span style={{ fontSize: '0.78rem', background: 'var(--soft)', color: 'var(--mute)', padding: '6px 12px', borderRadius: 'var(--r-full)', fontWeight: 600 }}>
             Spark

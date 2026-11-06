@@ -6,3 +6,7 @@
 export * from './types.js';
 export * from './checksum.js';
 export * from './syncManager.js';
+export * from './budget.js';
+export * from './health.js';
+export * from './excelParser.js';
+export * from './comparison.js';

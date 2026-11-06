@@ -5,7 +5,8 @@ import {
   type SettingSection,
   type SettingDefinition,
   type CuratedFontId,
-  type UserPersonalPreferences
+  type UserPersonalPreferences,
+  calculateWriteBudget
 } from '@badawi/logic';
 import { settingsService } from '../services/settings';
 import { appearanceService } from '../services/appearance';
@@ -29,6 +30,7 @@ export default function Settings() {
   const [publishedVersion, setPublishedVersion] = useState<number>(settingsService.getSettings().version);
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
   const [showRiskModal, setShowRiskModal] = useState<boolean>(false);
+  const [superAdminConfirmed, setSuperAdminConfirmed] = useState<boolean>(false);
 
   // User Local Appearance Preferences (T3.5)
   const [userPrefs, setUserPrefs] = useState<UserPersonalPreferences>(
@@ -52,8 +54,10 @@ export default function Settings() {
     };
   }, []);
 
-  const handleFieldChange = (def: SettingDefinition, newValue: unknown) => {
-    const res = settingsService.updateDraftValue(def.key, newValue);
+  const handleFieldChange = (def: SettingDefinition, newValue: unknown, isConfirmed = superAdminConfirmed) => {
+    const res = settingsService.updateDraftValue(def.key, newValue, {
+      superAdminConfirmed: isConfirmed
+    });
     if (!res.valid) {
       showToast(res.error || 'قيمة غير مقبولة');
     }
@@ -63,6 +67,15 @@ export default function Settings() {
     if (!canManageSettings) {
       showToast('ليس لديك صلاحية نشر الإعدادات');
       return;
+    }
+
+    const intervalVal = effectiveValues['ingestion.refresh_interval_minutes'];
+    if (intervalVal !== undefined) {
+      const budget = calculateWriteBudget(Number(intervalVal));
+      if (budget.requiresSuperAdminConfirmation && !superAdminConfirmed) {
+        showToast('⚠️ تحذير: معدل التحديث يستهلك > 90% من حد الكتابة؛ يجب تأكيد موافقة Super Admin أولاً (ADR-049)');
+        return;
+      }
     }
 
     const state = settingsService.publish(authService.getCurrentUser()?.displayName || 'Super Admin');
@@ -442,6 +455,121 @@ export default function Settings() {
                   )}
                 </div>
               </div>
+
+              {/* Specialized Live Spark Write Budget Meter for Refresh Rate (ADR-049) */}
+              {def.key === 'ingestion.refresh_interval_minutes' && (() => {
+                const budget = calculateWriteBudget(Number(currentValue));
+                const isOver90 = budget.worstCasePercentOfQuota >= 90;
+                const isOver70 = budget.worstCasePercentOfQuota >= 70;
+                const statusColor = isOver90 ? 'var(--bad)' : isOver70 ? 'var(--warn)' : 'var(--ok)';
+                const statusBg = isOver90 ? 'var(--bad-soft)' : isOver70 ? 'var(--warn-soft)' : 'var(--ok-soft)';
+
+                return (
+                  <div style={{ marginTop: '10px', borderTop: '1px solid var(--line)', paddingTop: '12px', display: 'grid', gap: '10px' }}>
+                    {/* Quick Presets */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--mute)', fontWeight: 600 }}>فترات شائعة:</span>
+                      {[60, 30, 15, 10, 5].map((mins) => (
+                        <button
+                          key={mins}
+                          type="button"
+                          disabled={!canManageSettings}
+                          className={`chip ${Number(currentValue) === mins ? 'active' : ''}`}
+                          onClick={() => handleFieldChange(def, mins)}
+                          style={{ fontSize: '0.78rem', padding: '4px 10px' }}
+                        >
+                          {mins === 15 ? `${mins} دقيقة (الموصى به)` : mins === 5 ? `${mins} دقائق (حرج 95%)` : `${mins} دقيقة`}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Live Spark Quota Meter */}
+                    <div style={{ background: statusBg, border: `1px solid ${statusColor}`, borderRadius: 'var(--r-sm)', padding: '14px', display: 'grid', gap: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '1.2rem' }}>{isOver90 ? '🚨' : isOver70 ? '⚠️' : '🛡️'}</span>
+                          <div>
+                            <b style={{ color: statusColor, fontSize: '0.88rem', display: 'block' }}>
+                              {isOver90
+                                ? 'تحذير حرج: تجاوز 90% من ميزانية الكتابات اليومية (ADR-049)'
+                                : isOver70
+                                ? 'تنبيه اقتراب من الحد المالي المجاني (70%+)'
+                                : 'معدل آمن ومستدام لحصة Firebase Spark (20,000 كتابة/يوم)'}
+                            </b>
+                            <small style={{ color: 'var(--mute)', fontSize: '0.76rem' }}>
+                              ميزانية خطة Spark المجانية: 20,000 كتابة/يوم لأسطول من 65 عربية
+                            </small>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'left' }}>
+                          <span style={{ fontSize: '1.15rem', fontWeight: 800, color: statusColor }}>
+                            {budget.worstCasePercentOfQuota}%
+                          </span>
+                          <small style={{ display: 'block', fontSize: '0.72rem', color: 'var(--mute)' }}>من إجمالي الحصة</small>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar with Milestones */}
+                      <div style={{ width: '100%', height: '12px', background: 'var(--card)', borderRadius: 'var(--r-full)', overflow: 'hidden', border: '1px solid var(--line)', position: 'relative' }}>
+                        <div
+                          style={{
+                            width: `${Math.min(100, budget.worstCasePercentOfQuota)}%`,
+                            height: '100%',
+                            background: statusColor,
+                            transition: 'width 0.3s ease'
+                          }}
+                        />
+                      </div>
+
+                      {/* Numbers Grid */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', fontSize: '0.78rem' }}>
+                        <div style={{ background: 'var(--card)', padding: '8px 10px', borderRadius: 'var(--r-xs)', border: '1px solid var(--line)' }}>
+                          <span style={{ color: 'var(--mute)', display: 'block' }}>دورات السحب:</span>
+                          <b style={{ color: 'var(--tx)', fontSize: '0.92rem' }}>{budget.runsPerDay} سحبة/يوم</b>
+                        </div>
+                        <div style={{ background: 'var(--card)', padding: '8px 10px', borderRadius: 'var(--r-xs)', border: '1px solid var(--line)' }}>
+                          <span style={{ color: 'var(--mute)', display: 'block' }}>أقصى كتابات محتملة:</span>
+                          <b style={{ color: statusColor, fontSize: '0.92rem' }}>{budget.worstCaseDailyWrites.toLocaleString('en-US')} / 20k</b>
+                        </div>
+                        <div style={{ background: 'var(--card)', padding: '8px 10px', borderRadius: 'var(--r-xs)', border: '1px solid var(--line)' }}>
+                          <span style={{ color: 'var(--mute)', display: 'block' }}>الواقعي (بتقنية FNV-1a):</span>
+                          <b style={{ color: 'var(--ok)', fontSize: '0.92rem' }}>~{budget.realisticDailyWrites.toLocaleString('en-US')} ({budget.realisticPercentOfQuota}%)</b>
+                        </div>
+                        <div style={{ background: 'var(--card)', padding: '8px 10px', borderRadius: 'var(--r-xs)', border: '1px solid var(--line)' }}>
+                          <span style={{ color: 'var(--mute)', display: 'block' }}>رصيد الأمان المتبقي:</span>
+                          <b style={{ color: 'var(--tx)', fontSize: '0.92rem' }}>~{Math.max(0, 20000 - budget.worstCaseDailyWrites).toLocaleString('en-US')}</b>
+                        </div>
+                      </div>
+
+                      {/* Super Admin Confirmation Checkbox if > 90% */}
+                      {isOver90 && (
+                        <div style={{ marginTop: '4px', padding: '12px', background: 'var(--card)', borderRadius: 'var(--r-xs)', border: '1px solid var(--bad)', boxShadow: 'var(--sh-sm)' }}>
+                          <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', fontSize: '0.82rem', color: 'var(--tx)' }}>
+                            <input
+                              type="checkbox"
+                              checked={superAdminConfirmed}
+                              disabled={!canManageSettings}
+                              onChange={(e) => {
+                                const isChecked = (e.target as HTMLInputElement).checked;
+                                setSuperAdminConfirmed(isChecked);
+                                if (isChecked) {
+                                  handleFieldChange(def, Number(currentValue), true);
+                                  showToast('تم اعتماد إقرار Super Admin لمعدل التحديث الحرج (ADR-049)');
+                                }
+                              }}
+                              style={{ marginTop: '3px', width: '16px', height: '16px', accentColor: 'var(--bad)' }}
+                            />
+                            <span style={{ lineHeight: 1.5 }}>
+                              <b style={{ color: 'var(--bad)', display: 'block' }}>إقرار وموافقة Super Admin الصريحة (ADR-049 & D-049):</b>
+                              أقر بصفتي مسؤول النظام بالموافقة على اختيار معدل سحب كل {budget.intervalMinutes} دقيقة واستنزاف ما يصل إلى {budget.worstCasePercentOfQuota}% ({budget.worstCaseDailyWrites.toLocaleString('en-US')} كتابة) من حصة Firebase Spark اليومية، وأتحمل مسؤولية توقف السحب المجدول في حال نفاد الحصة.
+                            </span>
+                          </label>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           );
         })}
@@ -470,6 +598,20 @@ export default function Settings() {
               <div style={{ background: 'var(--soft)', padding: '10px 14px', borderRadius: 'var(--r-xs)', fontSize: '0.8rem', color: 'var(--mute)', margin: '10px 0' }}>
                 🛡️ <b>حماية الفترات المقفولة:</b> التعديلات المنطقية تسري فقط على الفترات المفتوحة والعمليات اللاحقة، ولن تمس أي فترة معتمدة ومقفولة إطلاقاً (ADR-036).
               </div>
+              {(() => {
+                const intervalVal = effectiveValues['ingestion.refresh_interval_minutes'];
+                if (intervalVal !== undefined) {
+                  const b = calculateWriteBudget(Number(intervalVal));
+                  if (b.worstCasePercentOfQuota >= 90) {
+                    return (
+                      <div style={{ background: 'var(--bad-soft)', border: '1px solid var(--bad)', padding: '10px 14px', borderRadius: 'var(--r-xs)', fontSize: '0.8rem', color: 'var(--bad)', margin: '10px 0' }}>
+                        🚨 <b>تنبيه ميزانية Spark (ADR-049):</b> معدل التحديث المضبوط ({b.intervalMinutes} دقيقة) يستهلك {b.worstCasePercentOfQuota}% من حصة الـ 20,000 كتابة اليومية. تأكيد النشر هنا يمثل تفويضاً نهائياً.
+                      </div>
+                    );
+                  }
+                }
+                return null;
+              })()}
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '14px' }}>
                 <Button variant="ghost" onClick={() => setShowRiskModal(false)}>
                   إلغاء

@@ -18,14 +18,17 @@ import type {
   IngestionOptions,
   IngestionExecutionResult
 } from './types.js';
-import type { DailySummaryDocument, IssueDocument, VehicleType, IssueType } from '../schema/types.js';
+import type { DailySummaryDocument, IssueDocument, VehicleType, IssueType, DataSourceType } from '../schema/types.js';
+
+import { SPARK_DAILY_WRITE_LIMIT } from './budget.js';
 
 export const SYNC_STATE_DOC_ID = 'sync_state';
-export const SPARK_DAILY_WRITE_LIMIT = 20000;
+export { SPARK_DAILY_WRITE_LIMIT };
 
 export function convertAnalysisToDailySummary(
   analysis: ReturnType<typeof analyzeVehicleDailyData>,
-  driverId: string | null = null
+  driverId: string | null = null,
+  dataSource: DataSourceType = 'traccar'
 ): DailySummaryDocument {
   const isTractor = 
     analysis.vehicleType === 'tractor' || 
@@ -81,6 +84,7 @@ export function convertAnalysisToDailySummary(
     lastMovement: analysis.cleanPointsCount > 0 ? analysis.stops[analysis.stops.length - 1]?.endTime || null : null,
     matchingStatus: 'pending',
     rulesVersion: analysis.metadata.rulesVersion,
+    dataSource,
     createdAt: now,
     updatedAt: now
   };

@@ -12,3 +12,4 @@ export * from './Skeleton';
 export * from './Popover';
 export * from './Icon';
 export * from './PWAUpdateBanner';
+export * from './SyncHealthIndicator';
