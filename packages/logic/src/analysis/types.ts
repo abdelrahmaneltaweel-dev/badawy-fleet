@@ -81,7 +81,7 @@ export interface HaulCycle {
   loadingStop: GpsStop;
   unloadingStop: GpsStop;
   travelDistanceKm: number;
-  status: 'completed' | 'in_progress';
+  status: 'completed' | 'in_progress' | 'cancelled';
 }
 
 export interface VehicleTrip {
