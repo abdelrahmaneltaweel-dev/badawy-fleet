@@ -1,4 +1,7 @@
-/* Calm Direction Design Tokens - Badawi Fleet Platform v0.3.0 */
+/* Calm Direction Design Tokens - Badawi Fleet Platform v0.3.0 (ADR-024, ADR-029, ADR-058) */
+
+/* Import Curated Open-Licensed Arabic Fonts (OFL) with local fallbacks */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap');
 
 :root {
   /* Brand Core Colors (ADR-024) */
@@ -63,8 +66,13 @@
   --dur-norm: 0.25s;
   --dur-slow: 0.4s;
 
-  /* Fonts */
-  --font-family: "IBM Plex Sans Arabic", "Tajawal", "Segoe UI", Tahoma, system-ui, -apple-system, sans-serif;
+  /* Curated Typography Tokens (ADR-026, ADR-045, ADR-058) */
+  --font-size-base: 15px;
+  --font-family-ibm: "IBM Plex Sans Arabic", "Tajawal", "Segoe UI", Tahoma, system-ui, -apple-system, sans-serif;
+  --font-family-tajawal: "Tajawal", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font-family-cairo: "Cairo", "Tajawal", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font-family-noto: "Noto Sans Arabic", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --font-family: var(--font-family-ibm);
 
   color-scheme: light;
 }
@@ -115,6 +123,12 @@
   color-scheme: dark;
 }
 
+/* Font Switch Data Attributes */
+html[data-font="ibm_plex"] { --font-family: var(--font-family-ibm); }
+html[data-font="tajawal"] { --font-family: var(--font-family-tajawal); }
+html[data-font="cairo"] { --font-family: var(--font-family-cairo); }
+html[data-font="noto_sans"] { --font-family: var(--font-family-noto); }
+
 /* Global Reset & Base Typography */
 * {
   box-sizing: border-box;
@@ -127,6 +141,7 @@ html, body {
   background-color: var(--bg);
   color: var(--ink);
   font-family: var(--font-family);
+  font-size: var(--font-size-base);
   font-variant-numeric: tabular-nums; /* ADR-025 English tabular numbers */
   min-height: 100vh;
   direction: rtl;
