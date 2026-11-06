@@ -11,13 +11,15 @@ secrets/
 .clasprc.json
 .clasp.json
 
-# بيانات حقيقية وتصديرات (البيانات في Firestore فقط)
+# بيانات حقيقية وتصديرات ومرفقات (البيانات في Firestore فقط)
 data/
 exports/
 *.xlsx
 *.xls
 *.csv
 *.zip
+*.gs
+public/assets/
 # مسموح فقط ببيانات اختبار وهمية
 !packages/logic/tests/fixtures/**
 
