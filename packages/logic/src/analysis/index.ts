@@ -6,3 +6,4 @@ export * from './hauls.js';
 export * from './trips.js';
 export * from './status.js';
 export * from './pipeline.js';
+export * from './config.js';

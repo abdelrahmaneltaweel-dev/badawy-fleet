@@ -63,3 +63,42 @@ test('Settings Registry: validateSettingValue enforces safety bounds', () => {
   // Unknown key
   assert.strictEqual(validateSettingValue('non_existent_key', 123).valid, false);
 });
+
+test('T4.2: Analysis Rules in Settings Registry & Bridge with rulesVersion', () => {
+  // 1. فحص وجود جميع حدود خوارزميات التحليل في السجل المركزي
+  const requiredKeys = [
+    'trip_day_start_hour',
+    'rules_version',
+    'stop_speed_threshold_kmh',
+    'min_stop_duration_minutes',
+    'garage_maintenance_min_minutes',
+    'errand_min_stop_minutes',
+    'site_visit_radius_meters',
+    'max_speed_outlier_kmh',
+    'teleport_jump_threshold_kmh',
+    'gps_offline_threshold_minutes',
+    'gps_frozen_signal_threshold_minutes'
+  ];
+
+  for (const key of requiredKeys) {
+    const def = getSettingDefinition(key);
+    assert.ok(def, `يجب تعريف الحد [${key}] في سجل الإعدادات`);
+    assert.strictEqual(def.section, 'analysis_rules');
+    assert.strictEqual(def.riskLevel, 'logical');
+  }
+
+  // 2. التحقق من تحويل الإعدادات إلى AnalysisConfig
+  const defaults = getDefaultSettingsMap();
+  assert.strictEqual(defaults['rules_version'], '1.0.0');
+  assert.strictEqual(defaults['stop_speed_threshold_kmh'], 3);
+  assert.strictEqual(defaults['garage_maintenance_min_minutes'], 20);
+  assert.strictEqual(defaults['errand_min_stop_minutes'], 10);
+  assert.strictEqual(defaults['site_visit_radius_meters'], 250);
+  assert.strictEqual(defaults['gps_offline_threshold_minutes'], 60);
+
+  // 3. فحص صمامات الأمان لحدود التحليل
+  assert.strictEqual(validateSettingValue('stop_speed_threshold_kmh', 25).valid, false, 'يجب رفض سرعة توقف خيالية');
+  assert.strictEqual(validateSettingValue('max_speed_outlier_kmh', 50).valid, false, 'يجب رفض حد سرعة شاذة أقل من 100');
+  assert.strictEqual(validateSettingValue('gps_offline_threshold_minutes', 5).valid, false, 'يجب رفض مهلة انقطاع أقل من 15 دقيقة');
+  assert.strictEqual(validateSettingValue('rules_version', '2.1.0').valid, true);
+});

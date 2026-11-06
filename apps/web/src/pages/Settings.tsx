@@ -429,6 +429,17 @@ export default function Settings() {
                       />
                     </div>
                   )}
+
+                  {def.type === 'string' && (
+                    <div style={{ width: '180px' }}>
+                      <Field
+                        type="text"
+                        value={String(currentValue ?? '')}
+                        disabled={!canManageSettings}
+                        onInput={(e) => handleFieldChange(def, (e.currentTarget as HTMLInputElement).value)}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
