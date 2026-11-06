@@ -10,6 +10,7 @@ import {
 import { settingsService } from '../services/settings';
 import { appearanceService } from '../services/appearance';
 import { authService } from '../services/auth';
+import { repositoryService } from '../services/repository';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Switch } from '../components/Switch';
@@ -20,6 +21,7 @@ import { showToast } from '../components/Toast';
 
 export default function Settings() {
   const [activeSection, setActiveSection] = useState<SettingSection>('appearance');
+  const [activeRepoName, setActiveRepoName] = useState<string>(repositoryService.getActiveProvider());
   const [effectiveValues, setEffectiveValues] = useState<Record<string, unknown>>(
     settingsService.getEffectiveValues()
   );
@@ -229,6 +231,65 @@ export default function Settings() {
               />
             </div>
           </div>
+        </div>
+      </Card>
+
+      {/* Data Storage Provider Card (ADR-009) */}
+      <Card title="وسيط تخزين البيانات (Data Storage Provider - ADR-009)">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+            <div>
+              <b style={{ fontSize: '0.95rem', color: 'var(--tx)' }}>المخزن النشط حالياً:</b>
+              <span style={{ marginRight: '8px', padding: '3px 10px', borderRadius: 'var(--r-full)', background: 'var(--soft)', fontWeight: 700, color: 'var(--accent)' }}>
+                {activeRepoName === 'FirestoreRestRepository'
+                  ? 'سيرفر Firebase Firestore (Spark Plan)'
+                  : activeRepoName === 'GoogleSheetsBackupRepository'
+                  ? 'نسخة Google Sheets الاحتياطية (Apps Script Bridge)'
+                  : 'التخزين المحلي / ذاكرة المتصفح (Local & In-Memory)'}
+              </span>
+            </div>
+
+            {canManageSettings && (
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <Button
+                  variant={activeRepoName === 'InMemoryRepository' ? 'primary' : 'outline'}
+                  onClick={() => {
+                    repositoryService.setProvider({ provider: 'local' });
+                    setActiveRepoName(repositoryService.getActiveProvider());
+                    showToast('تم التحويل إلى المخزن المحلي/ذاكرة المتصفح (ADR-009)');
+                  }}
+                >
+                  تخزين محلي (Local)
+                </Button>
+                <Button
+                  variant={activeRepoName === 'FirestoreRestRepository' ? 'primary' : 'outline'}
+                  onClick={() => {
+                    repositoryService.setProvider({
+                      provider: 'firestore',
+                      projectId: 'badawi-fleet-prod'
+                    });
+                    setActiveRepoName(repositoryService.getActiveProvider());
+                    showToast('تم التحويل إلى مخزن Firestore REST (ADR-004, ADR-009)');
+                  }}
+                >
+                  Firestore (Spark)
+                </Button>
+                <Button
+                  variant={activeRepoName === 'GoogleSheetsBackupRepository' ? 'primary' : 'outline'}
+                  onClick={() => {
+                    repositoryService.setProvider({ provider: 'sheets' });
+                    setActiveRepoName(repositoryService.getActiveProvider());
+                    showToast('تم التحويل إلى جسر Google Sheets الاحتياطي (ADR-003)');
+                  }}
+                >
+                  Google Sheets
+                </Button>
+              </div>
+            )}
+          </div>
+          <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--mute)' }}>
+            عزل تام لطبقة البيانات عبر نمط المستودع (Repository Pattern): يتم التبديل بين بيئات التخزين بملف واحد وإعداد واحد دون الحاجة لتعديل أي كود في طبقة المنطق أو واجهات المستخدم (ADR-009).
+          </p>
         </div>
       </Card>
 
