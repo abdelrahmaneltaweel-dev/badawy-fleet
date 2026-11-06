@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Status — Badawy Group GPS Tracking &amp; Report System</title>
+<style>
+:root{color-scheme:light dark;--bg:#fff;--fg:#1f2328;--mut:#57606a;--bd:#d0d7de;--hd:#f6f8fa;--ac:#1a73e8;--code:#f3f4f6}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--fg:#e6edf3;--mut:#9da7b3;--bd:#30363d;--hd:#161b22;--ac:#58a6ff;--code:#1c2128}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.8;font-size:16px}
+main{max-width:1000px;margin:0 auto;padding:24px 18px 80px}
+h1{font-size:1.8em;border-bottom:2px solid var(--bd);padding-bottom:.3em}
+h2{font-size:1.4em;margin-top:2em;border-bottom:1px solid var(--bd);padding-bottom:.25em}
+h3{font-size:1.15em;margin-top:1.5em}
+a{color:var(--ac)}
+hr{border:0;border-top:1px solid var(--bd);margin:2em 0}
+blockquote{margin:1em 0;padding:.5em 1em;border-right:4px solid var(--ac);background:var(--hd);color:var(--mut)}
+blockquote p{margin:.4em 0}
+code{background:var(--code);padding:.1em .4em;border-radius:4px;font-family:Consolas,Menlo,monospace;direction:ltr;unicode-bidi:embed;font-size:.9em}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto;direction:ltr;text-align:left;line-height:1.5}
+pre code{background:none;padding:0}
+.tbl{overflow-x:auto;margin:1em 0}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid var(--bd);padding:6px 10px;vertical-align:top}
+th{background:var(--hd)}
+li{margin:.2em 0}
+@media print{main{max-width:none}pre,.tbl{overflow:visible}a{color:inherit}}
+</style>
+</head>
+<body>
+<main>
+<h1>حالة المشروع — Badawy Group GPS Tracking &amp; Report System</h1>
+<p><strong>آخر تحديث: 30/10/2026</strong> (بعد إضافة تقارير المشاوير، قائمة Vehicles، ملف بيانات الداشبورد، زرار 📘 حالة المشروع، وتوضيح موضوع التوقيت الصيفي/الشتوي، ونظام طلب بيان الخلاطة من صفحة التحكم (قسم 26)، <strong>وبيان الجراج بنفس النظام (قسم 14 و27)</strong>)</p>
+<blockquote>
+<p>الملف ده مكتوب بحيث أي حد (حتى طفل عنده 7 سنين) يقرأه يفهم المشروع كله: <strong>إيه اللي موجود، بيشتغل إزاي، وليه اتعمل كده</strong>.
+كل قاعدة أو قرار جنبه كلمة <strong>ليه؟</strong> بتشرح السبب.
+آخر قسم (قسم 24) فيه <strong>خريطة "لو عايز تغيّر كذا عدّل فين"</strong> و<strong>الفخاخ</strong> اللي تمنع إننا نبوّظ حاجة شغالة.</p>
+</blockquote>
+<hr />
+<h2>1) المشروع في ست جمل</h2>
+<ol>
+<li>شركة <strong>أبناء بدوي للمقاولات</strong> عندها عربيات كتير: <strong>عربيات نقل</strong> (خلاطة خرسانة) وكمان <strong>ملاكي وجامبو وربع نقل</strong> وعربيات تانية.</li>
+<li>كل عربية فيها جهاز <strong>GPS</strong> بيبعت مكانها كل شوية لمنصة اسمها <strong>Traccar</strong> (عندنا اسمها "المنصة").</li>
+<li>إحنا عملنا <strong>برنامج جوه Google Sheets</strong> بياخد بيانات الـ GPS ويحولها لتقارير بسيطة:
+   - <strong>عربيات النقل:</strong> عملت كام <strong>نقلة</strong> النهارده؟ وقفت فين؟ مشيت كام كم؟
+   - <strong>باقي العربيات:</strong> راحت فين؟ قعدت هناك قد إيه؟ خرجت امتى؟ (<strong>تقرير المشاوير</strong>)</li>
+<li>إنت (صاحب المشروع) بتراجع التقرير، وتعدّل لو في حاجة غلط، وفي آخر الشهر بتطبعه.</li>
+<li>وكمان في <strong>نظام مشاكل العربيات</strong> (مع المهندسين والسواقين)، وشاشة <strong>حالة الـ GPS</strong>، و<strong>Petro</strong> للوقود، و<strong>قائمة Vehicles</strong> لإضافة وحذف العربيات.</li>
+<li>وفي <strong>ملف منفصل لبيانات الداشبورد</strong> (Looker Studio) بيتحدّث بزرار.</li>
+</ol>
+<p><strong>ليه المشروع موجود أصلاً؟</strong> عشان التقارير كانت بتتعمل بإيد (حد يقعد يبص على خريطة ويعد)، وده بياخد وقت وفيه غلط. دلوقتي الكمبيوتر بيعدّ والإنسان بيراجع بس.</p>
+<hr />
+<h2>2) قاموس الكلمات (عشان نفهم بعض)</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>الكلمة</th>
+<th>معناها ببساطة</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GPS</strong></td>
+<td>جهاز في العربية بيقول "أنا هنا" كل كام ثانية.</td>
+</tr>
+<tr>
+<td><strong>المنصة / Traccar</strong></td>
+<td>الموقع اللي كل أجهزة GPS بتبعتله. عنوانها في الكود <code>PLATFORM.BASE_URL</code>.</td>
+</tr>
+<tr>
+<td><strong>الخلاطة</strong></td>
+<td>المكان اللي بيتعمل فيه الخرسانة، وبيبدأ منه اليوم وتنتهي فيه كل دورة (لعربيات النقل).</td>
+</tr>
+<tr>
+<td><strong>الكسارة</strong></td>
+<td>المكان اللي عربية النقل بتحمّل منه.</td>
+</tr>
+<tr>
+<td><strong>الدولي / البرج / حوش عيسي (عزبة كومبو)</strong></td>
+<td>أماكن <strong>التفريغ</strong> اللي عربية النقل بتروحلها بعد الكسارة.</td>
+</tr>
+<tr>
+<td><strong>الجراج / مركز سعفان</strong></td>
+<td>أماكن <strong>الصيانة</strong>. لو عربية النقل راحت هناك يبقى عندها عطل أو صيانة.</td>
+</tr>
+<tr>
+<td><strong>نقلة</strong></td>
+<td>رحلة كاملة ناجحة لعربية النقل: <strong>خلاطة ← كسارة (تحميل) ← مكان تفريغ ← رجوع للخلاطة.</strong></td>
+</tr>
+<tr>
+<td><strong>دورة</strong></td>
+<td>خروج عربية النقل من الخلاطة لحد رجوعها. الدورة ممكن يبقى فيها نقلة أو من غير نقلة.</td>
+</tr>
+<tr>
+<td><strong>بلوك</strong></td>
+<td>مجموعة صفوف في شيت تقرير النقلات بتمثل يوم واحد (أو جزء منه)، بين صفوف فاضية.</td>
+</tr>
+<tr>
+<td><strong>مشوار</strong></td>
+<td>(للعربيات غير النقل) رحلة من مكان لمكان، وبعدها العربية بتقف في المكان الجديد.</td>
+</tr>
+<tr>
+<td><strong>زيارة</strong></td>
+<td>وقوف <strong>10 دقايق أو أكتر</strong> في مكان. أقل من كده = إشارة مرور أو ماتور مطفي، بيتجاهل.</td>
+</tr>
+<tr>
+<td><strong>منطقة</strong></td>
+<td>مكان كبير يضم محلات كتير (زي "مدينة سوهاج الجديدة"). إحنا بنشتغل على المنطقة مش المحل.</td>
+</tr>
+<tr>
+<td><strong>Places</strong></td>
+<td>شيت فيه أسماء الأماكن اللي انت سمّيتها (بيستخدمها تقرير المشاوير وتقارير حالة الـ GPS).</td>
+</tr>
+<tr>
+<td><strong>Coordinates</strong></td>
+<td>شيت فيه مواقع الشغل الأساسية (خلاطة، كسارة…). <strong>بيحدد النقلات.</strong></td>
+</tr>
+<tr>
+<td><strong>كاش (Cache)</strong></td>
+<td>نسخة محفوظة من بيانات قديمة عشان ما نسحبهاش من المنصة تاني كل مرة (أسرع).</td>
+</tr>
+<tr>
+<td><strong>Apps Script</strong></td>
+<td>مكان بنكتب فيه كود بيشتغل جوه Google Sheets.</td>
+</tr>
+<tr>
+<td><strong>Web App</strong></td>
+<td>صفحة ويب بيعملها الكود (زي صفحة المشاكل) ومحدش يفتحها غير بالرابط.</td>
+</tr>
+<tr>
+<td><strong>Token (توكن)</strong></td>
+<td>مفتاح سري بيفتح الباب. مفتاح المنصة ومفاتيح المهندسين.</td>
+</tr>
+<tr>
+<td><strong>Script Properties</strong></td>
+<td>خزنة جوه Apps Script بنحط فيها الأسرار (مش بتظهر في الكود).</td>
+</tr>
+<tr>
+<td><strong>Looker Studio</strong></td>
+<td>برنامج جوجل بيعمل لوحات (داشبورد) من جداول. بيقرا من <strong>ملف بيانات الداشبورد</strong> بس.</td>
+</tr>
+<tr>
+<td><strong>meta (عمود L)</strong></td>
+<td>عمود مخفي في شيت المشاوير فيه بيانات داخلية (بصمة كل صف) عشان "تطبيق تعديلاتي" يعرف إيه اللي اتغير. <strong>ما تمسحوش.</strong></td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>3) الصورة الكبيرة (إزاي الحاجات متوصلة)</h2>
+<pre><code>   جهاز GPS في العربية
+          │  (بيبعت مكانه)
+          ▼
+   منصة Traccar ──────────────────────────────┐
+          │                                    │ سحب مباشر + كاش في Drive
+          │                                    ▼
+   ملفات Excel (طريقة قديمة)        كود Apps Script  (دالة platformPull_ مشتركة)
+          │                                    │
+          └──► تقرير النقلات   ◄──────────────┤──► تقرير المشاوير (Errand)
+                  │                            │            │
+                  │                            │            ├─ يقرا: Coordinates + Places
+                  ▼                            │            └─ يسجّل أماكن جديدة في Places
+   تقرير 120 + ملخص يومي + الدورات             ▼
+   + سجل الزيارات + تنبيهات            حالة الـ GPS (كل الأجهزة)
+          │                                    │
+          ├─ بيان الخلاطة / الجراج (بتكتبه إنت)│
+          └─ تطبيق تعديلاتي ──► Manual Edits Store (مخفي)
+                                               │
+   مشاوير 120 + ملخص مشاوير + تنبيهات مشاوير  │
+          └─ تطبيق تعديلاتي ──► Errand Edits Store (مخفي)
+                                               ▼
+   نظام المشاكل (Web App)  ───────►  ملف &quot;GPS Dashboard Data&quot; (منفصل) ──► Looker Studio
+</code></pre>
+<p><strong>ليه "platformPull_" مشتركة؟</strong> عشان السحب والكاش يتكتبوا مرة واحدة بس، وتقارير النقلات والمشاوير والداشبورد كلهم ياخدوا من نفس الكاش. لو غلطنا فيها هتبوظ التلاتة. (شوف الفخاخ في قسم 24.)</p>
+<hr />
+<h2>4) ملفات الكود (كلها في مشروع Apps Script واحد)</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>الملف</th>
+<th>سطور تقريباً</th>
+<th>بيعمل إيه</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>main.gs</code></td>
+<td>2500</td>
+<td><strong>القلب.</strong> القائمة، الإعدادات <code>GPS_CONFIG</code>، تحليل الحركة، تقرير النقلات، السحب من المنصة، الكاش، حالة الـ GPS، Places (<code>NAMED</code>)، Petro، مسح الشيتات، نافذة التقدم <code>JOBS</code>.</td>
+</tr>
+<tr>
+<td><code>Errand report.gs</code></td>
+<td>520</td>
+<td><strong>تقرير المشاوير</strong> (للعربيات غير النقل) + تطبيق تعديلات المشاوير. (اتعمل 30/10/2026.)</td>
+</tr>
+<tr>
+<td><code>Vehicles.gs</code></td>
+<td>100</td>
+<td><strong>Add Vehicle / Remove Vehicle</strong> (بيكتب ويمسح في شيت <code>Devices Naming Connection</code>).</td>
+</tr>
+<tr>
+<td><code>Manual edits.gs</code></td>
+<td>535</td>
+<td>زرار <strong>تطبيق تعديلاتي</strong> لتقارير النقلات، ومخزن التعديلات. وفي أوله سطر بيحوّل لتعديلات المشاوير لو انت واقف على شيت مشاوير.</td>
+</tr>
+<tr>
+<td><code>Statements.gs</code></td>
+<td>870</td>
+<td>شيتات <strong>بيان الخلاطة</strong> و<strong>بيان الجراج</strong>، نوافذ الإدخال اليدوي، <strong>مدير الخلاطة</strong> و<strong>قسم الأمن والعمليات</strong>، <strong>طلبات البيان</strong>، وصفحتين Web App: <strong>تقرير بيان الخلاطة</strong> و<strong>تقرير بيان الجراج</strong> (نفس الرابط <code>?page=stmt</code>، والنوع بيتحدد من الطلب).</td>
+</tr>
+<tr>
+<td><code>Issues management.gs</code></td>
+<td>700</td>
+<td><strong>نظام المشاكل</strong> (صفحة تحكم + صفحة لكل مهندس/سائق) كـ Web App. فيه الدالة <code>onEdit</code> (التريجر الوحيد في المشروع).</td>
+</tr>
+<tr>
+<td><code>Dashboard data.gs</code></td>
+<td>400</td>
+<td>بيكتب <strong>ملف بيانات الداشبورد</strong> (ملف Sheets منفصل) اللي Looker بيقراه.</td>
+</tr>
+<tr>
+<td><code>Health Check.gs</code></td>
+<td>12</td>
+<td>دالة <code>cellCount()</code> بتعدّ خلايا الملف كله (انظر قسم 17).</td>
+</tr>
+<tr>
+<td><code>Project docs.gs</code></td>
+<td>14</td>
+<td>دالة <code>showProjectStatus()</code>: بتفتح صفحة <code>Project Status.html</code> كنافذة جوه الشيت (من زرار 📘 حالة المشروع).</td>
+</tr>
+<tr>
+<td><code>Project Status.html</code></td>
+<td>—</td>
+<td><strong>ملف الحالة ده نفسه</strong> بصيغة HTML (عشان يتحط في المشروع ويتسجل في GitHub). أي تحديث للملف = استبداله بس، من غير تعديل في الكود.</td>
+</tr>
+<tr>
+<td><code>appsscript.json</code></td>
+<td>9</td>
+<td>إعدادات المشروع: التوقيت <code>Africa/Cairo</code>، V8، والـ Web App (<code>USER_DEPLOYING</code> و<code>ANYONE_ANONYMOUS</code>).</td>
+</tr>
+<tr>
+<td><code>README.md</code></td>
+<td>2</td>
+<td>وصف قصير للمشروع.</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>ملحوظة:</strong> كلهم في <strong>نفس</strong> المشروع، فالدوال بتشوف بعض (مفيش import). عشان كده لازم أي اسم دالة يكون <strong>فريد</strong> في المشروع كله.
+<code>Statements.gs</code> و<code>Vehicles.gs</code> و<code>Errand report.gs</code> ليهم بادئات (<code>stmt</code>، <code>veh</code>، <code>err</code>) عشان ما يتخبطوش مع غيرهم.</p>
+</blockquote>
+<h3>مين بينادي مين (عشان ما نبوّظش حاجة)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>الدالة / الثابت</th>
+<th>معرّفة في</th>
+<th>بتتنادى من</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>platformPull_</code> (سحب + كاش)</td>
+<td>main</td>
+<td>تقرير النقلات من المنصة، <strong>المشاوير</strong>، الداشبورد</td>
+</tr>
+<tr>
+<td><code>platformLookupGpsNo_</code>, <code>platformFindDevice_</code>, <code>traccarCookie_</code>, <code>traccarGet_</code></td>
+<td>main</td>
+<td>النقلات من المنصة، المشاوير، الداشبورد</td>
+</tr>
+<tr>
+<td><code>namedLoad_</code> / <code>namedRegister_</code> (شيت Places)</td>
+<td>main</td>
+<td>حالة الـ GPS، <strong>المشاوير</strong>، الداشبورد، تقرير النقلات (أسماء أماكن غير معروفة)</td>
+</tr>
+<tr>
+<td><code>cfgFor_</code> (إعدادات العربية، مثلاً 124)</td>
+<td>main</td>
+<td>النقلات، المشاوير، الداشبورد</td>
+</tr>
+<tr>
+<td><code>ensureGrid_</code>, <code>getOrCreateSheet_</code>, <code>safeVeh_</code>, <code>distM_</code>, <code>ymd_</code>, <code>p2_</code>, <code>nearTxt_</code>, <code>gpsMapUrl_</code>, <code>dayLabelFull_</code></td>
+<td>main</td>
+<td>المشاوير وغيره</td>
+</tr>
+<tr>
+<td><code>editsHash_</code>, <code>editsNum_</code>, <code>editsText_</code></td>
+<td>Manual edits</td>
+<td><strong>المشاوير</strong> (بتستعملهم لبصمة الصف وقراءة الأرقام)</td>
+</tr>
+<tr>
+<td><code>editsTime_</code>, <code>editsDigits_</code>, <code>editsOverlayStored_</code></td>
+<td>Manual edits</td>
+<td>الداشبورد (بتحسب النقلات بتعديلاتك)</td>
+</tr>
+<tr>
+<td><code>stmtDigits_</code>, <code>stmtTxt_</code></td>
+<td>Statements</td>
+<td><strong>Vehicles</strong> (تنضيف الأرقام العربي والمسافات)</td>
+</tr>
+<tr>
+<td><code>generatedCycleItems_</code></td>
+<td>main</td>
+<td>Manual edits، الداشبورد</td>
+</tr>
+<tr>
+<td><code>progress_</code>, <code>JOBS</code>, <code>openJob_</code></td>
+<td>main</td>
+<td>كل الأزرار اللي ليها نافذة تقدم (نقلات، منصة، مشاوير، حالة GPS، داشبورد)</td>
+</tr>
+<tr>
+<td><code>ERR.PREFIX</code> / <code>ERR.SUMMARY_PREFIX</code></td>
+<td>Errand report</td>
+<td><code>isProtectedSheet_</code>/<code>sheetGroups_</code>/<code>readInputs_</code> في main (عشان شيتات المشاوير تتصنّف صح)</td>
+</tr>
+<tr>
+<td><code>PLATFORM</code>, <code>GPS_STATUS</code>, <code>NAMED</code>, <code>ISS</code>, <code>DASH</code>, <code>STMT</code>, <code>EDITS</code>, <code>ERR</code>, <code>VEH</code></td>
+<td>ملف كل واحد</td>
+<td>بنفس الملف وغيره</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2>5) القائمة في الشيت (Badawy Group)</h2>
+<pre><code>Badawy Group
+├─ GPS Tracking System
+│   ├─ Vehicles                                  ← جديد، أول فئة
+│   │   ├─ ➕ Add Vehicle
+│   │   └─ 🗑 Remove Vehicle
+│   ├─ Reports Generation
+│   │   ├─ 🚚 إنشاء تقرير النقلات              (من ملفات Excel)
+│   │   ├─ 📡 إنشاء تقرير النقلات من المنصة     (مباشر من Traccar)
+│   │   ├─ 🚗 إنشاء تقرير سيارة من المنصة       ← جديد (المشاوير)
+│   │   ├─ 📶 متابعة حالة ال GPS
+│   │   └─ 🗑 مسح كاش البيانات
+│   ├─ Reports Edits
+│   │   ├─ ✏️ تطبيق تعديلاتي على التقرير       (للنقلات والمشاوير: بيعرف لوحده)
+│   │   ├─ 🧽 مسح تعديلاتي المحفوظة            (النقلات)
+│   │   └─ 🧽 مسح تعديلات المشاوير المحفوظة     ← جديد
+│   └─ خلاطة / جراج
+│       ├─ 🏭 بيان الخلاطة
+│       ├─ 🔧 بيان الجراج
+│       ├─ 👷 مدير الخلاطة
+│       └─ 🛡 قسم الأمن والعمليات                ← جديد (مسؤول بيان الجراج)
+├─ Petro App
+│   └─ ⛽ طلب عهدة
+├─ Dashboard Data
+│   ├─ ⚙️ إعداد ملف بيانات الداشبورد (أول مرة)
+│   ├─ 📊 تحديث بيانات الداشبورد
+│   ├─ 🔗 فتح ملف البيانات
+│   └─ ♻️ إعادة بناء الداشبورد من الصفر
+├─ Issues Management
+│   ├─ 🛠 إعداد نظام المشاكل (أول مرة)
+│   ├─ ➕ إضافة مهندس
+│   ├─ ➕ إضافة سائق
+│   ├─ 🌐 حفظ رابط الـ Web app
+│   └─ 🔗 روابط الصفحات
+├─ 🧹 مسح كل الشيتات
+└─ 📘 حالة المشروع                               ← جديد (بيفتح Project Status.html)
+</code></pre>
+<p><strong>قاعدة مهمة:</strong> أي دالة بتفتح نافذة (alert أو prompt) <strong>لازم تتشغل من قائمة الشيت</strong>، مش من زرار Run في المحرر. <strong>ليه؟</strong> لأن المحرر مفيهوش شاشة تتعرض عليها النافذة.</p>
+<p><strong>ليه الأزرار اتسمّت "تقرير النقلات"؟</strong> عشان لما ضفنا تقرير المشاوير، لازم الاسم يقول بوضوح إن ده للنقلات (خلاطة/كسارة) وده للباقي.</p>
+<hr />
+<h2>6) أنهي تقرير لأنهي عربية؟</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>تقرير النقلات</strong></th>
+<th><strong>تقرير المشاوير</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>لمين؟</td>
+<td>عربيات النقل (خلاطة)</td>
+<td>ملاكي، جامبو، ربع نقل، وأي عربية مش نقل</td>
+</tr>
+<tr>
+<td>الفكرة</td>
+<td><strong>نقلة</strong> = خلاطة ← كسارة ← تفريغ ← خلاطة</td>
+<td><strong>زيارة</strong> = وقوف 10 دقايق+ في أي مكان</td>
+</tr>
+<tr>
+<td>الأماكن</td>
+<td>ثابتة (شيت <strong>Coordinates</strong>)</td>
+<td>أي مكان (شيت <strong>Places</strong> + Coordinates للأماكن المعروفة)</td>
+</tr>
+<tr>
+<td>الشيتات الناتجة</td>
+<td><code>تقرير X</code> + ملخص يومي + الدورات + سجل الزيارات + تنبيهات</td>
+<td><code>مشاوير X</code> + <code>ملخص مشاوير X</code> + <code>تنبيهات مشاوير X</code></td>
+</tr>
+<tr>
+<td>التعديل</td>
+<td><code>Manual Edits Store</code></td>
+<td><code>Errand Edits Store</code></td>
+</tr>
+<tr>
+<td>بيان الخلاطة/الجراج</td>
+<td>بيدخل</td>
+<td><strong>مش بيدخل</strong> (مالوش لازمة)</td>
+</tr>
+<tr>
+<td>الداشبورد</td>
+<td>بيتحسب (10 عربيات نقل)</td>
+<td><strong>لسه مش بيدخل</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ليه تقريرين مختلفين؟</strong> عربية الملاكي مفيش عندها "نقلة". لو حاولنا نحسب لها نقلات هتطلع أصفار ومعلومات غلط.</p>
+<hr />
+<h2>7) قواعد تقرير النقلات وليه</h2>
+<h3>7.1 إيه هي "النقلة"؟</h3>
+<p><strong>خلاطة ← كسارة ← (دولي أو برج أو حوش عيسي) ← خلاطة.</strong>
+- لو العربية حمّلت من الكسارة <strong>تاني</strong> قبل ما ترجع الخلاطة = <strong>نقلة تانية</strong>.
+- لو دخلت الجراج أو سعفان = <strong>عطل/صيانة</strong> مش نقلة.
+- <strong>ليه؟</strong> ده تعريف الشغل الحقيقي عندكم. النقلة بتتحسب بس لما التفريغ يتم.</p>
+<h3>7.2 النقلة بتتحسب على أنهي يوم؟</h3>
+<ul>
+<li>القاعدة اسمها <strong>LASTU</strong>: يوم النقلة = <strong>يوم آخر تفريغ</strong>.</li>
+<li><strong>اليوم بيبدأ الساعة 6 الصبح</strong> (<code>DAY_START_HOUR = 6</code>). نقلة بدأت بالليل وخلصت بعد نص الليل بشوية تتحسب على اليوم اللي بدأت فيه.</li>
+<li><strong>ليه؟</strong> عشان التقرير يطلع زي تقاريرك اليدوية بالظبط.</li>
+</ul>
+<h3>7.3 رحلة الصيانة</h3>
+<ul>
+<li>بتتسجل في اليوم اللي حصلت فيه، والنقلة اللي بعدها بتروح لليوم التالي لو لزم (<code>splitW</code>).</li>
+<li><strong>ليه؟</strong> مشكلة ظهرت في العربية 124 يوم 5 و6/10.</li>
+<li>مركز الصيانة (الجراج/سعفان) <strong>على الطريق بين الخلاطة والكسارة</strong>، فعشان ما نحسبش أي عربية معدّية جنبه كأنها صيانة:</li>
+<li>لازم تدخل وتقف <strong>20 دقيقة على الأقل</strong> (<code>WORKSHOP_MIN_STAY_MIN</code>).</li>
+<li>ولو معدّية في نص الطريق من غير ما ترجع الخلاطة لازم تقف <strong>ساعتين</strong> (<code>WORKSHOP_MIN_STOP_MIN</code>).</li>
+</ul>
+<h3>7.4 الخلاطة "كبيرة" بس ليها "قلب"</h3>
+<ul>
+<li>نطاق الخلاطة 5.5 كم، لكن <strong>قلبها 500 متر و5 دقايق</strong> (<code>coreRadius</code>, <code>coreMinMin</code>).</li>
+<li><strong>ليه؟</strong> الخلاطة على نفس الطريق بتاع الكسارة ← الدولي، فالعربيات بتعدي جنبها. من غير القلب، أي مرور كان هيتحسب "زيارة".</li>
+</ul>
+<h3>7.5 وقفة الخلاطة القصيرة = مرور</h3>
+<ul>
+<li>وقفة قدام الخلاطة <strong>أقل من 20 دقيقة</strong> بين الكسارة والدولي = مجرد مرور (<code>MIXER_PASS_STOP_MIN = 20</code>).</li>
+<li><strong>ليه؟</strong> حالة 116 دورة 16 يوم 19/10: العربية وقفت 7 دقايق على الطريق قدام الخلاطة وطلعت زيارة غلط.</li>
+<li>المقياس هو <strong>مدة الوقوف الفعلي</strong> مش مدة البقاء في النطاق. وحقل <code>ignition</code> في الجهاز <strong>مش موثوق</strong> (بيقول false والعربية ماشية)، فما اعتمدناش عليه.</li>
+</ul>
+<h3>7.6 العربيات الصعبة (HARD_VEHICLES)</h3>
+<ul>
+<li>العربية <strong>124</strong> ليها بروفايل خاص (<code>FREEZE_FIX</code>): جهازها بيجمّد الإشارة (نفس الإحداثيات فترات طويلة) ويطلع قفزات، فبننضف النقط بقاعدة خاصة ونقيّم صحة الـ GPS.</li>
+<li>ممكن تضيف أرقام تانية في <code>HARD_VEHICLES</code>. (<strong>ملحوظة:</strong> ده برضه بيتطبق على المشاوير لو رقم العربية هناك.)</li>
+</ul>
+<h3>7.7 تنضيف الإشارة الغلط</h3>
+<ul>
+<li>نقطة بتقفز بسرعة أكتر من 250 كم/س = غلط وبتتشال (<code>MAX_JUMP_KMH</code>).</li>
+<li>نقطة بعيدة 150 كم عن كل المواقع = غلط (<code>MAX_AREA_KM</code>). <strong>ده مش بيتطبق على المشاوير</strong> (قسم 8.9).</li>
+<li><strong>ليه؟</strong> أجهزة بتبعت أحياناً مواقع في بلاد تانية (مثلاً إيطاليا!).</li>
+</ul>
+<h3>7.8 أطوال الرحلات</h3>
+<ul>
+<li>لو الطول في ملف الرحلات مستحيل (متوسط سرعة فوق 95 كم/س، <code>MAX_AVG_KMH</code>) بنحسبه من نقط الـ GPS ونعمل <strong>تنبيه</strong>.</li>
+<li>رحلات أقل من 0.2 كم = تذبذب إشارة وبتتشال.</li>
+<li><strong>ليه؟</strong> عدادات بعض الأجهزة بتطلع أرقام مستحيلة.</li>
+</ul>
+<h3>7.9 "على بعد X كم من أقرب موقع"</h3>
+<ul>
+<li>بتظهر <strong>بس لو أقل من 50 كم</strong> (<code>NEAR_KM</code>).</li>
+<li><strong>ليه؟</strong> عشان ما نقولش كلام مضلل عن مكان بعيد في منطقة تانية.</li>
+</ul>
+<h3>7.10 وقوف طويل جداً</h3>
+<ul>
+<li>وقوف 24 ساعة أو أكتر في نفس الموقع (<code>IDLE_MIN_HOURS</code>) = "العربية متوقفة". بيتسجل كملاحظة وبتتحط عليه علامة.</li>
+</ul>
+<h3>7.11 ربط الأجهزة بالعربيات</h3>
+<ul>
+<li>شيت <code>Devices Naming Connection</code>: <strong>A</strong> = رقم الجهاز (GPS)، <strong>B</strong> = رقم المركبة، <strong>C</strong> = الاسم/الرقم الداخلي.</li>
+<li>الكود بيدوّر على العربية بـ <strong>عمود C</strong> (اللي بتكتبه في نافذة التقرير)، وبياخد منه رقم الجهاز من <strong>عمود A</strong> (لازم رقم).</li>
+<li>مثال: جهاز <strong>130</strong> = عربية <strong>116</strong>.</li>
+<li><strong>ليه C مش B؟</strong> عشان C هو الاسم اللي بتتعامل بيه (ممكن "116" أو "ربع نقل 3 محلي").</li>
+</ul>
+<hr />
+<h2>8) تقرير المشاوير (للعربيات غير النقل) — اتعمل 30/10/2026</h2>
+<p>الملف: <code>Errand report.gs</code>. الزرار: <strong>GPS Tracking System ▸ Reports Generation ▸ 🚗 إنشاء تقرير سيارة من المنصة</strong>.</p>
+<h3>8.1 الفكرة</h3>
+<p>العربية دي مفيش لها مسار ثابت. بنتتبعها ونطلّع: <strong>خرجت من فين ← راحت فين ← قعدت قد إيه ← خرجت امتى</strong>. وبعد كده انت بتكلم السواق وتكتب في التقرير كان بيعمل إيه هناك.</p>
+<h3>8.2 القواعد (كلها في <code>ERR</code> أول الملف) وليه</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>القاعدة</th>
+<th>الرقم</th>
+<th>ليه؟</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>الزيارة</strong> = وقوف 10 دقايق أو أكتر</td>
+<td><code>MIN_STOP_MIN = 10</code></td>
+<td>أقل من كده ممكن تكون إشارة مرور والسواق طفّى الماتور توفير بنزين.</td>
+</tr>
+<tr>
+<td>وقفات من 4 لـ 10 دقايق</td>
+<td><code>SHORT_STOP_MIN = 4</code></td>
+<td>مش بتتحسب زيارة، بس بتتعدّ في سطر اليوم ("وقفات قصيرة متجاهلة: 5") عشان تعرف إن في حاجة اتجاهلت.</td>
+</tr>
+<tr>
+<td>الوقفة = البقاء جوه دايرة نصف قطرها 250 متر</td>
+<td><code>STAY_RADIUS_M</code></td>
+<td>GPS بيتحرك شوية وهو واقف (تذبذب).</td>
+</tr>
+<tr>
+<td>لو متوسط الحركة جوه الوقفة فوق 6 كم/س</td>
+<td><code>MAX_STAY_SPEED_KMH</code></td>
+<td>يبقى لفة أو زحمة مش وقوف.</td>
+</tr>
+<tr>
+<td>زيارتين لنفس <strong>المنطقة</strong> بينهم 45 دقيقة أو أقل = <strong>زيارة واحدة</strong></td>
+<td><code>AREA_MERGE_GAP_MIN</code></td>
+<td>انت شغال على المنطقة مش المحل. محلين جنب بعض في ونجت = ونجت.</td>
+</tr>
+<tr>
+<td>أقصى نطاق لموقع من Coordinates</td>
+<td><code>KNOWN_MAX_R = 1000</code> م</td>
+<td>الخلاطة نطاقها 5.5 كم (بتغطي مناطق كتير)، فبنستخدم <strong>قلبها</strong> (500 م) أو 1000 م على الأكتر.</td>
+</tr>
+<tr>
+<td>أماكن غير معروفة أقرب من 1200 م لبعض = نفس المكان</td>
+<td><code>UNKNOWN_CLUSTER_M</code></td>
+<td>عشان نفس المكان ما يتسجلش 5 مرات.</td>
+</tr>
+<tr>
+<td>المكان الجديد بيتسجل في Places بنصف قطر 1200 م</td>
+<td><code>NEW_PLACE_RADIUS</code></td>
+<td>يغطي منطقة كاملة تقريباً. لو عايزها أكبر كبّر الرقم في Places بنفسك.</td>
+</tr>
+<tr>
+<td>انقطاع إشارة أكتر من 45 دقيقة والعربية اتحركت أكتر من 3 كم</td>
+<td><code>GAP_ALERT_MIN</code> / <code>GAP_MIN_KM</code></td>
+<td>بنعمل تنبيه والمسافة بتتحسب خط مستقيم (تقديرية) وبتتلوّن <strong>أحمر</strong>.</td>
+</tr>
+<tr>
+<td>وقوف أكتر من 10 ساعات</td>
+<td><code>LONG_STAY_H</code></td>
+<td>بيتكتب "غالباً مبيت".</td>
+</tr>
+<tr>
+<td>وقوف 24 ساعة+</td>
+<td><code>IDLE_H</code></td>
+<td>تنبيه "العربية متوقفة".</td>
+</tr>
+<tr>
+<td>متوسط سرعة أعلى من 120 كم/س للمسافة</td>
+<td><code>MAX_AVG_KMH</code></td>
+<td>الرقم غلط، بنستعمل مسافة نقط الـ GPS بدله.</td>
+</tr>
+<tr>
+<td>اليوم بيبدأ 6 الصبح ويتحسب بـ <strong>يوم الخروج</strong></td>
+<td><code>DAY_START_HOUR</code></td>
+<td>نفس قاعدة النقلات (توحيد).</td>
+</tr>
+</tbody>
+</table></div>
+<h3>8.3 إزاي اسم المكان بيتحدد (بالترتيب)</h3>
+<ol>
+<li><strong>مواقع Coordinates المعروفة</strong> (الخلاطة، الكسارة، الجراج…) بنطاق ضيق. <strong>ليه الأول؟</strong> عشان "الخلاطة" ما تتسمّاش باسم منطقة تانية.</li>
+<li><strong>شيت Places</strong>: لو في مكان مسمّي قريب (جوه نصف قطره)، بياخد اسمه. <strong>لو كذا نقطة ليهم نفس الاسم = منطقة واحدة.</strong> يعني تسجّل 3 نقط اسمهم "ونجت" والتلاتة بيتحسبوا "ونجت".</li>
+<li><strong>مكان جديد</strong>: بيتسمّى مؤقتاً "منطقة غير مسماة #1" وبيتسجل <strong>تلقائي</strong> في Places (اسم فاضي + لينك الخريطة)، ولما انت تسمّيه مرة واحدة <strong>كل العربيات</strong> والتقارير الجاية تاخد الاسم.
+   - بيتكتب جنبه "قريب من X (2.1 كم)" لو في مكان مسمّي أقرب من 8 كم، أو "على بعد X كم من الخلاطة" لو أقل من 50 كم.
+   - <strong>ليه بنسجله في Places مش في Coordinates؟</strong> لأن Coordinates بيحدد النقلات، ولو ضفنا فيه مكان <strong>عدد النقلات هيتغير</strong>. Places للأسماء بس، فآمن.</li>
+</ol>
+<h3>8.4 الخوارزمية خطوة بخطوة (دالة <code>errBuild_</code>)</h3>
+<ol>
+<li><strong>تحويل الأوقات</strong> لتوقيت المنصة (UTC+2) وتنضيف الإشارات الغلط (القفزات المستحيلة بس).</li>
+<li><strong>اكتشاف الوقفات</strong> (<code>errStays_</code>): بياخد نقطة ويشوف لحد فين العربية فضلت في دايرة 250 م منها. لو المدة 4 دقايق+ وحركتها بطيئة = وقفة.</li>
+<li><strong>تصنيف:</strong> 10 دقايق+ = <strong>زيارة</strong>، 4–10 = <strong>قصيرة</strong> (بتتعدّ بس).</li>
+<li><strong>تسمية كل زيارة</strong> بالترتيب الموضح في 8.3، وتجميع الأماكن غير المعروفة (<code>errPlaceOf_</code>).</li>
+<li><strong>دمج</strong> زيارات نفس المنطقة المتتالية اللي بينها ≤ 45 دقيقة.</li>
+<li><strong>بناء الصفوف:</strong> كل صف = رحلة من الزيارة اللي قبلها للزيارة دي + الوقوف فيها. اليوم = يوم الخروج من المكان اللي قبله.</li>
+<li><strong>المسافة:</strong> من رحلات المنصة (Trips) لو منطقية (بين 90% و180% من مسافة النقط)، وإلا من مسافة نقط الـ GPS.</li>
+<li><strong>تنبيهات:</strong> انقطاع إشارة، مكان غير مسمى، رجوع لنفس المنطقة، وقوف طويل.</li>
+</ol>
+<p><strong>ليه بنسحب يوم قبل أول يوم تطلبه؟</strong> عشان نعرف العربية <strong>خرجت من فين</strong> في أول يوم. (بتظهر في رسالة التقدم كأن في يوم زيادة، وده طبيعي.)</p>
+<h3>8.5 شكل الشيتات</h3>
+<p><strong><code>مشاوير 120</code></strong> (الرئيسي، قابل للتعديل):
+- <strong>الصف 1:</strong> اسم السيارة (مثلاً "سيارة ربع نقل 3 محلي" أو "سيارة 103"). بيتاخد من اللي كتبته في نافذة التقرير، ولو بيبدأ بـ"سيارة" مش بيتكرر.
+- <strong>الصف 2 (الهيدر):</strong> <code>#</code> | خرج من | وقت الخروج | وصل إلى | وقت الوصول | مدة الطريق | المسافة | مدة الوقوف | وقت المغادرة | <strong>الغرض / تفاصيل الزيارة</strong> (أصفر، انت بتكتب فيه) | <strong>تنبيهات</strong> | <code>meta</code> (عمود L مخفي).
+- <strong>لكل يوم:</strong> سطر ملخص أزرق فاتح (التاريخ، عدد الزيارات، الكيلومترات، أول خروج، آخر وصول، <strong>المسار</strong>، وعدد الوقفات القصيرة المتجاهلة) وتحته الصفوف.
+- الأوقات بصيغة نص قصيرة <code>15/10 07:40 AM</code>.
+- خلية "وصل إلى" بتتلوّن برتقالي لو المكان غير مسمى وفيها <strong>لينك للخريطة</strong>.
+- المسافة بتتلوّن <strong>أحمر</strong> لو تقديرية (انقطاع إشارة أو رقم غلط).
+- <strong>التنسيق:</strong> كل خلية محاذاة أفقية في النص + رأسية في النص + التفاف النص (<code>errFormat_</code>).</p>
+<p><strong><code>ملخص مشاوير 120</code>:</strong>
+- عنوان "سيارة X — ملخص المشاوير".
+- <strong>جدول الأيام:</strong> التاريخ، اليوم، عدد الزيارات، المسافة، أول خروج، آخر وصول، المسار.
+- <strong>صف أخضر "إجمالي الفترة"</strong> بإجمالي الزيارات وإجمالي الكيلومترات.
+- <strong>جدول المناطق:</strong> كل منطقة كام زيارة، كام يوم، إجمالي وقت الوقوف، أول وآخر زيارة (مرتبة بالأكتر زيارة).</p>
+<p><strong><code>تنبيهات مشاوير 120</code>:</strong> نوع التنبيه، الوقت، المكان، التفاصيل، ولينك الخريطة.</p>
+<h3>8.6 التعديل والحفظ (<code>Errand Edits Store</code> المخفي)</h3>
+<p><strong>الفكرة:</strong> زي تعديلاتي في النقلات: تعدّل في الشيت وتدوس <strong>✏️ تطبيق تعديلاتي</strong> وانت واقف على شيت <code>مشاوير ...</code>. (الزرار القديم بيعرف لوحده ويحوّل.)</p>
+<p>اللي تقدر تعدّله: اسم المكان، الأوقات، المسافة، <strong>مسح صف</strong>، وعمود الغرض/التفاصيل.</p>
+<p>اللي بيحصل:
+1. نسخة احتياطية مخفية في <code>نسخة مشاوير قبل التعديل 120</code>.
+2. بيقرا الشيت (الصفوف المعروفة من عمود <code>meta</code>).
+3. بيحفظ في المخزن، وبيعيد بناء الشيت والملخص من الصفوف بعد تعديلك (الأيام والمسافات بتتحسب من جديد).
+4. أي سحب جديد لنفس العربية <strong>بيطبق تعديلاتك لوحده</strong>.</p>
+<p>أنواع المحفوظ:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>النوع</th>
+<th>معناه</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>G</strong></td>
+<td>لقطة بالصفوف اللي اتولّدت (مفتاح كل صف: رقم المكان + وقت الوصول). عشان نعرف إيه اللي مسحته.</td>
+</tr>
+<tr>
+<td><strong>E</strong></td>
+<td>صف <strong>اتعدّل</strong> (بيحل محل الصف المتولّد لنفس المكان ووقت الوصول ±20 دقيقة).</td>
+</tr>
+<tr>
+<td><strong>N</strong></td>
+<td>صف زي ما هو بس عليه <strong>ملاحظة</strong> (الغرض).</td>
+</tr>
+<tr>
+<td><strong>T</strong></td>
+<td>صف <strong>مسحته</strong> (بيتشال لو ظهر تاني).</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>إزاي بيعرف إنك عدّلت؟</strong> كل صف عليه <strong>بصمة</strong> (hash) لشكله الأصلي في عمود <code>meta</code>. لو الشكل الحالي غير البصمة = اتعدّل.
+<strong>ليه؟</strong> عشان أي تحسين في الكود يتطبق تلقائي على اللي ما اتلمسش.</p>
+<p><strong>حاجات لازم تعرفها:</strong>
+- لو سحبت التقرير من جديد <strong>قبل</strong> ما تدوس "تطبيق تعديلاتي"، تعديلاتك في الشيت الحالي هتضيع.
+- لو البيانات اتغيرت وتعديل محفوظ ما لقاش زيارته، بيطلع في رسالة التقدم "N تعديل محفوظ ما لقيتش زيارته".
+- الصف المضاف يدوي (من غير <code>meta</code>) <strong>مش بيتحفظ</strong> (بيظهر تنبيه).
+- تغيير اسم المكان في خلية واحدة بيأثر على زيارة واحدة بس. لو عايز كل العربيات تاخد الاسم، سمّيه في Places.
+- 🧽 مسح تعديلات المشاوير بيمسح E/N/T لعربية (أو الكل) ويسيب G.</p>
+<h3>8.7 الكاش</h3>
+<p>تقرير المشاوير بيستخدم نفس <code>platformPull_</code> والكاش (قسم 10): الأيام اللي عدّى عليها +48 ساعة من الكاش، والأحدث من المنصة. الكاش لكل جهاز مش لكل نوع تقرير، فلو سحبت عربية لتقرير نقلات وبعدين مشاوير، التاني بيلاقي الأيام جاهزة.</p>
+<h3>8.8 حاجات لازم تعرفها (حدود)</h3>
+<ul>
+<li><strong>مدة الوقوف بتشمل وقت التنقل بين المحلات المدموجة.</strong> يعني ساعة في المنطقة ≠ ساعة وقوف فعلي.</li>
+<li>المسار والمنطقة بيعتمدوا على ما انت مسمّيه في Places. كل ما تسمّي أكتر، التقارير تبقى أوضح.</li>
+<li>العربية اللي بتبات في مكان بتظهر كزيارة طويلة (غالباً مبيت). سمّي مكان المبيت في Places.</li>
+<li>اتختبر المنطق على بيانات تجريبية، وبعدها على بيانات حقيقية (عربية ربع نقل 3 محلي في سوهاج، 1–10/10/2026) والتقارير طلعت صح من حيث الشكل.</li>
+</ul>
+<h3>8.9 ليه تنضيف الإشارة مختلف هنا؟</h3>
+<p>قاعدة "نقطة بعيدة 150 كم عن كل مواقع Coordinates = غلط" كانت هتمسح <strong>كل</strong> نقط سوهاج (بعيدة مئات الكيلومترات عن الخلاطة). فتقرير المشاوير بيستخدم <code>errClean_</code> اللي بيشيل <strong>القفزات المستحيلة بس</strong> (أكتر من 250 كم/س).</p>
+<hr />
+<h2>9) قائمة Vehicles (إضافة وحذف العربيات) — اتعملت 30/10/2026</h2>
+<p>الملف: <code>Vehicles.gs</code>. <strong>ليه موجودة؟</strong> كل عربية جديدة لازم تتربط برقم جهازها في شيت <code>Devices Naming Connection</code>. بدل ما تفتح الشيت وتكتب بإيدك وتغلط، النافذة بتعمل ده بأمان.</p>
+<p><strong>➕ Add Vehicle:</strong> نافذة فيها 3 خانات:
+- <strong>رقم الـ GPS</strong> (عمود A): أرقام بس (هو الرقم اللي في أول اسم الجهاز في المنصة).
+- <strong>رقم المركبة</strong> (عمود B).
+- <strong>الاسم / الرقم الداخلي</strong> (عمود C): اللي بتكتبه في نوافذ التقارير.</p>
+<p>بعد "حفظ" بيتضاف صف في آخر الشيت، والنافذة بتفضل مفتوحة وفاضية عشان تدخل اللي بعده.
+بيرفض لو: الاسم الداخلي موجود، أو رقم الـ GPS مربوط بمركبة تانية، أو رقم الـ GPS مش أرقام.
+<strong>ليه بيرفض؟</strong> عشان الكود بيدوّر بالاسم الداخلي وبالرقم، لو اتكرروا العربية الغلط هتتسحب.</p>
+<p><strong>🗑 Remove Vehicle:</strong> نافذة فيها قائمة منسدلة بكل المركبات ("الاسم — مركبة رقم (GPS رقم)")، تختار وتدوس "حذف" وتأكد. بيمسح <strong>الصف كله</strong> من الشيت والقائمة بتتحدث.
+- لو الشيت معدّل والمركبة اتمسحت قبل كده، بيقولك إنها مش موجودة.
+- <strong>ليه بيمسح الصف مش بس الخلايا؟</strong> عشان ما يفضلش صف فاضي في نص الجدول.
+- حماية: كل العمليتين بتستعمل قفل (<code>LockService</code>) عشان لو اتنين شغالين مع بعض ما يتخبطوش.</p>
+<p><strong>حاجات تتأثر بالإضافة/الحذف:</strong>
+- نوافذ التقارير: العربية الجديدة تتسحب فوراً.
+- <strong>صفحة المشاكل:</strong> بتقرا القايمة من نفس الشيت وبتكاشيها دقيقتين، فالتغيير ممكن يتأخر يظهر هناك.
+- <strong>الداشبورد (جدول Vehicles وStatus):</strong> بتظهر في التحديث الجاي.
+- <strong>عربيات النقل العشرة</strong> مكتوبة يدوي في 3 أماكن (قسم 24)، فلو ضفت عربية <strong>نقل</strong> جديدة لازم تحدثهم.</p>
+<hr />
+<h2>10) السحب من المنصة (Traccar) والكاش</h2>
+<ul>
+<li><strong>الاتصال:</strong> بـ session cookie مش Bearer header. <strong>ليه؟</strong> لأن Bearer كان بيرجّع خطأ 400.</li>
+<li><strong>التوكن:</strong> محفوظ في Script Properties باسم <code>TRACCAR_TOKEN</code> (مش في الكود).</li>
+<li><strong>توقيت المنصة:</strong> المنصة بتبعت الأوقات بتوقيت UTC، والكود بيزوّد عليها <strong>ساعتين ثابتين</strong> (<code>UTC_OFFSET_H = 2</code>) زي ملفات Excel وتقاريرك. (التفاصيل والتوقيت الصيفي في قسم 10-أ تحت.)</li>
+<li><strong>السحب:</strong> المسار بيتقسم لشرايح يومين (<code>ROUTE_CHUNK_DAYS</code>)، و8 طلبات بالتوازي. أقصى فترة <strong>62 يوم</strong> (<code>MAX_DAYS</code>).</li>
+<li><strong>الكاش في Drive:</strong> فولدر <code>GPS Cache - Abna Badawy</code>. ملف مضغوط لكل جهاز في الشهر. اليوم بيتحفظ بس لو عدّى عليه <strong>أكتر من 48 ساعة</strong>.
+  <strong>ليه 48 ساعة؟</strong> عشان الأجهزة ممكن تبعت بيانات متأخرة، فالأيام الجديدة بتتسحب من المنصة كل مرة.</li>
+<li><strong>حد الوقت:</strong> Apps Script بيقطع بعد 6 دقايق. فالسحب بيقف بعد <strong>240 ثانية</strong> ويحفظ اللي اتسحب.</li>
+<li><strong>خانة "سحب جديد (تجاهل الكاش)"</strong> في نافذة التقارير بتتجاهل الكاش لمرة واحدة.</li>
+<li><strong>زرار 🗑 مسح الكاش:</strong> بيمسحه لو حسيت إن بيانات قديمة غلط.</li>
+</ul>
+<h3>10-أ) التوقيت الصيفي والشتوي (مهم)</h3>
+<ul>
+<li><strong>مصر عندها توقيت صيفي</strong> (UTC+3) من <strong>آخر جمعة في أبريل</strong> لحد <strong>آخر خميس في أكتوبر</strong> (القانون 34 لسنة 2023)، وبعدها توقيت شتوي (UTC+2). سنة 2026: الصيفي بدأ 24/4 وخلص بمنتصف ليلة 29/10، فبقى الشتوي من <strong>30/10/2026</strong>. (2027: من 30/4 لـ 29/10.)</li>
+<li><strong>الكود بيستخدم UTC+2 ثابت طول السنة.</strong> يعني:</li>
+<li><strong>في الشتا:</strong> أوقات التقارير = ساعة الحيطة. ✔</li>
+<li><strong>في الصيف:</strong> أوقات التقارير <strong>ساعة أقل</strong> من الساعة الفعلية (مثلاً "06:15 AM" كانت 7:15 فعلياً). وقاعدة "اليوم بيبدأ 6 الصبح" كانت فعلياً 7.</li>
+<li><strong>ليه ثابت؟</strong> عشان تتطابق مع ملفات Excel بتاعة المنصة وتقاريرك اليدوية، ولأن التغيير مش بسيط (تحت).</li>
+<li><strong>الكاش وملف الداشبورد</strong> بيسجّلوا قيمة الفرق (<code>off</code>). لو اتغيّرت القيمة، الكاش القديم <strong>بيتتجاهل</strong> كله (حماية)، يعني أول سحب بعد التغيير هيبقى بطيء ويحتاج كذا تشغيلة.</li>
+<li><strong>تواريخ الشيتات</strong> (<code>Utilities.formatDate</code>) بتستخدم توقيت الملف <code>Africa/Cairo</code> (الصيفي بيتحسب تلقائي)، لكن السحب نفسه بالفرق الثابت.</li>
+<li><strong>بيان الخلاطة/الجراج:</strong> الأوقات اللي بتكتبها انت (من ساعة الحيطة). في الصيف كان فيها ساعة فرق عن أوقات الـ GPS، دلوقتي (شتا) متطابقين.</li>
+<li><strong>القرار المؤجل:</strong> هل نخلي الصيف يتحسب بـ UTC+3؟ مؤجل لحد <strong>قبل 24 أبريل 2027</strong>، وفيه تفاصيله في قسم 21.</li>
+</ul>
+<hr />
+<h2>11) متابعة حالة الـ GPS</h2>
+<ul>
+<li>بتسحب كل الأجهزة وحالتها (<strong>Online / Offline / Unknown</strong>) وآخر موقع، وأحداث الاتصال آخر 30 يوم.</li>
+<li>بتطلع تقرير شامل (<code>متابعة حالة GPS</code>) وتقرير لكل عربية (<code>حالة GPS ...</code>).</li>
+<li><strong>انقطاع أقل من 10 دقايق</strong> = رمشة اتصال وبيتجاهل (<code>MIN_OFFLINE_MIN</code>).</li>
+<li><strong>"صامتة":</strong> متصلة في المنصة لكن مفيش بيانات بقالها أكتر من ساعتين.</li>
+<li><strong>"خارج الخدمة":</strong> مقطوعة من أكتر من 30 يوم.</li>
+<li>بتقيّم <strong>صحة الجهاز</strong> (للعربيات الصعبة زي 124).</li>
+<li>أي مكان مش معروف بيتسجّل تلقائي في شيت <code>Places</code> (لحد 60 مكان جديد في المرة).</li>
+<li><strong>الأسماء</strong> بتتاخد من Places: كل ما تسمّي أكتر، التقرير يفهم أكتر.</li>
+</ul>
+<hr />
+<h2>12) الشيتات: إيه المؤقت وإيه الدايم</h2>
+<h3>مؤقتة (بتتولّد وبتتمسح بعد الطباعة)</h3>
+<p><strong>لعربية نقل (مثلاً 120):</strong> <code>تقرير 120</code>، <code>ملخص يومي 120</code>، <code>الدورات 120</code>، <code>سجل الزيارات 120</code>، <code>تنبيهات 120</code>، <code>نسخة قبل التعديل 120</code>.
+<strong>لعربية غير نقل:</strong> <code>مشاوير X</code>، <code>ملخص مشاوير X</code>، <code>تنبيهات مشاوير X</code>، <code>نسخة مشاوير قبل التعديل X</code> (مخفية).
+<strong>حالة GPS:</strong> <code>حالة GPS ...</code> و <code>متابعة حالة GPS</code>.</p>
+<h3>دايمة (محمية من "مسح كل الشيتات")</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>الشيت</th>
+<th>فيه إيه</th>
+<th>الظهور</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Coordinates</code></td>
+<td>إحداثيات مواقع الشغل (خلاطة، كسارة...)</td>
+<td>بإيدك</td>
+</tr>
+<tr>
+<td><code>Devices Naming Connection</code></td>
+<td>ربط الجهاز بالعربية (A جهاز، B مركبة، C اسم)</td>
+<td>بإيدك (أو من Vehicles)</td>
+</tr>
+<tr>
+<td><code>Places</code></td>
+<td>أماكن سمّيتها (مش بتأثر على النقلات)</td>
+<td>بإيدك</td>
+</tr>
+<tr>
+<td><code>Manual Edits Store</code></td>
+<td>تعديلات تقارير النقلات</td>
+<td><strong>مخفي</strong></td>
+</tr>
+<tr>
+<td><code>Errand Edits Store</code></td>
+<td>تعديلات تقارير المشاوير</td>
+<td><strong>مخفي</strong></td>
+</tr>
+<tr>
+<td><code>بيان الخلاطة</code> / <code>بيان الجراج</code></td>
+<td>البيانات اللي بتكتبها</td>
+<td><strong>مخفي</strong></td>
+</tr>
+<tr>
+<td><code>Engineers</code> / <code>Drivers</code></td>
+<td>المهندسين والسواقين ومفاتيحهم</td>
+<td><strong>مخفي</strong></td>
+</tr>
+<tr>
+<td><code>Issues</code> / <code>Issue Replies</code></td>
+<td>المشاكل والردود</td>
+<td><strong>مخفي</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>ليه Coordinates و Places منفصلين؟</strong> <code>Coordinates</code> بيحدد النقلات (خلاطة/كسارة/تفريغ). لو أضفنا فيه مكان جديد، <strong>عدد النقلات هيتغير</strong>. <code>Places</code> للأسماء بس، فآمن. (وتقرير المشاوير بيستخدم الاتنين للقراءة، وبيكتب في Places بس.)</p>
+<p><strong>شكل شيت Places:</strong> صف 1 ملاحظة، صف 2 هيدر. الأعمدة: اسم، خط عرض، خط طول، <strong>نصف قطر (متر)</strong>، عدد الزيارات، آخر ظهور، آخر عربية، لينك الخريطة، وعمود I مخفي (الوقت). <strong>نصف القطر الافتراضي 300 م</strong> لأماكن حالة الـ GPS، و<strong>1200 م</strong> لأماكن المشاوير الجديدة. الأماكن غير المسماة القديمة (أكتر من 30 يوم) بتتنضف.</p>
+<hr />
+<h2>13) تطبيق تعديلاتي (النقلات)</h2>
+<p><strong>الفكرة:</strong> التقرير الأوتوماتيك ممكن يغلط. إنت بتعدّل <strong>مباشرة في شيت التقرير</strong> (نقلات، أوقات، مسافات، مسح صفوف، تواريخ، ملاحظات)، وتدوس ✏️ <strong>تطبيق تعديلاتي</strong>.</p>
+<p>اللي بيحصل:
+1. بيقرا الشيت <strong>زي ما هو دلوقتي</strong> بتعديلاتك.
+2. بيحفظ <strong>نسخة</strong> في <code>نسخة قبل التعديل &lt;رقم&gt;</code>.
+3. بيعيد حساب <code>ملخص يومي</code> و<code>الدورات</code>، وبيشيل زيارات الدورات اللي مسحتها من <code>سجل الزيارات</code>.
+4. بيعيد تنسيق التقرير لنفس الشكل الأصلي.
+5. بيحفظ تعديلاتك في <code>Manual Edits Store</code>.</p>
+<p><strong>أحلى حاجة:</strong> أي سحب جديد لنفس العربية <strong>بيطبق تعديلاتك لوحده</strong>.</p>
+<p><strong>إزاي بيعرف إنت عدّلت؟</strong> كل بلوك عليه <strong>بصمة</strong> (hash) في عمود J المخفي. لو اتغير = اتعدّل (بيتحفظ). لو لسه زي ما اتولّد = مش بيتحفظ (عشان أي تحسين في الكود يتطبق عليه).</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>النوع</th>
+<th>معناه</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>B</strong></td>
+<td>بلوك <strong>اتعدّل</strong>: بيحل محل المتولّد اللي بصمته تتقاطع معاه في الوقت.</td>
+</tr>
+<tr>
+<td><strong>N</strong></td>
+<td>بلوك <strong>زي ما هو</strong> بس عليه ملاحظة.</td>
+</tr>
+<tr>
+<td><strong>T</strong></td>
+<td>بلوك <strong>مسحته</strong>: بيتشال لو طلع بنفس البصمة (Tombstone).</td>
+</tr>
+</tbody>
+</table></div>
+<p>حاجات لازم تعرفها:
+- ملاحظاتك بتتنقل لعمود "ملاحظات" في الملخص. "بيان الخلاطة" و"بيان الجراج" بيتملوا من شيتاتهم بس.
+- <code>سجل الزيارات</code> و<code>تنبيهات</code> مش بيتغيروا بالتعديل اليدوي (غير حذف زيارات دورة اتمسحت).
+- لو GPS الأصلي لبلوك اتغيّر، التعديل بيتطبق بس بيطلع <strong>تحذير</strong>.
+- مفيش أي تلوين بيبيّن إن يوم اتعدّل.
+- <strong>الداشبورد بيحسب بتعديلاتك:</strong> (<code>editsOverlayStored_</code>) فالنقلات والكيلومترات هناك نفس التقارير.</p>
+<hr />
+<h2>14) بيان الخلاطة وبيان الجراج</h2>
+<p><strong>ليه موجودين؟</strong> الـ GPS مش بيعرف <strong>ملاحظات الصيانة</strong> ولا <strong>عدد النقلات الفعلي</strong> من الخلاطة، فمدير الخلاطة بيسجّل بيان يومي لكل عربية نقل. البيان بيتحط تلقائي في أعمدة <strong>بيان الخلاطة</strong> و<strong>بيان الجراج</strong> في «ملخص يومي»، وبيتقارن بنقلات التقرير في عمود «الحالة» (تطابق ✔ / غير متطابق ❌).</p>
+<h3>شيت بيان الخلاطة (الشكل الجديد، 13 عمود، مخفي ومحمي)</h3>
+<p>التاريخ | السيارة | <strong>نوع البيان</strong> (نقلة / صيانة / بدون نقلات) | السائق | عدد النقلات | نوع النقلات (سن / بيتومين…) | أول خروج من الخلاطة | آخر عودة للخلاطة | سبب الصيانة | مكان الصيانة | ملاحظات | رقم الطلب (داخلي) | وقت التسجيل (داخلي).</p>
+<ul>
+<li>صف لكل بيان. لو في أكتر من صف لنفس السيارة واليوم (مثلاً وردية صبح وليل بسواقين مختلفين): <strong>النقلات بتتجمع</strong>، وأول خروج وآخر عودة بيتاخدوا من كل الصفوف. <em>ليه؟</em> عشان البيان الحقيقي ممكن يبقى على مرتين.</li>
+<li>التاريخ في الشيت = <strong>تاريخ الخروج من الخلاطة</strong>. الخلايا نص والأوقات 12 ساعة (<code>20/10/2026 06:10 AM</code>) عشان Sheets ما تحوّلهاش. لو العودة في يوم تاني بيتكتب التاريخ كامل وبيظهر في الملخص <code>(21/10)</code>.</li>
+<li><strong>الشكل القديم بيتحوّل لوحده</strong> أول مرة (6 أعمدة): بيتعمل نسخة مخفية «بيان الخلاطة - نسخة قبل التحديث»، والصف اللي كان فيه ملاحظة صيانة ونقلات بيتحول لصفين (نقلة + صيانة) عشان ناتج التقرير يفضل زي ما هو.</li>
+<li>الأنواع الجديدة اللي بيضيفها المهندس (نوع نقلات / مكان صيانة) بتتحفظ في Script Properties: <code>STMT_TRIP_TYPES</code> و<code>STMT_PLACES</code> وبتظهر في القوايم بعد كده. السائقين من شيت <code>Drivers</code> (نفس نظام المشاكل) + اختيار «سائق آخر».</li>
+</ul>
+<h3>الناتج في ملخص يومي</h3>
+<ul>
+<li><strong>بيان الخلاطة:</strong> <code>5 نقلة | أول خروج من الخلاطة 06:10 AM | آخر عودة للخلاطة 02:30 AM (21/10)</code>، أو <code>بدون نقلات</code>.</li>
+<li><strong>ملاحظات:</strong> <code>صيانة (خلاطة): السبب — المكان</code> و<code>بدون نقلات (خلاطة): السبب</code> و<code>صيانة (جراج): ...</code>. الملاحظات العادية على صفوف النقلات مش بتروح الملخص (متسجلة في الشيت بس).</li>
+<li><strong>الحالة:</strong> بتقارن عدد النقلات المجمّع من الشيت بنقلات التقرير. «بدون نقلات» بتتحسب 0. اليوم اللي فيه صيانة بس (من غير نقلات مسجلة) الحالة بتفضل فاضية.</li>
+<li>العمودين مالهمش علاقة بالتعديلات اليدوية (مش بيتحفظوا في Manual Edits Store)، وملاحظات الصيانة / بدون نقلات المتولّدة بتتجاهل عند «تطبيق تعديلاتي» عشان لو مسحت الصف من الشيت تختفي من التقرير الجاي.</li>
+</ul>
+<h3>3 طرق للإدخال (بنفس البيانات)</h3>
+<ol>
+<li><strong>صفحة المهندس / قسم الأمن</strong> «تقرير بيان الخلاطة» أو «تقرير بيان الجراج» برابط الطلب (قسم 26 و27).</li>
+<li><strong>🏭 بيان الخلاطة / 🔧 بيان الجراج</strong> في الشيت (إدخال يدوي بنفس الحقول، الصف بيتسجل بعلامة «يدوي» في عمود رقم الطلب).</li>
+<li>الكتابة المباشرة في الشيت.</li>
+</ol>
+<h3>شيت بيان الجراج (الشكل الجديد، 9 أعمدة، مخفي ومحمي) — جديد</h3>
+<p>التاريخ | السيارة | <strong>نوع البيان</strong> (دخلت الجراج / لم تدخل الجراج) | السائق | دخول الجراج | خروج من الجراج | الصيانة اللي اتعملت | رقم الطلب (داخلي) | وقت التسجيل (داخلي).</p>
+<ul>
+<li>صف لكل بيان. التاريخ = <strong>تاريخ الدخول للجراج</strong>. الخلايا نص والأوقات 12 ساعة زي الخلاطة. لو الخروج في يوم تاني بيتكتب التاريخ كامل وبيظهر في الملخص <code>(22/10)</code>.</li>
+<li><strong>الشكل القديم (5 أعمدة) بيتحوّل لوحده</strong> أول مرة: نسخة مخفية «بيان الجراج - نسخة قبل التحديث»، وكل صف قديم بيتحول لصف «دخلت الجراج» وملاحظته القديمة بتبقى «الصيانة اللي اتعملت»، فناتج «ملخص يومي» بيفضل زي ما هو.</li>
+<li>الصيانة اللي اتعملت <strong>مش إجبارية</strong> في الكود، لكن الواجهة ما بتقولش كده (من غير كلمة «اختياري»). الخروج ممكن يتساب فاضي لو العربية لسه جوه الجراج.</li>
+<li>الناتج في «ملخص يومي»: <code>أول دخول للجراج 08:15 AM | آخر خروج من الجراج 05:40 PM</code> أو <code>لم تدخل الجراج</code>، ولو في صيانة مكتوبة: <code>صيانة (جراج): تغيير فلتر</code>.</li>
+<li>المسؤول عن بيان الجراج = <strong>قسم الأمن والعمليات</strong> (بيتسجل من 🛡 في القائمة)، وتفاصيل الطلب والصفحة في قسم 27.</li>
+</ul>
+<p>بيان الخلاطة والجراج لا بيتستخدموا في تقرير المشاوير.</p>
+<hr />
+<h2>15) نظام مشاكل العربيات (اتعمل 27/10/2026 وجُرّب وشغال)</h2>
+<p><strong>الفكرة:</strong> عربية واقفة أو GPS مقطوع؟ بدل ما تسأل بالتليفون، بتسجّل <strong>مشكلة</strong> وتبعتها للمهندس/السائق، وهو يرد من رابط خاص.</p>
+<h3>الأجزاء</h3>
+<ul>
+<li><strong>صفحة التحكم</strong> (إنت بس): تضيف مشكلة، تردّ، <strong>تقفل وتفتح</strong>. <strong>محدش غيرك يقدر يقفل أو يفتح.</strong></li>
+<li><strong>صفحة المهندس/السائق:</strong> رابط <strong>سري خاص</strong> لكل واحد (فيه Token). يشوف مشاكل عرباته <strong>بس</strong> ويرد.</li>
+<li>المشكلة بتفضل ظاهرة لحد ما إنت تقفلها، وبعد <strong>تم الحل</strong> بتفضل <strong>3 أيام</strong> (<code>SHOW_DONE_DAYS</code>) وتختفي.</li>
+</ul>
+<h3>الحالات</h3>
+<p><code>في انتظار رد المهندس</code> ← <code>رد المهندس</code> ← <code>تم الحل</code></p>
+<h3>الأنواع</h3>
+<p><code>عربية واقفة</code> / <code>GPS مقطوع</code> / <code>أخرى</code> (وأي نوع جديد بتضيفه بيتحفظ).</p>
+<h3>الإرسال</h3>
+<ul>
+<li><strong>واتساب:</strong> بيفتح واتساب والرسالة جاهزة، <strong>إنت اللي بتدوس إرسال</strong>.</li>
+<li><strong>إيميل Gmail:</strong> بيتبعت مباشرة.</li>
+</ul>
+<h3>الإعداد (أول مرة)</h3>
+<ol>
+<li>🛠 <strong>إعداد نظام المشاكل</strong>.</li>
+<li>➕ <strong>إضافة مهندس</strong> / ➕ <strong>إضافة سائق</strong>.</li>
+<li>من المحرر: <strong>Deploy ← New deployment ← Web app</strong>: <code>Execute as: Me</code> و <code>Who has access: Anyone</code>.</li>
+<li>انسخ الرابط (لازم ينتهي بـ <code>/exec</code>) واحفظه من 🌐 <strong>حفظ رابط الـ Web app</strong>.</li>
+<li>🔗 <strong>روابط الصفحات</strong>.</li>
+</ol>
+<p><strong>تحذير مهم:</strong> بعد <strong>أي تعديل في الكود</strong> لازم <strong>Deploy ← Manage deployments ← Edit ← New version</strong>، وإلا الصفحات هتفضل بالكود القديم.</p>
+<h3>حاجات تقنية (ليه كده؟)</h3>
+<ul>
+<li>الرابط محمي بـ <strong>مفتاح</strong> (مقارنة آمنة).</li>
+<li>الصفحة بتسأل "فيه جديد؟" كل <strong>4 ثواني</strong> (<code>POLL_MS</code>) وهي مفتوحة، والكود بيكاشي قراءة الشيتات <strong>120 ثانية</strong>. <strong>ليه؟</strong> عشان الصفحة تبقى سريعة من غير ما تستهلك حصة Sheets.</li>
+<li>لو عدّلت الشيتات بإيدك بيتحس خلال 15 ثانية (<code>SHEET_CHECK_SEC</code>).</li>
+<li>قائمة العربيات من <code>Devices Naming Connection</code> (فيه قائمة احتياطية في الكود <code>ISS.VEHICLES</code>).</li>
+<li><code>onEdit</code> هنا هو <strong>التريجر الوحيد</strong> في المشروع كله. <strong>ما تضيفش <code>onEdit</code> تاني</strong> في أي ملف (هيتخبطوا).</li>
+</ul>
+<hr />
+<h2>16) ملف بيانات الداشبورد (Looker Studio) — جديد</h2>
+<p>الملف: <code>Dashboard data.gs</code> (النسخة 2).</p>
+<p><strong>الفكرة:</strong> Looker بيحتاج جداول مسطّحة بسيطة. بدل ما يقرا من ملف الشغل (ويحسب نقلات بنفسه، وده غلط)، الكود بيكتب الجداول في <strong>ملف Google Sheets منفصل</strong> اسمه <code>GPS Dashboard Data</code>.
+<strong>ليه منفصل؟</strong> (1) حد الـ 10 مليون خلية، (2) عشان أي تعديل بإيدك في ملف الشغل ما يكسرش اللوحة، (3) Looker ما بيحسبش نقلات أبداً، بياخد الأرقام جاهزة.</p>
+<h3>الاستخدام</h3>
+<ol>
+<li><strong>Badawy Group ▸ Dashboard Data ▸ ⚙️ إعداد ملف بيانات الداشبورد</strong> (مرة واحدة): بيعمل الملف (أو تلصق رابط ملف موجود) ويحفظ رقمه في <code>DASH_SS_ID</code>.</li>
+<li><strong>📊 تحديث بيانات الداشبورد:</strong> بيحدّث الحالة والمشاكل وتحليل عربيات النقل العشر (الشهر الحالي + اللي قبله). ليه نافذة تقدم بزرار "إعادة المحاولة" (<code>auto: true</code>).</li>
+<li>لو ما خلصتش في تشغيلة واحدة (حد 6 دقايق)، <strong>شغّله تاني وهيكمل من حيث وقف</strong>.</li>
+<li><strong>🔗 فتح ملف البيانات</strong> ← وصّل الجداول بـ Looker.</li>
+<li><strong>♻️ إعادة بناء من الصفر:</strong> بيمسح مخزن التحليل المحفوظ ويحلل كل شيء تاني.</li>
+</ol>
+<h3>الجداول (8)</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>الجدول</th>
+<th>فيه إيه</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Days</code></td>
+<td>صف لكل (عربية، يوم): نقلات، كم، رحلات صيانة، تنقلات داخلية، يوم شغل؟</td>
+</tr>
+<tr>
+<td><code>Cycles</code></td>
+<td>صف لكل دورة (نقلة / وقوف / صيانة / رحلة خارجية) مع البداية والنهاية والمسار والمدة</td>
+</tr>
+<tr>
+<td><code>Status_Now</code></td>
+<td>حالة كل جهاز دلوقتي (مقطوعة/صامتة/سليمة/خارج الخدمة) وآخر إشارة ومكانه</td>
+</tr>
+<tr>
+<td><code>Outages</code></td>
+<td>فترات انقطاع الأجهزة (آخر 30 يوم)</td>
+</tr>
+<tr>
+<td><code>Vehicles</code></td>
+<td>كل العربيات من <code>Devices Naming Connection</code> (ومعلّم أنهي نقل)</td>
+</tr>
+<tr>
+<td><code>Vehicle_Summary</code></td>
+<td>لكل عربية نقل: آخر نقلة، من كام يوم، تحتاج متابعة؟</td>
+</tr>
+<tr>
+<td><code>Issues</code></td>
+<td>المشاكل من ملف الشغل</td>
+</tr>
+<tr>
+<td><code>Run_Log</code></td>
+<td>سجل آخر 100 تشغيل</td>
+</tr>
+</tbody>
+</table></div>
+<h3>قرارات وليه</h3>
+<ul>
+<li><strong>مخزن التحليل</strong> (<code>dash_store.gz64</code>) محفوظ في فولدر الكاش في Drive. <strong>ليه؟</strong> عشان نحفظ تحليل كل عربية بعد ما يخلص، لو التشغيل وقف نكمل منه.</li>
+<li><strong>عربيات النقل</strong> معرّفة يدوي في <code>DASH.NAKLA_VEHICLES</code> (10 عربيات). <strong>ليه؟</strong> الداشبورد بيحسب نقلات، والمشاوير مالهاش نقلات.</li>
+<li><code>RUN_BUDGET_SEC = 150</code>: بعد المدة دي من بداية التشغيل ما نبدأش عربية جديدة.</li>
+<li><code>STOP_DAYS = 2</code>: عربية من غير نقلات بقالها يومين = "محتاجة متابعة".</li>
+<li><code>ROUND_STALE_H = 6</code>: جولة ناقصة أقدم من 6 ساعات بنبدأ جولة جديدة.</li>
+<li><strong>الأرقام</strong> هي نفس أرقام التقارير (وبتتطبق تعديلاتك المحفوظة).</li>
+<li><strong>التواريخ</strong> بتتكتب كأرقام تاريخ حقيقية. <strong>ليه؟</strong> Looker يحتاج تواريخ حقيقية مش نص.</li>
+</ul>
+<h3>الحالة</h3>
+<ul>
+<li>ملف الداشبورد نفسه (الجداول) <strong>اتعمل</strong>. <strong>لوحة Looker نفسها لسه مش متصممة</strong> (انظر قسم 21).</li>
+<li><strong>عربيات المشاوير لسه مش بتدخل الداشبورد</strong>، بتظهر فقط في جدولي <code>Status_Now</code> و<code>Vehicles</code>.</li>
+</ul>
+<hr />
+<h2>17) حد Google Sheets (10 مليون خلية) — القرار</h2>
+<p><strong>المشكلة:</strong> Google Sheets بيحط حد <strong>10 مليون خلية</strong> للملف كله (والخلايا الفاضية المحجوزة بتتحسب!).</p>
+<p><strong>القرار:</strong> مش محتاجين زراري Health ولا أرشفة. <strong>ليه؟</strong>
+- الكاش الأصلي موجود في Drive، فمفيش داتا تتأرشف.
+- التعديلات محفوظة في شيتات مخفية صغيرة.
+- شيتات التقارير <strong>مؤقتة</strong> وبتتمسح بعد الطباعة.
+- الشيتات الدايمة حوالي 10 بس.
+- <strong>ملف الداشبورد منفصل</strong> فمش بيحسب على ملف الشغل.</p>
+<p><strong>الرقم الفعلي (29/10/2026):</strong> <strong>257,634 خلية = 2.58%</strong> من الحد.</p>
+<p><strong>التقدير:</strong> الوصول لـ 85% محتاج حوالي 317 ألف صف جديد في الدايمة (حوالي 8.7 سنة لو 100 صف في اليوم).</p>
+<p><strong>الخطر الحقيقي:</strong> <strong>تقارير العربيات المؤقتة</strong> لو سبت تقارير كتير مفتوحة (عربية نقل = 5–6 تبويبات، عربية مشاوير = 3 + نسخة). الحل: امسحها بعد الطباعة.</p>
+<p><strong>للمتابعة:</strong> شغّل <code>cellCount()</code> من <code>Health Check.gs</code> (المحرر ← اختار الدالة ← Run ← Execution log). بيعدّ <strong>كل الشيتات حتى المخفية</strong>.</p>
+<hr />
+<h2>18) مسح كل الشيتات</h2>
+<ul>
+<li>🧹 في آخر القائمة. بيفتح نافذة اختيار مقسّمة (تقارير السيارات، تقارير حالة GPS، بيانات الإدخال، شيتات تانية).</li>
+<li><strong>الشيتات المحمية</strong> مش بتتمسح: Coordinates، Devices Naming Connection، Places، Manual Edits Store، <strong>Errand Edits Store</strong>، Engineers، Drivers، Issues، Issue Replies، بيان الخلاطة، بيان الجراج. وأي شيت محتواه "إحداثيات مواقع" بيتعامل كمحمي.</li>
+<li>شيتات <code>مشاوير ...</code> و<code>ملخص مشاوير ...</code> و<code>تنبيهات ...</code> بتظهر في مجموعة "تقارير السيارات".</li>
+<li><strong>ليه؟</strong> عشان تمسح التقارير المؤقتة بأمان من غير ما تخسر بياناتك الدايمة.</li>
+</ul>
+<hr />
+<h2>19) Petro App (⛽ طلب عهدة)</h2>
+<ul>
+<li>بترفع <strong>ملفين Excel</strong>: (1) استهلاك الوقود لكل سائق وعربية، (2) كشف الحساب.</li>
+<li>الكود بينضّفهم وينسّقهم في تبويبين: <code>Petro - الوقود</code> و<code>Petro - كشف الحساب</code>. (القديم بيتمسح ويتعمل من الأول.)</li>
+<li>عمود الوقود بيتمسح منه أعمدة مش محتاجها (الفاتورة، الفرع، الطراز، لتر/100كم، طريقة السداد، بيانات المحطة...).</li>
+<li>التبويبات بتتكتب بحجم متغير.</li>
+<li><strong>مستقل تماماً</strong> عن باقي النظام (مفيش حد بيعتمد عليه).</li>
+</ul>
+<hr />
+<h2>20) الأمان والإعدادات</h2>
+<p><strong>Script Properties (الخزنة):</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>المفتاح</th>
+<th>بيحفظ إيه</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TRACCAR_TOKEN</code></td>
+<td>توكن المنصة (سري)</td>
+</tr>
+<tr>
+<td><code>GPS_CACHE_FOLDER_ID</code></td>
+<td>فولدر الكاش في Drive</td>
+</tr>
+<tr>
+<td><code>ISSUES_ADMIN_KEY</code></td>
+<td>مفتاح صفحة التحكم (بيتولّد لوحده)</td>
+</tr>
+<tr>
+<td>رابط الـ Web app</td>
+<td>بيتحفظ من زرار 🌐</td>
+</tr>
+<tr>
+<td><code>DASH_SS_ID</code></td>
+<td>رقم ملف بيانات الداشبورد</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>قواعد الأمان:</strong>
+- <strong>التوكن ما يتبعتش لأي حد ولا يتكتب في الكود.</strong>
+- النظام <strong>مجاني بس</strong>، من غير فواتير أو كروت.
+- كل واحد (مهندس/سائق) بيشوف <strong>مشاكله بس</strong>، والإدارة بس هي اللي بتقفل وتفتح.
+- بعد لصق الكود كله مكان القديم، إعدادات بتتغيّر يدوياً (زي <code>PILOT</code>) <strong>بترجع للافتراضي</strong>.
+- <code>appsscript.json</code>: الـ Web App <code>executeAs: USER_DEPLOYING</code> و<code>access: ANYONE_ANONYMOUS</code> (الرابط نفسه محمي بمفتاح).</p>
+<p><strong>طريقة لصق التحديث:</strong> الصق الملف كله مكان القديم ← Save ← حدّث الشيت (F5). ولو الملف جديد (زي <code>Vehicles.gs</code>) اعمل ملف جديد في المحرر.</p>
+<hr />
+<h2>21) اللي لسه مؤجل (متأكد منه)</h2>
+<ul>
+<li><strong>لوحة Looker Studio نفسها:</strong> هتتعمل من الأول (مجاني بس، تحديث كل 15 دقيقة على الأقل). ملف البيانات جاهز (قسم 16). الدليل v1.2 والـ mockups (v2: 6 صفحات) محفوظين. وهو <strong>الخطوة الجاية</strong>.</li>
+<li><strong>إدخال عربيات المشاوير في الداشبورد</strong> (مثلاً عدد الزيارات والكيلومترات).</li>
+<li><strong>قرار UTC+2 مقابل UTC+3 (التوقيت الصيفي):</strong> مؤجل. معناه: الكود بيحسب بـ UTC+2 ثابت، فتقارير <strong>الصيف</strong> بتبقى ساعة أقل من ساعة الحيطة (والشتا مظبوطة). لازم نقرر <strong>قبل 24 أبريل 2027</strong>: نسيبه ثابت (آمن وبسيط)، ولا نخليه ذكي (+3 في الصيف) عشان التقارير تطابق الساعة طول السنة؟ التغيير الذكي محتاج: مسح الكاش القديم، وتعديل <code>platformPull_</code> المشتركة، وتعامل مع يومين طولهم 23 و25 ساعة، فهيتعمل كمهمة لوحدها بإختبارات. <strong>دلوقتي مفيش حاجة تتغير</strong> (مصر على UTC+2 زي الكود).</li>
+<li><strong>إحداثيات سعفان في Coordinates:</strong> تصحيحها لو لسه غلط (30.7118 / 30.7128 ، 30.0327 / 30.0329).</li>
+<li><strong>تحسينات ممكنة للمشاوير:</strong> (أ) إضافة صف يدوي لزيارة أقل من 10 دقايق، (ب) عمود "نوع العربية" في Devices Naming Connection، (ج) ملخص شهري لكل المناطق على كل العربيات.</li>
+</ul>
+<p><strong>اتعمل فعلاً:</strong> صفحة المهندسين، تقرير المشاوير، قائمة Vehicles، ملف بيانات الداشبورد.</p>
+<hr />
+<h2>22) نتايج التحقق (آخر ما اتجرّب)</h2>
+<p><strong>عربيات النقل (آخر تحقق 29/10/2026):</strong></p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>العربية</th>
+<th>النقلات</th>
+<th>ملاحظة</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>116</td>
+<td>19</td>
+<td>لحد 19/10 (بعدها الـ GPS اتشال للصيانة)</td>
+</tr>
+<tr>
+<td>118</td>
+<td>29</td>
+<td></td>
+</tr>
+<tr>
+<td>124</td>
+<td>29</td>
+<td></td>
+</tr>
+<tr>
+<td>114</td>
+<td>20</td>
+<td>قبل آخر تعديل</td>
+</tr>
+<tr>
+<td>132</td>
+<td>14</td>
+<td>قبل آخر تعديل</td>
+</tr>
+<tr>
+<td>123</td>
+<td>13</td>
+<td>قبل آخر تعديل</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>عربيات المشاوير:</strong>
+- ربع نقل 3 محلي، 1–10/10/2026: أيام من 2 لـ 6 زيارات، من 41 لـ 153 كم في اليوم (مثلاً 3/10 = 6 زيارات و152.6 كم). الشكل والمسارات والملخص طلعوا زي المصمَّم. <strong>الأرقام لازم تراجعها بنفسك مع السواق</strong> (ده المقصود من عمود الغرض).</p>
+<hr />
+<h2>23) لو هتفتح محادثة جديدة مع Claude</h2>
+<ol>
+<li>ارفع <strong>ملفات الكود الحالية</strong> (الـ zip كله أو ملفات الـ <code>.gs</code>).</li>
+<li>لو الموضوع تقرير نقلات: ارفع ملفات العربية (<strong>Trips + Routing Points</strong>) واكتب <strong>اسم العربية والتاريخ</strong>. لو مشاوير أو داشبورد: مش لازم ملفات (بيسحب من المنصة).</li>
+<li>وقول إيه المطلوب بالظبط (مثلاً "نقلة ناقصة يوم كذا في عربية كذا" أو "عايز أضيف عمود للمشاوير").</li>
+<li>وارفع ملف الحالة (<code>Project Status.html</code> أو نسخته <code>.md</code>).</li>
+<li><strong>ملف الحالة بيتسلّم دايماً باسم <code>Project Status.html</code> بصيغة HTML</strong> (عشان يتحط في Apps Script وGitHub).</li>
+<li><strong>مع كل مهمة بيتسلّم المشروع كامل:</strong> ملف <code>.zip</code> فيه كل الملفات بآخر تحديث + <code>Project Status.html</code> محدّث بنفس الأسلوب.</li>
+</ol>
+<hr />
+<h2>24) خريطة "لو عايز تغيّر كذا عدّل فين" + الفخاخ</h2>
+<h3>أ) لو عايز تغيّر...</h3>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>عايز تغيّر</th>
+<th>عدّل في</th>
+<th>ملحوظة</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>مدة الزيارة في المشاوير (10 د)</td>
+<td><code>ERR.MIN_STOP_MIN</code> في <code>Errand report.gs</code></td>
+<td></td>
+</tr>
+<tr>
+<td>دمج المحلات في المنطقة (45 د)</td>
+<td><code>ERR.AREA_MERGE_GAP_MIN</code></td>
+<td>0 = ما يدمجش</td>
+</tr>
+<tr>
+<td>حجم المنطقة المسجلة الجديدة</td>
+<td><code>ERR.NEW_PLACE_RADIUS</code> أو نصف القطر في Places نفسه</td>
+<td>الأسهل في Places</td>
+</tr>
+<tr>
+<td>شكل شيت المشاوير (أعمدة/ألوان)</td>
+<td><code>errWriteMain_</code> / <code>errWriteSummary_</code> / <code>errWriteAlerts_</code></td>
+<td><strong>لو غيّرت ترتيب الأعمدة غيّر <code>errReadMain_</code> معاه</strong> (بيقرا بالأرقام)</td>
+</tr>
+<tr>
+<td>قواعد النقلة (خلاطة/كسارة...)</td>
+<td><code>GPS_CONFIG</code> و<code>buildFleetReport_</code> في main</td>
+<td>بيأثر على تقارير النقلات والداشبورد</td>
+</tr>
+<tr>
+<td>مواقع ثابتة جديدة (تفريغ جديد)</td>
+<td>شيت <code>Coordinates</code> + قاعدة اسم في <code>GPS_CONFIG.SITES</code></td>
+<td><strong>بيغيّر عدد النقلات</strong></td>
+</tr>
+<tr>
+<td>اسم مكان</td>
+<td>شيت <code>Places</code></td>
+<td>بيتطبق على الكل</td>
+</tr>
+<tr>
+<td>عربية جديدة</td>
+<td><strong>Vehicles ▸ Add Vehicle</strong></td>
+<td>لو <strong>نقل</strong> لازم أماكن (ب) تحت</td>
+</tr>
+<tr>
+<td>عربيات النقل الظاهرة في الداشبورد</td>
+<td><code>DASH.NAKLA_VEHICLES</code></td>
+<td></td>
+</tr>
+<tr>
+<td>مدة كاش (48 ساعة) / حد السحب (240 ث)</td>
+<td><code>platformPull_</code> في main</td>
+<td></td>
+</tr>
+<tr>
+<td>زمن انتظار الداشبورد (150 ث)</td>
+<td><code>DASH.RUN_BUDGET_SEC</code></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3>ب) أماكن مكتوبة يدوي (لو ضفت عربية <strong>نقل</strong> جديدة حدثهم كلهم)</h3>
+<ol>
+<li><code>DASH.NAKLA_VEHICLES</code> (الداشبورد).</li>
+<li><code>ISS.VEHICLES</code> (القائمة الاحتياطية في المشاكل — بتتجاب من الشيت لو موجود).</li>
+<li><code>GPS_CONFIG.HARD_VEHICLES</code> (لو جهازها بيخرف).</li>
+</ol>
+<h3>ج) الفخاخ (اللي يبوّظ لو ما انتبهناش)</h3>
+<ol>
+<li><strong>اسم دالة مكرر في أي ملفين = واحدة بتغطي على التانية بدون خطأ.</strong> استخدم البادئة (<code>err</code>, <code>veh</code>, <code>stmt</code>, <code>dash</code>, <code>edits</code>, <code>gps</code>, <code>named</code>, <code>iss</code>, <code>petro</code>).</li>
+<li><strong>ما تضيفش <code>onEdit</code> تاني.</strong> موجودة في <code>Issues management.gs</code> بس.</li>
+<li><strong><code>platformPull_</code> مشتركة بين 3 تقارير.</strong> لو غيّرت شكل اللي بترجعه (<code>route</code>, <code>trips</code>, <code>info</code>) هتوقع النقلات والمشاوير والداشبورد.</li>
+<li><strong><code>namedRegister_</code> و<code>namedLoad_</code></strong> مشتركة. (<code>namedRegister_</code> بتاخد <code>r</code> اختياري من المشاوير: ما تشيلوش.)</li>
+<li><strong><code>isProtectedSheet_</code> و<code>sheetGroups_</code> و<code>readInputs_</code></strong>: أي شيت دايم جديد لازم تضيفه في <code>isProtectedSheet_</code> عشان "مسح كل الشيتات" ما يمسحوش. وأي نوع تقرير جديد لازم تضيف بادئته في <code>sheetGroups_</code>.</li>
+<li><strong>الأسماء المحجوزة:</strong> البادئات <code>تقرير</code>, <code>ملخص يومي</code>, <code>الدورات</code>, <code>سجل الزيارات</code>, <code>تنبيهات</code>, <code>مشاوير</code>, <code>ملخص مشاوير</code> محجوزة. أي شيت اسمه بيبدأ بيها بيتعامل كتقرير مؤقت.</li>
+<li><strong>التعديلات اليدوية بتعتمد على بصمة الشكل الأصلي.</strong> لو غيّرنا شكل التقرير (أعمدة/ترتيب)، لازم نراجع قراءة الشيت (<code>errReadMain_</code> للمشاوير، و<code>Manual edits.gs</code> للنقلات) عشان ما نكسرش حفظ التعديلات.</li>
+<li><strong>أي دالة فيها نافذة تشتغل من القائمة بس</strong> (مش Run).</li>
+<li><strong>بعد أي تعديل في صفحة المشاكل: New version في Deploy.</strong> وإلا بتشتغل بالكود القديم.</li>
+<li><strong>حد 6 دقايق في Apps Script:</strong> أي شغل جديد طويل لازم يوقف بميزانية وقت ويحفظ اللي خلصه (زي الداشبورد).</li>
+<li><strong>عمود <code>meta</code> (L) في شيت المشاوير ما يتمسحش.</strong> ممكن يتخفى ويتظهر عادي، بس محتواه ضروري.</li>
+<li><strong>قبل ما تسحب تقرير من جديد:</strong> لو عدّلت في الشيت دوس "تطبيق تعديلاتي" الأول وإلا هتضيع.</li>
+</ol>
+<h3>د) قبل ما نضيف أي ميزة جديدة، نسأل:</h3>
+<ul>
+<li>هل بتغيّر عدد النقلات؟ ← ممنوع إلا بقرار منك.</li>
+<li>هل بتكتب في شيت دايم؟ ← محمي من المسح؟ ومحفوظ في التعديلات؟</li>
+<li>هل بتستخدم السحب؟ ← بتنادي <code>platformPull_</code> ما بتكررش الكود.</li>
+<li>هل ليها نافذة؟ ← تتعمل <code>JOBS</code> جديدة وتتنادى بـ <code>openJob_</code>.</li>
+<li>هل ليها دوال جديدة؟ ← ليها بادئة فريدة.</li>
+</ul>
+<hr />
+<h2>25) نصايح لتجنب المشاكل</h2>
+<ul>
+<li><strong>أي دالة فيها نافذة:</strong> من <strong>قائمة الشيت</strong> مش من Run.</li>
+<li><strong>قبل تعديلاتك:</strong> النظام بيحفظ نسخة تلقائي. متمسحش <code>نسخة قبل التعديل</code> / <code>نسخة مشاوير قبل التعديل</code> قبل ما تتأكد.</li>
+<li><strong>نقلات مش متطابقة:</strong> ابدأ بـ <code>تنبيهات &lt;رقم&gt;</code> وبعدها <code>سجل الزيارات</code> و<code>الدورات</code>.</li>
+<li><strong>بيانات قديمة غلط:</strong> جرّب 🗑 مسح الكاش وأعد السحب.</li>
+<li><strong>التقارير المؤقتة:</strong> امسحها بعد الطباعة (🧹) عشان الملف يفضل خفيف.</li>
+<li><strong>تقرير مشاوير فيه "منطقة غير مسماة":</strong> افتح Places، دوس لينك الخريطة، سمّي المكان، وأعد سحب التقرير.</li>
+<li><strong>عايز محلين في نفس المنطقة يتحسبوا مكان واحد:</strong> سمّيهم بنفس الاسم، أو كبّر نصف القطر في Places.</li>
+<li><strong>الداشبورد ناقص عربيات:</strong> شغّل 📊 تحديث تاني (بيكمل من حيث وقف).</li>
+<li><strong>إضافة GitHub Assistant</strong> (في المتصفح) ممكن تفشل مرة وهي بترفع ملفات والخطأ يظهر في الـ Execution log كـ <code>[github assistant] undefined</code>: ده من الإضافة مش من كودنا. حدّث الصفحة وأعد المحاولة.</li>
+</ul>
+<hr />
+<h2>26) طلب بيان الخلاطة من صفحة التحكم (جديد 30/10/2026)</h2>
+<p><strong>الفكرة:</strong> بدل ما تجري ورا مدير الخلاطة، بتعمل «طلب بيان» لفترة (من يوم لـ يوم)، فيوصله رابط على واتساب أو Gmail يفتح صفحة يسجّل فيها بيان كل عربية يوم بيوم، وإنت بتتابع التقدم من صفحة التحكم.</p>
+<h3>أ) مدير الخلاطة (من الشيت)</h3>
+<ul>
+<li>الزرار: <strong>خلاطة / جراج ▸ 👷 مدير الخلاطة</strong>. بيعرض الحالي (الاسم، واتساب، الإيميل، تاريخ التعيين). لو مفيش: «مفيش مدير خلاطة معين. قم بإضافة مدير خلاطة جديد» وزرار ➕ إضافة. لو في: زرار ✏️ تغيير.</li>
+<li>الحقول: الاسم + رقم واتساب (بيتحقق منه) + إيميل اختياري (لازم لو هتبعت بالإيميل).</li>
+<li>بيتخزن في شيت مخفي <code>Statement Managers</code> (محمي). التغيير بيقفل القديم ويضيف جديد (السجل بيفضل). <strong>قسم الأمن والعمليات</strong> (بيان الجراج) بيتضاف بنفس الطريقة من 🛡 قسم الأمن والعمليات في نفس الفئة (قسم 27).</li>
+</ul>
+<h3>ب) الطلب (من صفحة التحكم)</h3>
+<ul>
+<li>زرار <strong>📋 طلب بيان جديد</strong> جنب «إضافة مشكلة جديدة»: نوع البيان (خلاطة / جراج) + من تاريخ + إلى تاريخ + طريقة الإرسال (واتساب / إيميل Gmail / بدون إرسال). أقصى فترة 62 يوم.</li>
+<li>بيتسجل في شيت مخفي <code>Statement Requests</code> (محمي) ومعاه <strong>Token سري</strong> للرابط. واتساب بيفتح الرسالة جاهزة وإنت اللي بتدوس إرسال، والإيميل بيتبعت مباشرة (زي نظام المشاكل).</li>
+<li>نص الرسالة: «السلام عليكم ورحمة الله، مهندس {الاسم}، يا رب يكون حضرتك بخير، بستأذن حضرتك في بيان الخلاطة في الفترة من … إلى …. برجاء تسجيل البيان من خلال الدخول على الرابط التالي: … لو حاولت تفتح الرابط ومفتحش، برجاء إرسال بيان الفترة المحددة على واتساب بشكل مؤقت حتى عودة الموقع للعمل».</li>
+<li>قايمة <strong>طلبات البيانات</strong> أعلى الصفحة: الفترة، المسؤول، شريط تقدم (عدد «يوم × سيارة» اللي اتسجل من الإجمالي)، الحالة (مفتوح / مكتمل / ملغي)، <strong>تذكير واتساب</strong> و<strong>إلغاء الطلب</strong> (الرابط بيقف يشتغل).</li>
+</ul>
+<h3>ج) صفحة المهندس «تقرير بيان الخلاطة» (<code>?page=stmt&amp;k=TOKEN</code>)</h3>
+<ul>
+<li>عنوان + ترحيب بالمهندس + اختيار السيارة (10 عربيات النقل من <code>DASH.NAKLA_VEHICLES</code>، وكل واحدة مكتوب جنبها «فاضل N يوم» أو «✔ مكتمل»).</li>
+<li>بعد اختيار السيارة: «برجاء إدخال بيان السيارة X من تاريخ … لتاريخ …» + «فاضلك: …». اليوم المتاح بيتحدد لأول يوم لسه ماتسجلش (والأيام المسجلة عليها ✔ ولسه ينفع يختارها لإدخال بيان تاني، زي نقلات وصيانة في نفس اليوم).</li>
+<li><strong>نقلة:</strong> السائق (قايمة + سائق آخر) ← عدد النقلات ← نوع النقلات (سن / بيتومين / ➕ جديد) ← تاريخ ووقت الخروج ← تاريخ ووقت العودة ← ملاحظات.</li>
+<li><strong>صيانة:</strong> السائق ← سبب الصيانة ← مكان الصيانة (الجراج / مركز ال سعفان / ➕ جديد) ← الخروج ← العودة (اختياري لو لسه في الصيانة) ← ملاحظات.</li>
+<li><strong>بدون نقلات:</strong> الملاحظات بس (سبب عدم وجود نقلات، مطلوب).</li>
+<li>بعد «إرسال البيان» الصفحة بتفضى والسيارة بتفضل مختارة والتاريخ بيروح لليوم اللي بعده، ومكتوب اللي فاضل. لما كل أيام السيارة تخلص: «شكراً لحضرتك يا بشمهندس … تم إرسال بيان الخلاطة للفترة المطلوبة (سيارة X)، جزاك الله خيرًا» + السيارات اللي لسه فاضلة. الطلب بيبقى «مكتمل» لما كل السيارات تخلص.</li>
+<li>تاريخ الخروج لازم يكون نفس اليوم المختار، والعودة بعد الخروج. نفس البيان بنفس القيم مرتين بيترفض (حماية من الدوسة المزدوجة).</li>
+</ul>
+<h3>د) لازم تعرفه / فخاخ</h3>
+<ul>
+<li><strong>بعد لصق الكود لازم Deploy ← Manage deployments ← Edit ← New version</strong> وإلا صفحة المهندس والزرار الجديد مش هيشتغلوا (الـ Web App بيشتغل بالكود القديم).</li>
+<li>الرابط محمي بـ Token لكل طلب، ودوال الشيت (نوافذ مدير الخلاطة والإدخال اليدوي) بتتأكد إن اللي بينادي صاحب الشيت (<code>stmtEditorOnly_</code>) لأن أي دالة public بتتنادى من أي صفحة Web App.</li>
+<li>شيتات جديدة محمية من «مسح كل الشيتات»: <code>Statement Managers</code> و<code>Statement Requests</code> و«بيان الخلاطة - نسخة قبل التحديث» و«بيان الجراج - نسخة قبل التحديث» (في <code>isProtectedSheet_</code>).</li>
+<li>أي كود HTML/JS جوه <code>`</code> (template literal) ممنوع فيه <code>\</code> أو <code>${</code>. استخدم <code>String.fromCharCode(10)</code> للسطر الجديد.</li>
+<li>لو غيّرت عربيات النقل: <code>DASH.NAKLA_VEHICLES</code> هي مصدر قايمة صفحة المهندس كمان.</li>
+<li>الداشبورد لسه مابيقراش بيان الخلاطة ولا بيان الجراج.</li>
+</ul>
+<hr />
+<h2>27) بيان الجراج من صفحة التحكم (جديد 30/10/2026)</h2>
+<p><strong>الفكرة:</strong> نفس نظام بيان الخلاطة بالظبط (قسم 26)، بس المسؤول هنا هو <strong>قسم الأمن والعمليات في الجراج</strong> (موظف الأمن هو اللي بيطلّع بيان الجراج). بتعمل «طلب بيان» لفترة، فيوصل الرابط للمسؤول على واتساب أو Gmail، يسجّل بيان كل عربية يوم بيوم، وإنت بتتابع التقدم من صفحة التحكم.</p>
+<h3>أ) قسم الأمن والعمليات (من الشيت)</h3>
+<ul>
+<li>الزرار: <strong>خلاطة / جراج ▸ 🛡 قسم الأمن والعمليات</strong>. نفس شاشة مدير الخلاطة: بيعرض المسؤول الحالي (الاسم، واتساب، الإيميل، تاريخ التعيين)، أو «مفيش مسؤول معين لقسم الأمن والعمليات. قم بإضافة مسؤول جديد» وزرار ➕ إضافة، ولو موجود زرار ✏️ تغيير.</li>
+<li>بيتخزن في نفس الشيت المخفي <code>Statement Managers</code> بنوع <code>garage</code> (التغيير بيقفل القديم ويضيف جديد والسجل بيفضل). <em>ليه نفس الشيت؟</em> الكود كان جاهز لنوعين من الأول، فمفيش داعي لشيت تاني.</li>
+</ul>
+<h3>ب) الطلب (من صفحة التحكم)</h3>
+<ul>
+<li>زرار <strong>📋 طلب بيان جديد</strong>: نوع البيان بقى فيه <strong>بيان خلاطة</strong> و<strong>بيان جراج</strong> (الاتنين شغالين). الباقي زي ما هو: من تاريخ، إلى تاريخ، طريقة الإرسال، وأقصى فترة 62 يوم.</li>
+<li>سطر «المسؤول عن البيان» بيتغير مع النوع (مدير الخلاطة / قسم الأمن والعمليات) وبيحذّر لو مفيش واتساب أو إيميل محفوظ.</li>
+<li>نص الرسالة نفسه (السلام عليكم ورحمة الله، <strong>أستاذ</strong> {الاسم}، يا رب يكون حضرتك بخير، بستأذن حضرتك في <strong>بيان الجراج</strong> في الفترة من … إلى …) مع الرابط وسطر «لو الرابط مفتحش ابعت البيان على واتساب مؤقتاً».</li>
+<li>قايمة الطلبات بتعرض الاتنين (خلاطة وجراج) بشريط تقدم، وتذكير واتساب وإلغاء.</li>
+</ul>
+<h3>ج) صفحة «تقرير بيان الجراج» (نفس الرابط <code>?page=stmt&amp;k=TOKEN</code>)</h3>
+<p>الصفحة بتتحدد من نوع الطلب. الترتيب: عنوان ← ترحيب بالأستاذ ← اختيار السيارة (10 عربيات النقل، وجنبها «فاضل N يوم» أو «✔ مكتمل») ← «برجاء إدخال بيان السيارة X من … لـ …» + «فاضلك: …» ← اليوم ← نوع البيان:</p>
+<ul>
+<li><strong>دخلت الجراج:</strong> السائق (قايمة من <code>Drivers</code> + «سائق آخر») ← تاريخ ووقت دخول الجراج ← تاريخ ووقت الخروج من الجراج (يتساب فاضي لو لسه جوه) ← <strong>الصيانة اللي اتعملت</strong>.</li>
+<li><strong>لم تدخل الجراج:</strong> من غير أي حقول تانية.</li>
+</ul>
+<ul>
+<li><strong>ليه فيه خيار «لم تدخل الجراج»؟</strong> إضافة مني على اللي اتطلب: أغلب العربيات مبتدخلش الجراج كل يوم، والتقدم بيتحسب «يوم × سيارة» زي الخلاطة، فمن غير الخيار ده الطلب عمره ما يوصل «مكتمل» (ومعناه كمان إن الأمن أكد إن العربية ماجتش). مقابل «بدون نقلات» في الخلاطة.</li>
+<li><strong>الصيانة مش إجبارية في الكود</strong>، والواجهة ما بتقولش كده (اسم الحقل «الصيانة اللي اتعملت» من غير كلمة اختياري).</li>
+<li>بعد «إرسال البيان» الصفحة بتفضى والسيارة بتفضل مختارة والتاريخ بيروح لليوم اللي بعده، ولما أيام السيارة تخلص: «شكراً لحضرتك يا أستاذ … تم إرسال بيان الجراج للفترة المطلوبة (سيارة X)، جزاك الله خيرًا». الطلب بيبقى «مكتمل» لما كل السيارات تخلص.</li>
+<li>قواعد التحقق: تاريخ الدخول لازم يكون نفس اليوم المختار، والخروج بعد الدخول، والسائق مطلوب لما العربية دخلت، ونفس البيان بنفس القيم مرتين بيترفض.</li>
+<li>لو اخترت يوم متسجل (✔) ينفع تدخل بيان تاني (مثلاً دخلت الجراج مرتين في نفس اليوم)، والملخص بياخد أول دخول وآخر خروج من كل الصفوف.</li>
+</ul>
+<h3>د) الإدخال اليدوي من الشيت (🔧 بيان الجراج)</h3>
+<p>نفس الحقول بالظبط (السيارة، اليوم، نوع البيان، السائق، الدخول، الخروج، الصيانة) من نافذة الشيت، والصف بيتسجل بعلامة «يدوي». الدالة محمية بـ <code>stmtEditorOnly_</code> زي الخلاطة.</p>
+<h3>هـ) لازم تعرفه / فخاخ</h3>
+<ul>
+<li><strong>بعد لصق الكود لازم Deploy ← Manage deployments ← Edit ← New version</strong> وإلا صفحة قسم الأمن وزرار الطلب الجديد مش هيشتغلوا.</li>
+<li>أول مرة بعد التحديث شيت بيان الجراج القديم بيتحوّل لوحده (قسم 14) من أول تقرير نقلات أو أول فتح للنافذة. افتح التقرير وراجع إن بيانك القديم لسه ظاهر في «ملخص يومي».</li>
+<li>الكود الجديد: <code>stmtFormatGarage_</code> و<code>stmtGarageMigrate_</code> و<code>stmtReadGarageRows_</code> و<code>stmtSaveGarageRec_</code> و<code>STMT_GFORM_JS_</code> (نموذج الصفحة والنافذة) في <code>Statements.gs</code>. وتم حذف نافذة الجراج القديمة و<code>stmtSaveEntry</code>.</li>
+<li><code>STMT_GFORM_JS_</code> جوه template literal: نفس التحذير (ممنوع <code>\</code> و<code>${</code>).</li>
+<li>الداشبورد لسه مابيقراش بيان الجراج. وبيان الجراج مالوش علاقة بتقرير المشاوير.</li>
+<li>قايمة العربيات في صفحة الجراج هي نفسها <code>DASH.NAKLA_VEHICLES</code> (عربيات النقل).</li>
+<li>اتختبر الكود بـ Node بمحاكاة للشيتات والصفحة (الترحيل، الحفظ والرفض، الطلب والتقدم، الصفحة بالكامل) وبيان الخلاطة لسه شغال زي ما هو. اللي ما اتجربش هو Sheets والـ Web App الحقيقيين، فجرّبهم بعد الـ Deploy.</li>
+</ul>
+</main>
+</body>
+</html>

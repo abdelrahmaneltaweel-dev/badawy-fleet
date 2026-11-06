@@ -6,6 +6,7 @@
  */
 
 import type { CleanGpsPoint, GpsStop, HaulCycle, AnalysisConfig } from './types.js';
+import { DEFAULT_ANALYSIS_CONFIG } from './types.js';
 import { calculateDistanceKm } from './geo.js';
 
 export function detectHaulCycles(
@@ -18,16 +19,25 @@ export function detectHaulCycles(
     return [];
   }
 
+  const config = { ...DEFAULT_ANALYSIS_CONFIG, ..._customConfig };
   const hauls: HaulCycle[] = [];
 
   // تصنيف الوقفات بحسب نوع الموقع الجغرافي
   // مواقع التحميل النموذجية: crusher (كسارة), quarry (محجر)
   // مواقع التفريغ النموذجية: mixer (خلاطة), dump_site (موقع تفريغ), project (موقع مشروع)
   const isLoadingStop = (stop: GpsStop) => {
+    // وقفة الخلاطة القصيرة أقل من 20 دقيقة = مجرد مرور على الطريق وليست وقفة عمل (D-059 / Section 7.5)
+    if (stop.geofenceType === 'mixer' && stop.durationMinutes < (config.mixerPassStopMinutes ?? 20)) {
+      return false;
+    }
     return stop.geofenceType === 'crusher' || stop.geofenceType === 'custom';
   };
 
   const isUnloadingStop = (stop: GpsStop) => {
+    // وقفة الخلاطة القصيرة أقل من 20 دقيقة = مجرد مرور على الطريق وليست تفريغاً (حالة 116 دورة 16)
+    if (stop.geofenceType === 'mixer' && stop.durationMinutes < (config.mixerPassStopMinutes ?? 20)) {
+      return false;
+    }
     return (
       stop.geofenceType === 'mixer' ||
       stop.geofenceType === 'dump_site' ||
@@ -40,6 +50,12 @@ export function detectHaulCycles(
 
   for (let i = 0; i < stops.length; i++) {
     const currentStop = stops[i];
+
+    // وقفة صيانة في الجراج تلغي حالة التحميل (ADR-048 / evalCycle)
+    if (currentStop.geofenceType === 'garage' && currentStop.isMaintenance) {
+      activeLoadingStop = null;
+      continue;
+    }
 
     if (isLoadingStop(currentStop)) {
       activeLoadingStop = currentStop;

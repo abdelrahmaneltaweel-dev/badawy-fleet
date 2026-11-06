@@ -30,6 +30,8 @@ firebase-debug.log
 *.log
 coverage/
 .vite/
+bun.lock*
+bun.lockb
 
 # أنظمة تشغيل ومحررات
 .DS_Store

@@ -102,6 +102,22 @@ export function cleanAndFilterGpsPoints(
     return [];
   }
 
+  // 2.5 تصحيح السرعة الوهمية للعربيات الصعبة (FREEZE_FIX لمركبات مثل 124)
+  if (config.freezeFix) {
+    for (let i = 1; i < uniquePoints.length; i++) {
+      const prev = uniquePoints[i - 1];
+      const cur = uniquePoints[i];
+      if (cur.speed > 0 && cur.speed <= 15) {
+        const distKm = calculateDistanceKm(prev.lat, prev.lng, cur.lat, cur.lng);
+        // إزاحة أقل من 15 متر مع سرعة وهمية <= 15 كم/س = تصفير السرعة
+        if (distKm < 0.015) {
+          cur.speed = 0;
+          cur.ignition = false;
+        }
+      }
+    }
+  }
+
   // 3. تصفية القفزات المستحيلة (Teleportation Jitter Filter) وحساب المسافات
   const cleaned: CleanGpsPoint[] = [];
 
