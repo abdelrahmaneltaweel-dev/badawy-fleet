@@ -182,8 +182,8 @@ async function main() {
   if (stats.issuesDetected > 0) {
     console.log(`⚠️ تم رصد مشاكل GPS: [${stats.issuesDetected}] مشكلة`);
   }
-  if (stats.errorsCount > 0) {
-    console.log(`❌ أخطاء أثناء المعالجة: [${stats.errorsCount}]`);
+  if (result.dailySnapshot) {
+    console.log(`📸 لقطة الأسطول المجمعة (Snapshot): [${result.dailySnapshot.snapshotId}] جاهزة (قراءة واحدة 1 Read للداشبورد)`);
   }
   console.log('====================================================\n');
 

@@ -10,3 +10,4 @@ export * from './budget.js';
 export * from './health.js';
 export * from './excelParser.js';
 export * from './comparison.js';
+export * from './snapshot.js';

@@ -5,6 +5,7 @@ export * from './auth/permissions.js';
 export * from './settings/types.js';
 export * from './settings/registry.js';
 export * from './settings/appearance.js';
+export * from './settings/dashboardCards.js';
 export * from './entities/types.js';
 export * from './entities/parser.js';
 export * from './audit/types.js';
@@ -32,3 +33,10 @@ export {
   compareSingleVehicleSummary,
   compareBatchDailySummaries
 } from './ingestion/comparison.js';
+export {
+  buildFleetDailySnapshot,
+  computeSnapshotChecksum,
+  saveFleetSnapshot,
+  loadFleetSnapshot,
+  fleetSnapshotCache
+} from './ingestion/snapshot.js';

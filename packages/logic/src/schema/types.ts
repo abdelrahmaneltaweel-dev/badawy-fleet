@@ -18,7 +18,8 @@ export type CollectionName =
   | 'petro_requests'
   | 'settings'
   | 'audit_logs'
-  | 'period_snapshots';
+  | 'period_snapshots'
+  | 'daily_snapshots';
 
 export type VehicleType = 'tractor' | 'truck' | 'private';
 export type VehicleStatus = 'online' | 'offline' | 'idle';
@@ -222,4 +223,61 @@ export interface PeriodSnapshotDocument extends BaseDocument {
   frozen: boolean;
   reason: string | null;
   data: Record<string, unknown>;
+}
+
+/**
+ * 13. Daily Snapshot (لقطة اليوم المجمعة للأسطول - قراءة واحدة لشاشات الداشبورد والأسطول) - ADR-004, D-059
+ */
+export interface FleetTotals {
+  totalVehicles: number;
+  onlineCount: number;
+  offlineCount: number;
+  idleCount: number;
+  totalTrips: number;
+  tractorTrips: number; // النقلات
+  truckTrips: number;   // مشاوير النقل
+  privateTrips: number; // مشاوير الملاكي
+  totalStops: number;
+  maintenanceStops: number;
+  activeIssuesCount: number;
+}
+
+export interface VehicleSnapshotItem {
+  vehicleId: string;
+  name: string;
+  type: VehicleType;
+  plateNumber: string;
+  status: VehicleStatus;
+  tripsCount: number;
+  stopsCount: number;
+  firstMovement: string | null;
+  lastMovement: string | null;
+  lastLocationName?: string;
+  driverId: string | null;
+  driverName?: string;
+  matchingStatus: 'matched' | 'mismatched' | 'pending';
+  hasIssue: boolean;
+  issueType?: IssueType;
+  dataSource?: DataSourceType;
+  updatedAt: string;
+}
+
+export interface IssueSnapshotItem {
+  issueId: string;
+  vehicleId: string;
+  type: IssueType;
+  detectedAt: string;
+  status: IssueStatus;
+  notes: string | null;
+}
+
+export interface DailySnapshotDocument extends BaseDocument {
+  snapshotId: string; // e.g. "2026-11-06" or "current"
+  date: string;       // YYYY-MM-DD
+  fleetTotals: FleetTotals;
+  vehicles: VehicleSnapshotItem[];
+  recentIssues: IssueSnapshotItem[];
+  checksum: string;
+  rulesVersion: string;
+  dataSource: DataSourceType;
 }

@@ -154,5 +154,11 @@ service cloud.firestore {
       );
       allow delete: if false;
     }
+
+    // 13. Daily Snapshots: Aggregated fleet view for 1-read dashboard/fleet (T5.6, ADR-004)
+    match /daily_snapshots/{snapshotId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
   }
 }

@@ -4,6 +4,8 @@ import {
   processRawGpsInput,
   generateSyntheticTraccarRows,
   compareBatchDailySummaries,
+  buildFleetDailySnapshot,
+  saveFleetSnapshot,
   type ExcelIngestionResult,
   type BatchComparisonResult,
   type SingleVehicleComparison,
@@ -123,7 +125,16 @@ export default function ExcelUpload() {
         savedCount++;
       }
 
-      showToast(`✅ تم حفظ ${savedCount} ملخص يومي موسوم بـ [Excel خام] في قاعدة البيانات بنجاح.`);
+      // T5.6: Build and save fleet daily snapshot for 1-read dashboard/fleet views
+      const opDate = result.summariesList[0]?.date || '2026-10-28';
+      const snapshot = buildFleetDailySnapshot({
+        operationalDate: opDate,
+        summaries: result.summariesList,
+        dataSource: 'excel'
+      });
+      await saveFleetSnapshot(repo, snapshot, { forceWrite: true });
+
+      showToast(`✅ تم حفظ ${savedCount} ملخص يومي وتحديث لقطة الأسطول المجمعة (Snapshot) بنجاح.`);
     } catch (err: any) {
       showToast(`خطأ في الحفظ: ${err.message || err}`);
     } finally {
