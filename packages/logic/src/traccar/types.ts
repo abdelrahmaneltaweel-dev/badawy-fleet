@@ -13,6 +13,7 @@ export interface TraccarAuthConfig {
   password?: string;
   timeoutMs?: number;
   speedUnit?: SpeedUnit; // Traccar default is knots (1 knot = 1.852 km/h)
+  customHeaders?: Record<string, string>;
 }
 
 export interface TraccarDevice {

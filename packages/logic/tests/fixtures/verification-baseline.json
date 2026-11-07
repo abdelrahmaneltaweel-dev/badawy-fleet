@@ -9,7 +9,7 @@
   "geofences": [
     {
       "id": "FENCE-CRUSHER",
-      "name": "كسارة الكيلو 21",
+      "name": "الكسارة النموذجية (موقع أ)",
       "type": "crusher",
       "center": {
         "lat": 31.02,
@@ -19,7 +19,7 @@
     },
     {
       "id": "FENCE-MIXER",
-      "name": "محطة خلاطة برج العرب",
+      "name": "محطة الخلاطة التجريبية (موقع ب)",
       "type": "mixer",
       "center": {
         "lat": 30.92,
@@ -29,7 +29,7 @@
     },
     {
       "id": "FENCE-DOWLY",
-      "name": "موقع الطريق الدولي",
+      "name": "موقع التفريغ الأول (موقع ج)",
       "type": "dump_site",
       "center": {
         "lat": 31.15,
@@ -39,7 +39,7 @@
     },
     {
       "id": "FENCE-BORG",
-      "name": "موقع برج العرب",
+      "name": "موقع التفريغ الثاني (موقع د)",
       "type": "dump_site",
       "center": {
         "lat": 30.88,
@@ -49,7 +49,7 @@
     },
     {
       "id": "FENCE-HAWSH",
-      "name": "عزبة كومبو - حوش عيسى",
+      "name": "موقع تفريغ فرعي (موقع هـ)",
       "type": "dump_site",
       "center": {
         "lat": 30.91,
@@ -59,7 +59,7 @@
     },
     {
       "id": "FENCE-GARAGE",
-      "name": "الجراج الرئيسي",
+      "name": "جراج الأسطول المركزي",
       "type": "garage",
       "center": {
         "lat": 31.1,

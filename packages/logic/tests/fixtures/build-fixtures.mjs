@@ -10,12 +10,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const GEOFENCES = [
-  { id: 'FENCE-CRUSHER', name: 'كسارة الكيلو 21', type: 'crusher', center: { lat: 31.0200, lng: 29.7200 }, radiusMeters: 4500 },
-  { id: 'FENCE-MIXER', name: 'محطة خلاطة برج العرب', type: 'mixer', center: { lat: 30.9200, lng: 29.6200 }, radiusMeters: 5500 },
-  { id: 'FENCE-DOWLY', name: 'موقع الطريق الدولي', type: 'dump_site', center: { lat: 31.1500, lng: 29.8500 }, radiusMeters: 2500 },
-  { id: 'FENCE-BORG', name: 'موقع برج العرب', type: 'dump_site', center: { lat: 30.8800, lng: 29.5800 }, radiusMeters: 4000 },
-  { id: 'FENCE-HAWSH', name: 'عزبة كومبو - حوش عيسى', type: 'dump_site', center: { lat: 30.9100, lng: 30.1700 }, radiusMeters: 800 },
-  { id: 'FENCE-GARAGE', name: 'الجراج الرئيسي', type: 'garage', center: { lat: 31.1000, lng: 29.8000 }, radiusMeters: 400 }
+  { id: 'FENCE-CRUSHER', name: 'الكسارة النموذجية (موقع أ)', type: 'crusher', center: { lat: 31.0200, lng: 29.7200 }, radiusMeters: 4500 },
+  { id: 'FENCE-MIXER', name: 'محطة الخلاطة التجريبية (موقع ب)', type: 'mixer', center: { lat: 30.9200, lng: 29.6200 }, radiusMeters: 5500 },
+  { id: 'FENCE-DOWLY', name: 'موقع التفريغ الأول (موقع ج)', type: 'dump_site', center: { lat: 31.1500, lng: 29.8500 }, radiusMeters: 2500 },
+  { id: 'FENCE-BORG', name: 'موقع التفريغ الثاني (موقع د)', type: 'dump_site', center: { lat: 30.8800, lng: 29.5800 }, radiusMeters: 4000 },
+  { id: 'FENCE-HAWSH', name: 'موقع تفريغ فرعي (موقع هـ)', type: 'dump_site', center: { lat: 30.9100, lng: 30.1700 }, radiusMeters: 800 },
+  { id: 'FENCE-GARAGE', name: 'جراج الأسطول المركزي', type: 'garage', center: { lat: 31.1000, lng: 29.8000 }, radiusMeters: 400 }
 ];
 
 function generateVehicleHauls(vehicleId, count, options = {}) {

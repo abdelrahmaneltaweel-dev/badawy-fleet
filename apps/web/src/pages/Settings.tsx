@@ -23,6 +23,10 @@ import { Field } from '../components/Field';
 import { Select } from '../components/Select';
 import { Table } from '../components/Table';
 import { showToast } from '../components/Toast';
+import { firebaseService } from '../services/firebase';
+import { traccarService, type SyncProgressUpdate } from '../services/traccar';
+import { entitiesService } from '../services/entities';
+import { getOperationalDateString } from '@badawi/logic';
 
 export default function Settings() {
   const [activeSection, setActiveSection] = useState<SettingSection>('appearance');
@@ -40,6 +44,27 @@ export default function Settings() {
   const [userPrefs, setUserPrefs] = useState<UserPersonalPreferences>(
     appearanceService.getPreferences()
   );
+
+  // Firebase configuration state
+  const existingFb = firebaseService.getConfig();
+  const [fbProjectId, setFbProjectId] = useState(existingFb?.projectId || '');
+  const [fbApiKey, setFbApiKey] = useState(existingFb?.apiKey || '');
+  const [fbAuthDomain, setFbAuthDomain] = useState(existingFb?.authDomain || '');
+  const [isFbTesting, setIsFbTesting] = useState(false);
+  const [fbTestStatus, setFbTestStatus] = useState<{ ok: boolean; message: string; latencyMs: number } | null>(null);
+
+  // Traccar configuration & live sync state
+  const existingTraccar = traccarService.getConfig();
+  const [traccarUrl, setTraccarUrl] = useState(existingTraccar.url || 'http://196.221.144.183:8080');
+  const [traccarToken, setTraccarToken] = useState(existingTraccar.token || '');
+  const [traccarUser, setTraccarUser] = useState(existingTraccar.username || 'it');
+  const [traccarPass, setTraccarPass] = useState(existingTraccar.password || '');
+  const [useTraccarProxy, setUseTraccarProxy] = useState(existingTraccar.useProxy !== false);
+  const [isTraccarTesting, setIsTraccarTesting] = useState(false);
+  const [traccarTestStatus, setTraccarTestStatus] = useState<any>(null);
+  const [isSyncingFleet, setIsSyncingFleet] = useState(false);
+  const [syncProgress, setSyncProgress] = useState<SyncProgressUpdate | null>(null);
+  const [syncTargetDate, setSyncTargetDate] = useState(getOperationalDateString(new Date()));
 
   const canManageSettings = authService.can('settings.manage');
 
@@ -251,64 +276,324 @@ export default function Settings() {
         </div>
       </Card>
 
-      {/* Data Storage Provider Card (ADR-009) */}
-      <Card title="وسيط تخزين البيانات (Data Storage Provider - ADR-009)">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-            <div>
-              <b style={{ fontSize: '0.95rem', color: 'var(--tx)' }}>المخزن النشط حالياً:</b>
-              <span style={{ marginRight: '8px', padding: '3px 10px', borderRadius: 'var(--r-full)', background: 'var(--soft)', fontWeight: 700, color: 'var(--accent)' }}>
-                {activeRepoName === 'FirestoreRestRepository'
-                  ? 'سيرفر Firebase Firestore (Spark Plan)'
-                  : activeRepoName === 'GoogleSheetsBackupRepository'
-                  ? 'نسخة Google Sheets الاحتياطية (Apps Script Bridge)'
-                  : 'التخزين المحلي / ذاكرة المتصفح (Local & In-Memory)'}
-              </span>
-            </div>
+      {/* 2. Real Cloud Integrations: Firebase Firestore & Traccar Live Sync */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '16px' }}>
+        {/* Firebase Firestore & Auth Card */}
+        <Card
+          title="🔥 قاعدة بيانات Firebase Firestore والمصادقة (Real Firebase)"
+          subtitle="اتصال حقيقي وسحب وتخزين CRUD على سحابة Google Firebase (ADR-004, ADR-013)"
+          action={
+            <span
+              style={{
+                fontSize: '0.78rem',
+                padding: '3px 10px',
+                borderRadius: 'var(--r-full)',
+                fontWeight: 700,
+                background: repositoryService.isFirestore() ? 'var(--ok-soft)' : 'var(--warn-soft)',
+                color: repositoryService.isFirestore() ? 'var(--ok)' : 'var(--warn)'
+              }}
+            >
+              {repositoryService.isFirestore() ? `● متصل بـ Firestore (${activeRepoName})` : `○ وضع التخزين التجريبي (${activeRepoName})`}
+            </span>
+          }
+        >
+          <div style={{ display: 'grid', gap: '12px' }}>
+            <Field
+              label="معرّف المشروع (Firebase Project ID)"
+              placeholder="e.g. badawi-fleet-prod"
+              value={fbProjectId}
+              onInput={(e) => setFbProjectId((e.currentTarget as HTMLInputElement).value)}
+            />
 
-            {canManageSettings && (
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <Button
-                  variant={activeRepoName === 'InMemoryRepository' ? 'primary' : 'outline'}
-                  onClick={() => {
-                    repositoryService.setProvider({ provider: 'local' });
-                    setActiveRepoName(repositoryService.getActiveProvider());
-                    showToast('تم التحويل إلى المخزن المحلي/ذاكرة المتصفح (ADR-009)');
-                  }}
-                >
-                  تخزين محلي (Local)
-                </Button>
-                <Button
-                  variant={activeRepoName === 'FirestoreRestRepository' ? 'primary' : 'outline'}
-                  onClick={() => {
-                    repositoryService.setProvider({
-                      provider: 'firestore',
-                      projectId: 'badawi-fleet-prod'
-                    });
-                    setActiveRepoName(repositoryService.getActiveProvider());
-                    showToast('تم التحويل إلى مخزن Firestore REST (ADR-004, ADR-009)');
-                  }}
-                >
-                  Firestore (Spark)
-                </Button>
-                <Button
-                  variant={activeRepoName === 'GoogleSheetsBackupRepository' ? 'primary' : 'outline'}
-                  onClick={() => {
-                    repositoryService.setProvider({ provider: 'sheets' });
-                    setActiveRepoName(repositoryService.getActiveProvider());
-                    showToast('تم التحويل إلى جسر Google Sheets الاحتياطي (ADR-003)');
-                  }}
-                >
-                  Google Sheets
-                </Button>
+            <Field
+              label="مفتاح الـ API العام (Firebase Web API Key)"
+              placeholder="AIzaSy..."
+              type="password"
+              value={fbApiKey}
+              onInput={(e) => setFbApiKey((e.currentTarget as HTMLInputElement).value)}
+            />
+
+            <Field
+              label="نطاق المصادقة (Auth Domain - اختياري)"
+              placeholder="project-id.firebaseapp.com"
+              value={fbAuthDomain}
+              onInput={(e) => setFbAuthDomain((e.currentTarget as HTMLInputElement).value)}
+            />
+
+            {fbTestStatus && (
+              <div
+                style={{
+                  padding: '10px 14px',
+                  borderRadius: 'var(--r-xs)',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  background: fbTestStatus.ok ? 'var(--ok-soft)' : 'var(--bad-soft)',
+                  color: fbTestStatus.ok ? 'var(--ok)' : 'var(--bad)'
+                }}
+              >
+                {fbTestStatus.message} {fbTestStatus.ok && `(${fbTestStatus.latencyMs}ms)`}
               </div>
             )}
+
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  if (!fbProjectId || !fbApiKey) {
+                    showToast('يرجى كتابة Project ID و API Key أولاً');
+                    return;
+                  }
+                  const res = firebaseService.saveConfig({
+                    projectId: fbProjectId.trim(),
+                    apiKey: fbApiKey.trim(),
+                    authDomain: fbAuthDomain.trim() || `${fbProjectId.trim()}.firebaseapp.com`
+                  });
+                  if (res.success) {
+                    repositoryService.setProvider({
+                      provider: 'firestore',
+                      projectId: fbProjectId.trim(),
+                      apiKey: fbApiKey.trim()
+                    });
+                    setActiveRepoName(repositoryService.getActiveProvider());
+                    showToast('تم تفعيل الاتصال بـ Firebase Firestore الحقيقي بنجاح!');
+                  } else {
+                    showToast(`خطأ في الإعداد: ${res.error}`);
+                  }
+                }}
+              >
+                💾 حفظ وتفعيل Firestore
+              </Button>
+
+              <Button
+                variant="outline"
+                loading={isFbTesting}
+                onClick={async () => {
+                  setIsFbTesting(true);
+                  const result = await firebaseService.testConnection();
+                  setFbTestStatus(result);
+                  setIsFbTesting(false);
+                }}
+              >
+                ⚡ فحص الاتصال بـ Firestore
+              </Button>
+
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  repositoryService.setProvider({ provider: 'local' });
+                  setActiveRepoName(repositoryService.getActiveProvider());
+                  showToast('تم التبديل إلى التخزين المحلي التجريبي');
+                }}
+              >
+                تبديل للمخزن المحلي
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  const vehicles = entitiesService.getVehicles();
+                  showToast(`جاري مزامنة ${vehicles.length} عربية إلى Firestore...`);
+                  for (const v of vehicles) {
+                    await repositoryService.getRepository().create('vehicles', v.vehicleId, v).catch(() => {});
+                  }
+                  showToast('تمت مزامنة بيانات الأسطول إلى Firestore بنجاح');
+                }}
+              >
+                📤 مزامنة بيانات المركبات إلى Firestore
+              </Button>
+            </div>
           </div>
-          <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--mute)' }}>
-            عزل تام لطبقة البيانات عبر نمط المستودع (Repository Pattern): يتم التبديل بين بيئات التخزين بملف واحد وإعداد واحد دون الحاجة لتعديل أي كود في طبقة المنطق أو واجهات المستخدم (ADR-009).
-          </p>
-        </div>
-      </Card>
+        </Card>
+
+        {/* Traccar Live Pull & Ingestion Card */}
+        <Card
+          title="📡 سيرفر Traccar وسحب بيانات الأسطول الحية (Traccar Ingestion)"
+          subtitle="اتصال وسحب إحداثيات GPS حقيقية وتحليل النقلات واللقطات (ADR-005, ADR-023, ADR-049)"
+          action={
+            <span
+              style={{
+                fontSize: '0.78rem',
+                padding: '3px 10px',
+                borderRadius: 'var(--r-full)',
+                fontWeight: 700,
+                background: traccarTestStatus?.ok ? 'var(--ok-soft)' : 'var(--soft)',
+                color: traccarTestStatus?.ok ? 'var(--ok)' : 'var(--mute)'
+              }}
+            >
+              {traccarTestStatus?.ok ? `● Traccar متصل (${traccarTestStatus.deviceCount} جهاز)` : '○ سيرفر Traccar'}
+            </span>
+          }
+        >
+          <div style={{ display: 'grid', gap: '12px' }}>
+            <Field
+              label="رابط سيرفر Traccar (URL)"
+              placeholder="http://traccar.example.com:8082"
+              value={traccarUrl}
+              onInput={(e) => setTraccarUrl((e.currentTarget as HTMLInputElement).value)}
+            />
+
+            <Field
+              label="رمز الدخول (API Bearer Token - مفضل)"
+              placeholder="Bearer Token من شاشة مستخدم Traccar"
+              type="password"
+              value={traccarToken}
+              onInput={(e) => setTraccarToken((e.currentTarget as HTMLInputElement).value)}
+            />
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <Field
+                label="اسم المستخدم (اختياري)"
+                placeholder="User / Email"
+                value={traccarUser}
+                onInput={(e) => setTraccarUser((e.currentTarget as HTMLInputElement).value)}
+              />
+              <Field
+                label="كلمة السر (اختياري)"
+                placeholder="Password"
+                type="password"
+                value={traccarPass}
+                onInput={(e) => setTraccarPass((e.currentTarget as HTMLInputElement).value)}
+              />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--soft)', borderRadius: 'var(--r-xs)', gap: '12px' }}>
+              <div>
+                <b style={{ fontSize: '0.84rem', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--ink)' }}>
+                  <span>🛡️ توجيه الاتصال عبر البروكسي الداخلي</span>
+                  <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: 'var(--r-full)', background: 'var(--ok-soft)', color: 'var(--ok)', fontWeight: 700 }}>
+                    مفعل تلقائياً
+                  </span>
+                </b>
+                <small style={{ color: 'var(--mute)', fontSize: '0.74rem' }}>
+                  يتولى خادم Node.js سحب البيانات من السيرفر مباشرة، ويتجاوز حظر المتصفح لـ CORS و Mixed Content (HTTPS ↔ HTTP).
+                </small>
+              </div>
+              <Switch checked={useTraccarProxy} onChange={setUseTraccarProxy} />
+            </div>
+
+            {traccarTestStatus && (
+              <div
+                style={{
+                  padding: '12px 14px',
+                  borderRadius: 'var(--r-xs)',
+                  fontSize: '0.84rem',
+                  fontWeight: 600,
+                  background: traccarTestStatus.ok ? 'var(--ok-soft)' : 'var(--bad-soft)',
+                  color: traccarTestStatus.ok ? 'var(--ok)' : 'var(--bad)',
+                  border: `1px solid ${traccarTestStatus.ok ? 'var(--ok)' : 'var(--bad)'}`
+                }}
+              >
+                {traccarTestStatus.ok ? (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <span>✓ تم الاتصال بسيرفر Traccar بنجاح!</span>
+                      <span style={{ fontSize: '0.74rem', opacity: 0.85 }}>({traccarTestStatus.latencyMs}ms)</span>
+                    </div>
+                    <div style={{ fontSize: '0.78rem', opacity: 0.9 }}>
+                      إصدار السيرفر: <b>Traccar v{traccarTestStatus.serverVersion}</b> · الأجهزة المسجلة: <b>{traccarTestStatus.deviceCount} جهاز</b> · طريقة المصادقة: <b>{traccarTestStatus.authMethodUsed}</b>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <b style={{ display: 'block', marginBottom: '2px' }}>✕ خطأ في الاتصال بسيرفر Traccar:</b>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>{traccarTestStatus.error}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Live Progress Bar when Syncing */}
+            {syncProgress && (
+              <div style={{ background: 'var(--soft)', padding: '12px', borderRadius: 'var(--r-sm)', border: '1px solid var(--line)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '6px' }}>
+                  <b>{syncProgress.message}</b>
+                  <span>{syncProgress.total > 0 ? Math.round((syncProgress.current / syncProgress.total) * 100) : 0}%</span>
+                </div>
+                <div style={{ height: '8px', background: 'var(--line)', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      height: '100%',
+                      background: syncProgress.phase === 'error' ? 'var(--bad)' : 'var(--acc)',
+                      width: `${syncProgress.total > 0 ? Math.min(100, Math.round((syncProgress.current / syncProgress.total) * 100)) : 0}%`,
+                      transition: 'width 0.3s ease'
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginTop: '6px' }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  traccarService.saveConfig({
+                    url: traccarUrl.trim(),
+                    token: traccarToken.trim(),
+                    username: traccarUser.trim(),
+                    password: traccarPass.trim(),
+                    useProxy: useTraccarProxy
+                  });
+                  showToast('تم حفظ إعدادات Traccar');
+                }}
+              >
+                💾 حفظ الإعدادات
+              </Button>
+
+              <Button
+                variant="outline"
+                loading={isTraccarTesting}
+                onClick={async () => {
+                  setIsTraccarTesting(true);
+                  const res = await traccarService.testConnection({
+                    url: traccarUrl.trim(),
+                    token: traccarToken.trim(),
+                    username: traccarUser.trim(),
+                    password: traccarPass.trim(),
+                    useProxy: useTraccarProxy
+                  });
+                  setTraccarTestStatus(res);
+                  setIsTraccarTesting(false);
+                }}
+              >
+                ⚡ فحص اتصال Traccar
+              </Button>
+
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flex: 1, minWidth: '240px' }}>
+                <input
+                  type="date"
+                  className="field-input"
+                  value={syncTargetDate}
+                  onChange={(e) => setSyncTargetDate((e.currentTarget as HTMLInputElement).value)}
+                  style={{ minHeight: '38px', padding: '4px 8px', fontSize: '0.84rem' }}
+                />
+                <Button
+                  variant="primary"
+                  loading={isSyncingFleet}
+                  onClick={async () => {
+                    traccarService.saveConfig({
+                      url: traccarUrl.trim(),
+                      token: traccarToken.trim(),
+                      username: traccarUser.trim(),
+                      password: traccarPass.trim(),
+                      useProxy: useTraccarProxy
+                    });
+                    setIsSyncingFleet(true);
+                    const unsub = traccarService.subscribeSync((prog) => setSyncProgress(prog));
+                    try {
+                      await traccarService.runLiveFleetSync(syncTargetDate);
+                    } finally {
+                      unsub();
+                      setIsSyncingFleet(false);
+                    }
+                  }}
+                >
+                  🚀 سحب وتحليل الأسطول الآن
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
 
       {/* Draft Notification Banner */}
       {hasDraft && (

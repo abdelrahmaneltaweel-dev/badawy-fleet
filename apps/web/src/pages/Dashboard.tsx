@@ -12,6 +12,7 @@ import {
   resolveDashboardCards
 } from '@badawi/logic';
 import { showToast } from '../components/Toast';
+import { traccarService } from '../services/traccar';
 
 export default function Dashboard() {
   const [evalResult, setEvalResult] = useState<SyncHealthEvaluation>(syncHealthService.getEvaluation());
@@ -25,7 +26,21 @@ export default function Dashboard() {
     settingsService.getEffectiveValues()
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isTraccarSyncing, setIsTraccarSyncing] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'tractor' | 'truck' | 'private'>('all');
+
+  const handleLiveTraccarSync = async () => {
+    setIsTraccarSyncing(true);
+    try {
+      const res = await traccarService.runLiveFleetSync();
+      if (res.success) {
+        await webSnapshotService.loadSnapshot(undefined, true);
+        await syncHealthService.refresh();
+      }
+    } finally {
+      setIsTraccarSyncing(false);
+    }
+  };
 
   useEffect(() => {
     const unsubHealth = syncHealthService.subscribe((res, syncDoc) => {
@@ -122,7 +137,17 @@ export default function Dashboard() {
             onClick={handleManualCheck}
             style={{ fontSize: '0.82rem', padding: '6px 12px' }}
           >
-            {isRefreshing ? 'جاري الفحص...' : '🔄 تحديث اللقطة والمزامنة'}
+            {isRefreshing ? 'جاري الفحص...' : '🔄 تحديث اللقطة'}
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={isTraccarSyncing}
+            onClick={handleLiveTraccarSync}
+            style={{ fontSize: '0.82rem', padding: '6px 14px' }}
+          >
+            {isTraccarSyncing ? 'جاري سحب Traccar...' : '📡 سحب Traccar الحي'}
           </button>
         </div>
       </div>

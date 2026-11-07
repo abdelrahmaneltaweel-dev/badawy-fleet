@@ -39,22 +39,19 @@ export class TraccarClient {
 
     if (this.sessionCookie) {
       headers['Cookie'] = this.sessionCookie;
-      return headers;
-    }
-
-    if (this.config.token) {
+    } else if (this.config.token) {
       const tok = this.config.token.trim();
       headers['Authorization'] = tok.startsWith('Bearer ') ? tok : `Bearer ${tok}`;
-      return headers;
-    }
-
-    if (this.config.username && this.config.password) {
+    } else if (this.config.username && this.config.password) {
       const basicStr = `${this.config.username}:${this.config.password}`;
       const encoded = typeof btoa === 'function'
         ? btoa(basicStr)
         : ((globalThis as unknown as { Buffer?: { from: (s: string) => { toString: (e: string) => string } } }).Buffer?.from(basicStr).toString('base64') ?? '');
       headers['Authorization'] = `Basic ${encoded}`;
-      return headers;
+    }
+
+    if (this.config.customHeaders) {
+      Object.assign(headers, this.config.customHeaders);
     }
 
     return headers;
@@ -65,7 +62,15 @@ export class TraccarClient {
    */
   private async safeGet<T>(endpoint: string, retries = 2): Promise<T> {
     const timeoutMs = this.config.timeoutMs || 20000;
-    const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+
+    let targetEndpoint = endpoint;
+    if (this.config.token && this.config.token.trim()) {
+      const tok = this.config.token.trim();
+      const sep = targetEndpoint.includes('?') ? '&' : '?';
+      targetEndpoint = `${targetEndpoint}${sep}token=${encodeURIComponent(tok)}`;
+    }
+
+    const url = `${this.baseUrl}${targetEndpoint.startsWith('/') ? targetEndpoint : `/${targetEndpoint}`}`;
 
     let lastError: Error | null = null;
 
@@ -84,6 +89,9 @@ export class TraccarClient {
 
         if (!res.ok) {
           const errBody = await res.text().catch(() => '');
+          if (res.status === 401 || res.status === 403) {
+            throw new Error(`خطأ مصادقة [${res.status}]: بيانات الاعتماد غير صحيحة أو رمز الـ Token غير صالح`);
+          }
           throw new Error(`Traccar API error [${res.status}]: ${errBody.slice(0, 150)}`);
         }
 
@@ -106,16 +114,29 @@ export class TraccarClient {
   public async testConnection(): Promise<TraccarConnectionStatus> {
     const start = Date.now();
     try {
-      // 1. Probe server status
+      // 1. Probe server status (public endpoint)
       const serverInfo = await this.safeGet<Record<string, unknown>>('/api/server', 0);
       const latencyMs = Date.now() - start;
 
       // 2. Probe device listing to verify authenticated read access
-      const devices = await this.getDevices(true);
+      let devices: TraccarDevice[] = [];
+      let authMethod = 'بدون مصادقة';
 
-      let authMethod = 'None';
-      if (this.config.token) authMethod = 'Bearer Token';
-      else if (this.config.username) authMethod = 'Basic Auth';
+      if (this.config.token || (this.config.username && this.config.password)) {
+        try {
+          devices = await this.getDevices(true);
+          authMethod = this.config.token ? 'Bearer Token' : 'Basic Auth';
+        } catch (authErr) {
+          const authMsg = authErr instanceof Error ? authErr.message : String(authErr);
+          return {
+            ok: false,
+            status: 401,
+            serverVersion: String(serverInfo.version || 'Traccar'),
+            latencyMs,
+            error: `تم الاتصال بالسيرفر بنجاح (إصدار ${serverInfo.version}) ولكن فشلت المصادقة: ${authMsg}`
+          };
+        }
+      }
 
       return {
         ok: true,

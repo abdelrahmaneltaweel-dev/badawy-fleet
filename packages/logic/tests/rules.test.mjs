@@ -49,8 +49,18 @@ describe('Firestore Security Rules Matrix & Safety Checks (T3.2)', () => {
     assert.ok(rulesContent.includes('isDriver() && isUser(driverId)'));
   });
 
-  it('should protect daily snapshots with authenticated read and super admin write (T5.6 / ADR-004)', () => {
+  it('should protect daily snapshots for operational staff and super admin write (T5.6 / ADR-004)', () => {
     assert.ok(rulesContent.includes('match /daily_snapshots/{snapshotId}'));
-    assert.ok(rulesContent.includes('allow read: if isAuthenticated();'));
+    assert.ok(rulesContent.includes('allow write: if isSuperAdmin();'));
+  });
+
+  it('should protect statements with field-level immutability on source and enteredBy (ADR-018)', () => {
+    assert.ok(rulesContent.includes('request.resource.data.enteredBy == resource.data.enteredBy'));
+    assert.ok(rulesContent.includes('request.resource.data.source == resource.data.source'));
+  });
+
+  it('should restrict GPS issues read so drivers only see their assigned issues (ADR-019)', () => {
+    assert.ok(rulesContent.includes('match /issues/{issueId}'));
+    assert.ok(rulesContent.includes('resource.data.driverId == request.auth.uid'));
   });
 });

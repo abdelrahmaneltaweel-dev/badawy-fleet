@@ -3,6 +3,8 @@ name: Fleet GPS Ingestion Worker
 on:
   schedule:
     # Run every 30 minutes (ADR-004 Spark Free Plan Quota Protection & ADR-005 Actions Worker)
+    # ملاحظة: في المستودعات العامة يوقف GitHub الـ Scheduled Workflows إذا انعدم النشاط 60 يوماً؛
+    # يمكن إعادة تفعيلها بالضغط على Enable Workflow أو تشغيل الـ dispatch يدوياً، أو عمل commit دوري.
     - cron: '*/30 * * * *'
   workflow_dispatch:
     inputs:

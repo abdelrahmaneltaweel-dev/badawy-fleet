@@ -11,6 +11,7 @@ import type {
   VehicleCandidate
 } from '@badawi/logic';
 import { auditService } from './audit';
+import { appRepository } from './repository';
 
 const VEHICLES_STORAGE_KEY = 'badawi_entities_vehicles_v1';
 const DRIVERS_STORAGE_KEY = 'badawi_entities_drivers_v1';
@@ -121,6 +122,11 @@ export const entitiesService = {
 
     save(VEHICLES_STORAGE_KEY, list);
     notify();
+
+    // Persist to real Firestore / active repository
+    appRepository.create('vehicles', savedVehicle.vehicleId, savedVehicle).catch((err) => {
+      console.warn('[EntitiesService] Failed to persist vehicle to repository:', err);
+    });
 
     // ADR-018: Record audit trail with before/after and onBehalfOf if active
     auditService.recordAction({
@@ -289,6 +295,22 @@ export const entitiesService = {
       before: active ? { vehicleId, driverId: active.driverId, startDate: active.startDate } : null,
       after: { vehicleId, driverId, startDate }
     });
+    // Persist to repository
+    appRepository.create('assignments', newAssignment.assignmentId, newAssignment as any).catch(() => {});
+  },
+
+  async syncFromRepository(): Promise<boolean> {
+    try {
+      const remoteVehicles = await appRepository.list<VehicleDocument>('vehicles');
+      if (remoteVehicles && remoteVehicles.length > 0) {
+        save(VEHICLES_STORAGE_KEY, remoteVehicles);
+        notify();
+        return true;
+      }
+    } catch (e) {
+      console.warn('[EntitiesService] syncFromRepository error:', e);
+    }
+    return false;
   },
 
   subscribe(listener: EntityChangeListener): () => void {
