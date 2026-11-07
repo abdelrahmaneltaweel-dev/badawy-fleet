@@ -5,16 +5,20 @@ import {
   type SiteRecord,
   type AssignmentRecord,
   type VehicleType,
+  type IssueDocument,
   parseVehiclesFromExcelPaste,
   type BulkImportParseResult
 } from '@badawi/logic';
 import { entitiesService } from '../services/entities';
 import { authService } from '../services/auth';
+import { issuesService } from '../services/issues';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { Field } from '../components/Field';
 import { Select } from '../components/Select';
 import { Table, StatusBadge } from '../components/Table';
+import { GpsIssuesModal } from '../components/GpsIssuesModal';
+import { VehicleDetailsModal } from '../components/VehicleDetailsModal';
 import { showToast } from '../components/Toast';
 
 export default function Fleet() {
@@ -23,6 +27,7 @@ export default function Fleet() {
   const [drivers, setDrivers] = useState<DriverRecord[]>([]);
   const [sites, setSites] = useState<SiteRecord[]>([]);
   const [assignments, setAssignments] = useState<AssignmentRecord[]>([]);
+  const [issuesList, setIssuesList] = useState<IssueDocument[]>(() => issuesService.getIssues());
 
   // Filtering
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -32,6 +37,9 @@ export default function Fleet() {
   const [showAddVehicleModal, setShowAddVehicleModal] = useState(false);
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState<VehicleDocument | null>(null);
+  const [showIssuesModal, setShowIssuesModal] = useState(false);
+  const [issueModalVehicleId, setIssueModalVehicleId] = useState<string | undefined>(undefined);
+  const [selectedVehicleForDetails, setSelectedVehicleForDetails] = useState<string | null>(null);
 
   // Form states
   const [newVehicleId, setNewVehicleId] = useState('');
@@ -52,10 +60,16 @@ export default function Fleet() {
     setDrivers(entitiesService.getDrivers());
     setSites(entitiesService.getSites());
     setAssignments(entitiesService.getAssignments());
+    setIssuesList(issuesService.getIssues());
   };
 
   useEffect(() => {
-    return entitiesService.subscribe(refresh);
+    const unsubEntities = entitiesService.subscribe(refresh);
+    const unsubIssues = issuesService.subscribe((list) => setIssuesList(list));
+    return () => {
+      unsubEntities();
+      unsubIssues();
+    };
   }, []);
 
   const handleSaveVehicle = (e: Event) => {
@@ -144,16 +158,27 @@ export default function Fleet() {
         title="إدارة الأسطول والكيانات (Fleet & Entities)"
         subtitle={`إجمالي الأسطول: ${vehicles.length} عربية مسجلة · إسناد بتواريخ واستيراد جماعي (ADR-016, ADR-047)`}
         action={
-          canManage && (
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              <Button variant="secondary" onClick={() => setShowBulkModal(true)}>
-                📋 استيراد جماعي من Excel
-              </Button>
-              <Button variant="primary" onClick={() => setShowAddVehicleModal(true)}>
-                ➕ إضافة عربية جديدة
-              </Button>
-            </div>
-          )
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIssueModalVehicleId(undefined);
+                setShowIssuesModal(true);
+              }}
+            >
+              🛰️ مشاكل GPS ({issuesList.filter((i) => i.status === 'open' || i.status === 'contacted').length})
+            </Button>
+            {canManage && (
+              <>
+                <Button variant="secondary" onClick={() => setShowBulkModal(true)}>
+                  📋 استيراد جماعي من Excel
+                </Button>
+                <Button variant="primary" onClick={() => setShowAddVehicleModal(true)}>
+                  ➕ إضافة عربية جديدة
+                </Button>
+              </>
+            )}
+          </div>
         }
       >
         <p style={{ margin: 0, color: 'var(--mute)', fontSize: '0.86rem' }}>
@@ -227,7 +252,7 @@ export default function Fleet() {
                 <th>الموقع الحالي</th>
                 <th>جهاز GPS</th>
                 <th>الحالة</th>
-                {canManage && <th>الإجراءات</th>}
+                <th>الإجراءات</th>
               </tr>
             </thead>
             <tbody>
@@ -239,8 +264,24 @@ export default function Fleet() {
                 return (
                   <tr key={v.vehicleId}>
                     <td className="col-sticky">
-                      <b>{v.name}</b>
-                      <div style={{ fontSize: '0.74rem', color: 'var(--mute)' }}>#{v.vehicleId}</div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedVehicleForDetails(v.vehicleId)}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          padding: 0,
+                          textAlign: 'right',
+                          cursor: 'pointer',
+                          display: 'block'
+                        }}
+                        title="انقر لفتح شاشة تفاصيل العربية والحالة اللحظية (T6.3)"
+                      >
+                        <b style={{ color: 'var(--accent)', textDecoration: 'underline', textUnderlineOffset: '2px' }}>
+                          {v.name}
+                        </b>
+                        <div style={{ fontSize: '0.74rem', color: 'var(--mute)' }}>#{v.vehicleId} 🔍</div>
+                      </button>
                     </td>
                     <td style={{ fontWeight: 600 }}>{v.plateNumber}</td>
                     <td>
@@ -263,11 +304,49 @@ export default function Fleet() {
                       {v.gpsDeviceId || '—'}
                     </td>
                     <td>
-                      <StatusBadge status={v.status} />
+                      {(() => {
+                        const activeIssue = issuesList.find(
+                          (i) => i.vehicleId === v.vehicleId && (i.status === 'open' || i.status === 'contacted')
+                        );
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <StatusBadge status={v.status} />
+                            {activeIssue && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIssueModalVehicleId(v.vehicleId);
+                                  setShowIssuesModal(true);
+                                }}
+                                style={{
+                                  fontSize: '0.72rem',
+                                  padding: '2px 6px',
+                                  borderRadius: 'var(--r-xs)',
+                                  background: activeIssue.status === 'open' ? 'rgba(198, 40, 40, 0.12)' : 'rgba(239, 108, 0, 0.12)',
+                                  color: activeIssue.status === 'open' ? 'var(--bad)' : 'var(--warn)',
+                                  border: `1px solid ${activeIssue.status === 'open' ? 'var(--bad)' : 'var(--warn)'}`,
+                                  cursor: 'pointer',
+                                  fontWeight: 600
+                                }}
+                                title={`انقر لمتابعة مشكلة GPS (${activeIssue.status === 'open' ? 'مفتوحة' : 'تم التواصل'})`}
+                              >
+                                ⚠️ {activeIssue.status === 'open' ? 'مشكلة GPS' : 'تم التواصل'}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </td>
-                    {canManage && (
-                      <td>
-                        <div style={{ display: 'flex', gap: '6px' }}>
+                    <td>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        <Button
+                          variant="outline"
+                          style={{ minHeight: '28px', padding: '2px 8px', fontSize: '0.76rem' }}
+                          onClick={() => setSelectedVehicleForDetails(v.vehicleId)}
+                        >
+                          🔍 تفاصيل
+                        </Button>
+                        {canManage && (
                           <Button
                             variant="secondary"
                             style={{ minHeight: '28px', padding: '2px 8px', fontSize: '0.76rem' }}
@@ -278,9 +357,9 @@ export default function Fleet() {
                           >
                             إسناد سائق
                           </Button>
-                        </div>
-                      </td>
-                    )}
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -328,7 +407,23 @@ export default function Fleet() {
                   </td>
                   <td>
                     {assignedVeh ? (
-                      <b style={{ color: 'var(--acc)' }}>{assignedVeh.name} ({assignedVeh.plateNumber})</b>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedVehicleForDetails(assignedVeh.vehicleId)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer',
+                          color: 'var(--accent)',
+                          fontWeight: 700,
+                          textAlign: 'right',
+                          textDecoration: 'underline'
+                        }}
+                        title="انقر لفتح تفاصيل العربية"
+                      >
+                        {assignedVeh.name} ({assignedVeh.plateNumber}) 🔍
+                      </button>
                     ) : (
                       <span style={{ color: 'var(--mute)' }}>لا يوجد</span>
                     )}
@@ -404,7 +499,23 @@ export default function Fleet() {
               return (
                 <tr key={a.assignmentId}>
                   <td className="col-sticky">
-                    <b>{veh?.name || a.vehicleId}</b>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedVehicleForDetails(a.vehicleId)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                        color: 'var(--accent)',
+                        fontWeight: 700,
+                        textAlign: 'right',
+                        textDecoration: 'underline'
+                      }}
+                      title="انقر لفتح تفاصيل العربية"
+                    >
+                      {veh?.name || `عربية ${a.vehicleId}`} 🔍
+                    </button>
                   </td>
                   <td>{drv?.name || a.driverId}</td>
                   <td>{a.startDate}</td>
@@ -624,6 +735,23 @@ export default function Fleet() {
           </div>
         </div>
       )}
+      {/* GPS Issues Management Modal (ADR-019 & ADR-011) */}
+      <GpsIssuesModal
+        isOpen={showIssuesModal}
+        onClose={() => {
+          setShowIssuesModal(false);
+          setIssueModalVehicleId(undefined);
+        }}
+        initialVehicleId={issueModalVehicleId}
+      />
+
+      {/* Vehicle Details & Telemetry Inspection Modal (T6.3, ADR-016, ADR-019, ADR-018) */}
+      <VehicleDetailsModal
+        isOpen={!!selectedVehicleForDetails}
+        vehicleId={selectedVehicleForDetails}
+        onClose={() => setSelectedVehicleForDetails(null)}
+        onVehicleUpdated={refresh}
+      />
     </div>
   );
 }

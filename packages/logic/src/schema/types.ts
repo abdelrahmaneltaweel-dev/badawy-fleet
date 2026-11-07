@@ -117,6 +117,24 @@ export interface IssueDocument extends BaseDocument {
   status: IssueStatus;
   resolvedAt: string | null;
   notes: string | null;
+  // Lifecycle & Driver details (T6.2, ADR-019, ADR-011)
+  driverId?: string | null;
+  driverName?: string | null;
+  driverPhone?: string | null;
+  contactedAt?: string | null;
+  contactedBy?: string | null;
+  contactNotes?: string | null;
+  resolvedBy?: string | null;
+  resolutionNotes?: string | null;
+  openedBy?: string; // 'system' | user UID
+  offlineMinutes?: number;
+  lastLocationName?: string;
+  history?: Array<{
+    status: IssueStatus;
+    timestamp: string;
+    actor: string;
+    notes?: string;
+  }>;
 }
 
 /**
@@ -269,6 +287,12 @@ export interface IssueSnapshotItem {
   detectedAt: string;
   status: IssueStatus;
   notes: string | null;
+  driverId?: string | null;
+  driverName?: string | null;
+  driverPhone?: string | null;
+  contactedAt?: string | null;
+  resolvedAt?: string | null;
+  offlineMinutes?: number;
 }
 
 export interface DailySnapshotDocument extends BaseDocument {
