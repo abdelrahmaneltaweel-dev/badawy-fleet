@@ -76,7 +76,8 @@ const COLLECTION_TITLES_AR: Record<CollectionName, string> = {
   petro_requests: 'طلبات العهدة (Petro)',
   settings: 'سجل الإعدادات',
   audit_logs: 'سجل المراجعة',
-  period_snapshots: 'لقطات الفترات'
+  period_snapshots: 'لقطات الفترات',
+  daily_snapshots: 'لقطات اليوم المجمعة'
 };
 
 /**

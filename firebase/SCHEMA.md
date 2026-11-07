@@ -73,3 +73,18 @@
 ### `period_snapshots` (ADR-036, ADR-038)
 - **المعرف:** `periodId` (مثال: `"2026-10"`)
 - **الحقول:** `closedAt`, `closedBy`, `version`, `frozen`, `reason`, `data`, `schemaVersion`.
+
+### `daily_snapshots` (ADR-004, D-059, T5.6)
+- **المعرف:** `snapshotId` (مثال: `"2026-11-06"`)
+- **الوصف:** لقطة مجمعة مسبقة الاحتساب لكامل الأسطول (قراءة واحدة 1 Read للشاشات بدلاً من 130 قراءة، وتُستبدل يومياً لحماية حصص Spark المجانية).
+- **الحقول:**
+  - `snapshotId`: `string`
+  - `date`: `string` (YYYY-MM-DD)
+  - `fleetTotals`: `{ totalVehicles, onlineCount, offlineCount, idleCount, totalTrips, tractorTrips, truckTrips, privateTrips, totalStops, maintenanceStops, activeIssuesCount }`
+  - `vehicles`: قائمة مختصرة لكل عربية `{ vehicleId, name, type, plateNumber, status, tripsCount, stopsCount, firstMovement, lastMovement, lastLocationName, driverId, driverName, matchingStatus, hasIssue, issueType, dataSource, updatedAt }`
+  - `recentIssues`: قائمة مختصرة بالمشاكل الحالية
+  - `checksum`: بصمة FNV-1a للتحقق من التغيير وتخطي الكتابة عند عدم التغير
+  - `rulesVersion`: `string`
+  - `dataSource`: `'traccar' | 'excel'`
+  - `schemaVersion`: `number` (1)
+  - `createdAt`, `updatedAt`: `string` (ISO)

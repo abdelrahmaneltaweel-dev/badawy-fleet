@@ -18,7 +18,8 @@ import type {
   IngestionOptions,
   IngestionExecutionResult
 } from './types.js';
-import type { DailySummaryDocument, IssueDocument, VehicleType, IssueType, DataSourceType } from '../schema/types.js';
+import type { DailySummaryDocument, IssueDocument, VehicleType, IssueType, DataSourceType, DailySnapshotDocument } from '../schema/types.js';
+import { buildFleetDailySnapshot, saveFleetSnapshot } from './snapshot.js';
 
 import { SPARK_DAILY_WRITE_LIMIT } from './budget.js';
 
@@ -244,6 +245,7 @@ export class IngestionManager {
 
     const vehicleResults: VehicleSyncResult[] = [];
     const createdSummaries: DailySummaryDocument[] = [];
+    const allSummaries: DailySummaryDocument[] = [];
     const createdIssues: IssueDocument[] = [];
 
     let writesExecuted = 0;
@@ -280,6 +282,7 @@ export class IngestionManager {
         const changed = hasSummaryChanged(prevChecksum, newChecksum, options.forceAllWrites);
 
         const summaryDoc = convertAnalysisToDailySummary(analysis, target.driverId);
+        allSummaries.push(summaryDoc);
         const issueDoc = detectGpsIssueFromAnalysis(analysis);
 
         if (changed) {
@@ -342,7 +345,27 @@ export class IngestionManager {
       ? Math.round((writesSkipped / totalPotentialWrites) * 1000) / 10
       : 100;
 
-    // 5. Update and persist sync state
+    // 5. Build and save Daily Aggregated Snapshot (T5.6: 1-read dashboard/fleet snapshot)
+    const dailySnapshot: DailySnapshotDocument = buildFleetDailySnapshot({
+      operationalDate,
+      summaries: allSummaries,
+      targets,
+      issues: createdIssues,
+      rulesVersion: this.analysisConfig?.rulesVersion || '1.0.0',
+      dataSource: 'traccar',
+      referenceNow
+    });
+
+    if (!options.dryRun) {
+      const snapResult = await saveFleetSnapshot(this.repository, dailySnapshot, {
+        forceWrite: options.forceAllWrites
+      });
+      if (snapResult.written) {
+        writesExecuted++;
+      }
+    }
+
+    // 6. Update and persist sync state
     const nextSyncState: SyncStateDocument = {
       schemaVersion: 1,
       lastSyncTime: newestPingTime,
@@ -387,7 +410,9 @@ export class IngestionManager {
       vehicleResults,
       syncState: nextSyncState,
       createdSummaries,
-      createdIssues
+      createdIssues,
+      dailySnapshot
     };
   }
 }
+

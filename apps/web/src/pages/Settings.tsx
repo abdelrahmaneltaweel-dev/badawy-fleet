@@ -6,7 +6,11 @@ import {
   type SettingDefinition,
   type CuratedFontId,
   type UserPersonalPreferences,
-  calculateWriteBudget
+  calculateWriteBudget,
+  DASHBOARD_CARDS_CATALOG,
+  CANONICAL_DASHBOARD_CARDS_ORDER,
+  moveDashboardCard,
+  type DashboardCardId
 } from '@badawi/logic';
 import { settingsService } from '../services/settings';
 import { appearanceService } from '../services/appearance';
@@ -364,9 +368,171 @@ export default function Settings() {
         })}
       </div>
 
+      {/* T6.1 / ADR-059: Interactive Visual Dashboard Cards Order & Visibility Manager */}
+      {activeSection === 'navigation_dashboard' && (() => {
+        const rawOrderStr = typeof effectiveValues['dashboard_cards_order'] === 'string'
+          ? (effectiveValues['dashboard_cards_order'] as string)
+          : CANONICAL_DASHBOARD_CARDS_ORDER.join(',');
+
+        const currentOrderList = rawOrderStr
+          .split(',')
+          .map((s) => s.trim())
+          .filter((id): id is DashboardCardId => id in DASHBOARD_CARDS_CATALOG);
+
+        for (const c of CANONICAL_DASHBOARD_CARDS_ORDER) {
+          if (!currentOrderList.includes(c)) currentOrderList.push(c);
+        }
+
+        const handleMove = (cardId: DashboardCardId, direction: 'up' | 'down') => {
+          if (!canManageSettings) return;
+          const updated = moveDashboardCard(rawOrderStr, cardId, direction);
+          settingsService.updateDraftValue('dashboard_cards_order', updated);
+        };
+
+        const handleToggle = (meta: (typeof DASHBOARD_CARDS_CATALOG)[DashboardCardId], checked: boolean) => {
+          if (!canManageSettings) return;
+          settingsService.updateDraftValue(meta.settingKey, checked);
+        };
+
+        const handleResetOrder = () => {
+          if (!canManageSettings) return;
+          settingsService.updateDraftValue(
+            'dashboard_cards_order',
+            CANONICAL_DASHBOARD_CARDS_ORDER.join(',')
+          );
+          for (const c of CANONICAL_DASHBOARD_CARDS_ORDER) {
+            settingsService.updateDraftValue(DASHBOARD_CARDS_CATALOG[c].settingKey, true);
+          }
+          showToast('تمت استعادة الترتيب والتفعيل الافتراضي لجميع البطاقات الست');
+        };
+
+        return (
+          <Card
+            title="إدارة وترتيب بطاقات الداشبورد الست (ADR-059 & Decision D-059)"
+            subtitle="تحكّم في إظهار أو إخفاء أي بطاقة وإعادة ترتيب أولوية ظهورها بالأسهم 🔼 و 🔽 مع مسودة ونشر فوري."
+            action={
+              canManageSettings ? (
+                <Button variant="outline" onClick={handleResetOrder} style={{ fontSize: '0.78rem', padding: '4px 10px' }}>
+                  ↺ استعادة الترتيب الافتراضي
+                </Button>
+              ) : undefined
+            }
+          >
+            <div style={{ display: 'grid', gap: '8px' }}>
+              {currentOrderList.map((cardId, index) => {
+                const meta = DASHBOARD_CARDS_CATALOG[cardId];
+                if (!meta) return null;
+
+                const isVisible = effectiveValues[meta.settingKey] !== undefined
+                  ? Boolean(effectiveValues[meta.settingKey])
+                  : meta.defaultVisible;
+
+                const isFirst = index === 0;
+                const isLast = index === currentOrderList.length - 1;
+
+                return (
+                  <div
+                    key={cardId}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '12px 14px',
+                      background: isVisible ? 'var(--card)' : 'var(--soft)',
+                      opacity: isVisible ? 1 : 0.65,
+                      border: '1px solid var(--line)',
+                      borderRadius: 'var(--r-sm)',
+                      gap: '12px',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                      <span
+                        style={{
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          width: '24px',
+                          height: '24px',
+                          display: 'grid',
+                          placeItems: 'center',
+                          borderRadius: 'var(--r-full)',
+                          background: 'var(--soft)',
+                          color: 'var(--mute)'
+                        }}
+                      >
+                        #{index + 1}
+                      </span>
+                      <span style={{ fontSize: '1.4rem' }}>{meta.icon}</span>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <b style={{ fontSize: '0.92rem', color: 'var(--ink)' }}>{meta.title}</b>
+                          <span
+                            style={{
+                              fontSize: '0.7rem',
+                              padding: '1px 6px',
+                              borderRadius: 'var(--r-full)',
+                              background: isVisible ? 'var(--ok-soft)' : 'var(--soft)',
+                              color: isVisible ? 'var(--ok)' : 'var(--mute)',
+                              fontWeight: 600
+                            }}
+                          >
+                            {isVisible ? 'معروضة' : 'مخفية'}
+                          </span>
+                        </div>
+                        <small style={{ color: 'var(--mute)', fontSize: '0.78rem', display: 'block' }}>
+                          {meta.subtitle}
+                        </small>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <Button
+                          variant="outline"
+                          disabled={!canManageSettings || isFirst}
+                          onClick={() => handleMove(cardId, 'up')}
+                          style={{ minHeight: '30px', padding: '2px 8px', fontSize: '0.8rem' }}
+                          title="تحريك لأعلى"
+                        >
+                          🔼
+                        </Button>
+                        <Button
+                          variant="outline"
+                          disabled={!canManageSettings || isLast}
+                          onClick={() => handleMove(cardId, 'down')}
+                          style={{ minHeight: '30px', padding: '2px 8px', fontSize: '0.8rem' }}
+                          title="تحريك لأسفل"
+                        >
+                          🔽
+                        </Button>
+                      </div>
+
+                      <div style={{ marginRight: '6px' }}>
+                        <Switch
+                          checked={isVisible}
+                          disabled={!canManageSettings}
+                          onChange={(checked) => handleToggle(meta, checked)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        );
+      })()}
+
       {/* Active Section Auto-Generated Fields */}
       <div style={{ display: 'grid', gap: '12px' }}>
-        {currentSectionSettings.map((def) => {
+        {currentSectionSettings
+          .filter((def) => {
+            if (activeSection === 'navigation_dashboard') {
+              return !def.key.startsWith('dashboard_show_') && def.key !== 'dashboard_cards_order';
+            }
+            return true;
+          })
+          .map((def) => {
           const currentValue = effectiveValues[def.key] ?? def.defaultValue;
           const isDraftModified = settingsService.getDraftValues()[def.key] !== undefined;
 

@@ -93,13 +93,73 @@ export const SETTINGS_REGISTRY: SettingDefinition[] = [
     ]
   },
 
-  // 3. Navigation & Dashboard (التنقل والداشبورد) - ADR-059
+  // 3. Navigation & Dashboard (التنقل والداشبورد) - ADR-059 & Decision D-059
+  {
+    key: 'dashboard_cards_order',
+    section: 'navigation_dashboard',
+    type: 'string',
+    label: 'ترتيب بطاقات الداشبورد الست',
+    description: 'الترتيب المعتمد لظهور البطاقات الست الرئيسية باللوحة (معرفات مفصولة بفواصل)',
+    defaultValue: 'fleet_status,gps_issues,inquiries_pending,tractor_hauls,truck_trips,petro_wallet',
+    riskLevel: 'visual',
+    scope: 'global'
+  },
+  {
+    key: 'dashboard_show_fleet_status',
+    section: 'navigation_dashboard',
+    type: 'boolean',
+    label: 'عرض بطاقة حالة الأسطول الآن',
+    description: 'إظهار بطاقة جاهزية وحالة الأسطول (Online / Offline / متوقفة) مقسمة حسب النوع',
+    defaultValue: true,
+    riskLevel: 'visual',
+    scope: 'global'
+  },
+  {
+    key: 'dashboard_show_gps_issues',
+    section: 'navigation_dashboard',
+    type: 'boolean',
+    label: 'عرض بطاقة مشاكل GPS المفتوحة',
+    description: 'إظهار بطاقة مشاكل التتبع المفتوحة والمدة وأزرار الاتصال والواتساب السريعة للسائق',
+    defaultValue: true,
+    riskLevel: 'visual',
+    scope: 'global'
+  },
+  {
+    key: 'dashboard_show_inquiries',
+    section: 'navigation_dashboard',
+    type: 'boolean',
+    label: 'عرض بطاقة الاستفسارات والمطابقة',
+    description: 'إظهار بطاقة الاستفسارات المعلقة من السائقين ومحطة الخلاطة وأمن الجراج',
+    defaultValue: true,
+    riskLevel: 'visual',
+    scope: 'global'
+  },
+  {
+    key: 'dashboard_show_tractor_hauls',
+    section: 'navigation_dashboard',
+    type: 'boolean',
+    label: 'عرض بطاقة نقلات الجرارات الـ 10',
+    description: 'إظهار بطاقة نقلات الأمس للجرارات والمطابقة الثلاثية (GPS ↔ خلاطة ↔ جراج)',
+    defaultValue: true,
+    riskLevel: 'visual',
+    scope: 'global'
+  },
+  {
+    key: 'dashboard_show_truck_trips',
+    section: 'navigation_dashboard',
+    type: 'boolean',
+    label: 'عرض بطاقة مشاوير النقل والملاكي',
+    description: 'إظهار بطاقة مشاوير وزيارات عربيات النقل والملاكي وإجمالي الوقفات اليومية',
+    defaultValue: true,
+    riskLevel: 'visual',
+    scope: 'global'
+  },
   {
     key: 'dashboard_show_wallet_card',
     section: 'navigation_dashboard',
     type: 'boolean',
     label: 'عرض بطاقة محفظة Petro في الداشبورد',
-    description: 'إظهار رصيد ومؤشر محفظة الوقود في بطاقات الداشبورد الرئيسية',
+    description: 'إظهار رصيد ومؤشر محفظة الوقود وتنبيه الحد الأدنى للعهدة (25,000 ج.م)',
     defaultValue: true,
     riskLevel: 'visual',
     scope: 'global'

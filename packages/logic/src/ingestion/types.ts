@@ -78,5 +78,7 @@ export interface IngestionExecutionResult {
   syncState: SyncStateDocument;
   createdSummaries: DailySummaryDocument[];
   createdIssues: IssueDocument[];
+  dailySnapshot?: import('../schema/types.js').DailySnapshotDocument;
   error?: string;
 }
+

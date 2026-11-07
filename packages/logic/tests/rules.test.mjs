@@ -2,9 +2,14 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 describe('Firestore Security Rules Matrix & Safety Checks (T3.2)', () => {
-  const rulesPath = path.resolve(process.cwd(), '../../firebase/firestore.rules');
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const candidate1 = path.resolve(__dirname, '../../../firebase/firestore.rules');
+  const candidate2 = path.resolve(process.cwd(), 'firebase/firestore.rules');
+  const candidate3 = path.resolve(process.cwd(), '../../firebase/firestore.rules');
+  const rulesPath = fs.existsSync(candidate1) ? candidate1 : (fs.existsSync(candidate2) ? candidate2 : candidate3);
   const rulesContent = fs.readFileSync(rulesPath, 'utf8');
 
   it('should have firestore.rules file existing and using version 2', () => {
@@ -42,5 +47,10 @@ describe('Firestore Security Rules Matrix & Safety Checks (T3.2)', () => {
   it('should restrict driver profile reading so drivers cannot inspect others (ADR-013)', () => {
     assert.ok(rulesContent.includes('match /drivers/{driverId}'));
     assert.ok(rulesContent.includes('isDriver() && isUser(driverId)'));
+  });
+
+  it('should protect daily snapshots with authenticated read and super admin write (T5.6 / ADR-004)', () => {
+    assert.ok(rulesContent.includes('match /daily_snapshots/{snapshotId}'));
+    assert.ok(rulesContent.includes('allow read: if isAuthenticated();'));
   });
 });

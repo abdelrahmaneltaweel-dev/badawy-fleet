@@ -99,6 +99,12 @@ export function validateDocument(
         errors.push('Period snapshot requires periodId and frozen flag');
       }
       break;
+
+    case 'daily_snapshots':
+      if (!data['snapshotId'] || !data['date'] || !data['fleetTotals'] || !Array.isArray(data['vehicles'])) {
+        errors.push('Daily snapshot requires snapshotId, date, fleetTotals, and vehicles array');
+      }
+      break;
   }
 
   return {

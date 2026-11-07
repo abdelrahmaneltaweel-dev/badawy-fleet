@@ -98,8 +98,8 @@ test('T5.2.2: First Run Ingestion — Writes Summaries & Sync State to Repositor
 
   assert.equal(result.ok, true);
   assert.equal(result.stats.vehiclesProcessed, 2);
-  // 2 summaries + 1 sync_state = 3 writes
-  assert.equal(result.stats.writesExecuted, 3);
+  // 2 summaries + 1 snapshot (T5.6) + 1 sync_state = 4 writes
+  assert.equal(result.stats.writesExecuted, 4);
   assert.equal(result.stats.writesSkipped, 0);
 
   // Check stored documents in repo
@@ -133,12 +133,12 @@ test('T5.2.3: Zero-Write Optimization on Unchanged Runs (ADR-004 Quota Protectio
     { deviceId: 2, vehicleId: '118', vehicleType: 'tractor' }
   ];
 
-  // Run 1: First sync writes 2 summaries + 1 state
+  // Run 1: First sync writes 2 summaries + 1 snapshot + 1 state
   const run1 = await manager.runIngestion(targets, {
     operationalDate: '2026-11-06',
     referenceNow: '2026-11-06T07:35:00Z'
   });
-  assert.equal(run1.stats.writesExecuted, 3);
+  assert.equal(run1.stats.writesExecuted, 4);
 
   // Run 2: Exact same points returned (vehicles did not move)
   const run2 = await manager.runIngestion(targets, {
@@ -203,7 +203,7 @@ test('T5.2.4: Partial Update (Diff Check) Writes ONLY Changed Vehicles', async (
   assert.equal(result124?.changed, false);
 
   assert.equal(run2.stats.writesSkipped, 2);
-  assert.equal(run2.stats.writesExecuted, 2); // 1 summary (118) + 1 state
+  assert.equal(run2.stats.writesExecuted, 2); // 1 summary (118) + 1 sync_state (snapshot skipped since macro totals unchanged)
 });
 
 test('T5.2.5: Resilient lastSyncTime Monotonic Tracking & Cron Jitter Recovery', async () => {
@@ -246,12 +246,12 @@ test('T5.2.6: Spark Write Budget Protection — Fleet of 65 Stays Far Below 20,0
 
   const manager = new IngestionManager(client, repo);
 
-  // Run 1: Morning initialization (65 writes + 1 state = 66 writes)
+  // Run 1: Morning initialization (65 summaries + 1 snapshot + 1 state = 67 writes)
   const morningRun = await manager.runIngestion(targets, {
     operationalDate: '2026-11-06',
     referenceNow: '2026-11-06T07:15:00Z'
   });
-  assert.equal(morningRun.stats.writesExecuted, 66);
+  assert.equal(morningRun.stats.writesExecuted, 67);
 
   // Simulate 23 subsequent runs throughout the day (every hour) where only 5 vehicles move per hour
   let totalDailyWrites = morningRun.stats.writesExecuted;
