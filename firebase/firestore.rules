@@ -91,8 +91,14 @@ service cloud.firestore {
     }
 
     // 6. Issues: GPS issues managed by Super Admin / Worker (ADR-019)
+    // Driver can only read issues assigned to their vehicle or driver profile
     match /issues/{issueId} {
-      allow read: if isAuthenticated();
+      allow read: if isSuperAdmin() || isManagement() || isGarageSecurity() || isMixerManager()
+                  || (isDriver() && (
+                    resource.data.driverId == request.auth.uid ||
+                    (request.auth.token.driverId != null && resource.data.driverId == request.auth.token.driverId) ||
+                    (request.auth.token.driverVehicleId != null && resource.data.vehicleId == request.auth.token.driverVehicleId)
+                  ));
       allow write: if isSuperAdmin();
     }
 
@@ -112,17 +118,26 @@ service cloud.firestore {
           (isDriver() && request.resource.data.source == 'driver')
         )
       );
+      // Field-level guard: author cannot alter source, enteredBy, or approval status (ADR-018, ADR-060)
       allow update: if isSuperAdmin() || (
         resource.data.enteredBy == request.auth.uid &&
         resource.data.approved == false &&
-        request.resource.data.approved == false
+        request.resource.data.approved == false &&
+        request.resource.data.enteredBy == resource.data.enteredBy &&
+        request.resource.data.source == resource.data.source &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['tripsCount', 'notes', 'details', 'updatedAt'])
       );
       allow delete: if isSuperAdmin();
     }
 
     // 8. Daily Summaries: Pre-calculated summaries by Worker/Super Admin (ADR-005, ADR-023)
     match /daily_summaries/{summaryId} {
-      allow read: if isAuthenticated();
+      allow read: if isSuperAdmin() || isManagement() || isMixerManager() || isGarageSecurity()
+                  || (isDriver() && (
+                    resource.data.driverId == request.auth.uid ||
+                    (request.auth.token.driverVehicleId != null && resource.data.vehicleId == request.auth.token.driverVehicleId)
+                  ));
       allow write: if isSuperAdmin();
     }
 
@@ -156,8 +171,9 @@ service cloud.firestore {
     }
 
     // 13. Daily Snapshots: Aggregated fleet view for 1-read dashboard/fleet (T5.6, ADR-004)
+    // Non-driver operational staff and management only
     match /daily_snapshots/{snapshotId} {
-      allow read: if isAuthenticated();
+      allow read: if isSuperAdmin() || isManagement() || isMixerManager() || isGarageSecurity();
       allow write: if isSuperAdmin();
     }
   }

@@ -5,7 +5,7 @@
   "type": "module",
   "dependencies": {
     "firebase-admin": "^12.7.0",
-    "read-excel-file": "^5.8.6",
+    "read-excel-file": "^9.3.14",
     "write-excel-file": "^2.0.4"
   }
 }

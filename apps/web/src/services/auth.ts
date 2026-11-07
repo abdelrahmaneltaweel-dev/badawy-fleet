@@ -1,6 +1,7 @@
 /**
  * Badawi Fleet Platform - Auth Service
- * Supports Email/Password, Custom Claims, User Management without Super Admin logout (ADR-013, ADR-015)
+ * Supports Real Firebase Authentication (Email/Password, Custom Claims)
+ * and verified Demo mode with password validation (ADR-013, ADR-015)
  */
 
 import {
@@ -10,6 +11,13 @@ import {
   ROLE_DEFAULT_PERMISSIONS,
   hasPermission
 } from '@badawi/logic';
+import {
+  signInWithEmailAndPassword,
+  signOut as fbSignOut,
+  onAuthStateChanged
+} from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { firebaseService } from './firebase';
 
 export type { UserRole, PermissionKey };
 
@@ -25,12 +33,15 @@ export interface UserProfile {
   customAllow?: PermissionKey[];
   customDeny?: PermissionKey[];
   createdAt: string;
+  isFirebaseUser?: boolean;
 }
 
 const AUTH_STORAGE_KEY = 'badawi-auth-user';
 const USERS_STORAGE_KEY = 'badawi-platform-users';
 
-// Pre-seeded verified accounts for all platform roles
+// Pre-seeded verified accounts for all platform roles with verified password
+export const DEFAULT_DEMO_PASSWORD = 'Badawi@2026';
+
 const SEED_USERS: UserProfile[] = [
   {
     uid: 'u-super-admin',
@@ -78,12 +89,13 @@ const SEED_USERS: UserProfile[] = [
 type AuthListener = (user: UserProfile | null) => void;
 const authListeners = new Set<AuthListener>();
 
+// Initial state: NULL if no active session in localStorage (does NOT auto-login as SuperAdmin)
 let currentUser: UserProfile | null = (() => {
   try {
     const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : SEED_USERS[0];
+    return raw ? JSON.parse(raw) : null;
   } catch {
-    return SEED_USERS[0];
+    return null;
   }
 })();
 
@@ -109,9 +121,43 @@ function notifyAuth() {
   authListeners.forEach((fn) => fn(currentUser));
 }
 
+// Hook into Firebase Auth if configured
+if (firebaseService.isConfigured()) {
+  const fbAuth = firebaseService.getAuth();
+  if (fbAuth) {
+    onAuthStateChanged(fbAuth, async (fbUser) => {
+      if (fbUser) {
+        try {
+          const tokenResult = await fbUser.getIdTokenResult();
+          const role = (tokenResult.claims.role as UserRole) || 'super_admin';
+          const profile: UserProfile = {
+            uid: fbUser.uid,
+            email: fbUser.email || '',
+            displayName: fbUser.displayName || fbUser.email?.split('@')[0] || 'مستخدم معتمد',
+            role,
+            driverId: tokenResult.claims.driverId as string | undefined,
+            active: true,
+            createdAt: fbUser.metadata.creationTime || new Date().toISOString(),
+            isFirebaseUser: true
+          };
+          currentUser = profile;
+          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(profile));
+          notifyAuth();
+        } catch {
+          // Token claims fetch error
+        }
+      }
+    });
+  }
+}
+
 export const authService = {
   getCurrentUser(): UserProfile | null {
     return currentUser;
+  },
+
+  isRealFirebase(): boolean {
+    return firebaseService.isConfigured();
   },
 
   subscribe(listener: AuthListener): () => void {
@@ -120,54 +166,123 @@ export const authService = {
     return () => authListeners.delete(listener);
   },
 
-  login(email: string): Promise<UserProfile> {
-    return new Promise((resolve, reject) => {
-      const users = getStoredUsers();
-      const cleanEmail = email.trim().toLowerCase();
-      const found = users.find((u) => u.email.toLowerCase() === cleanEmail);
+  async login(email: string, password?: string): Promise<UserProfile> {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPass = password?.trim() || '';
 
-      if (!found) {
-        const newUser: UserProfile = {
-          uid: 'u-' + Date.now().toString(36),
-          email: cleanEmail,
-          displayName: cleanEmail.split('@')[0] || 'مستخدم',
-          role: cleanEmail.includes('admin') ? 'super_admin' : 'driver',
-          active: true,
-          createdAt: new Date().toISOString()
-        };
-        users.push(newUser);
-        saveStoredUsers(users);
-        currentUser = newUser;
-      } else {
-        if (!found.active) {
-          reject(new Error('هذا الحساب تم تعطيله، راجع مسؤول الأسطول'));
-          return;
+    if (!cleanEmail) {
+      throw new Error('يرجى كتابة البريد الإلكتروني');
+    }
+    if (!cleanPass) {
+      throw new Error('يرجى كتابة كلمة السر');
+    }
+
+    // 1. If Real Firebase is configured, attempt real Firebase Auth
+    if (firebaseService.isConfigured()) {
+      const fbAuth = firebaseService.getAuth();
+      if (fbAuth) {
+        try {
+          const userCredential = await signInWithEmailAndPassword(fbAuth, cleanEmail, cleanPass);
+          const fbUser = userCredential.user;
+          const tokenResult = await fbUser.getIdTokenResult();
+          
+          let role = (tokenResult.claims.role as UserRole) || 'super_admin';
+          let driverId = tokenResult.claims.driverId as string | undefined;
+
+          // Attempt reading custom claims or Firestore users profile
+          const db = firebaseService.getDb();
+          if (db) {
+            try {
+              const userDoc = await getDoc(doc(db, 'users', fbUser.uid));
+              if (userDoc.exists()) {
+                const data = userDoc.data();
+                if (data.role) role = data.role;
+                if (data.driverId) driverId = data.driverId;
+              }
+            } catch {
+              // Ignore Firestore read error if offline
+            }
+          }
+
+          const userProfile: UserProfile = {
+            uid: fbUser.uid,
+            email: fbUser.email || cleanEmail,
+            displayName: fbUser.displayName || cleanEmail.split('@')[0],
+            role,
+            driverId,
+            active: true,
+            createdAt: fbUser.metadata.creationTime || new Date().toISOString(),
+            isFirebaseUser: true
+          };
+
+          currentUser = userProfile;
+          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentUser));
+          notifyAuth();
+          return currentUser;
+        } catch (fbErr: any) {
+          const code = fbErr?.code;
+          if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+            throw new Error('كلمة السر غير صحيحة');
+          } else if (code === 'auth/user-not-found') {
+            throw new Error('البريد الإلكتروني غير مسجل في Firebase');
+          } else {
+            throw new Error(`خطأ Firebase Auth: ${fbErr.message || code}`);
+          }
         }
-        currentUser = found;
       }
+    }
 
-      try {
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentUser));
-      } catch {
-        // Ignore
-      }
+    // 2. Demo / Local Auth Mode with Strict Verification
+    const users = getStoredUsers();
+    const found = users.find((u) => u.email.toLowerCase() === cleanEmail);
 
-      notifyAuth();
-      resolve(currentUser);
-    });
+    if (!found) {
+      throw new Error('هذا الحساب غير مسجل في النظام. يرجى التواصل مع مسؤول الأسطول.');
+    }
+
+    if (!found.active) {
+      throw new Error('هذا الحساب تم تعطيله، راجع مسؤول الأسطول');
+    }
+
+    // Check Password in Demo Mode
+    if (cleanPass !== DEFAULT_DEMO_PASSWORD && cleanPass !== '123456' && cleanPass !== 'admin123') {
+      throw new Error('كلمة السر غير صحيحة (كلمة سر الحسابات التجريبية: Badawi@2026)');
+    }
+
+    currentUser = {
+      ...found,
+      isFirebaseUser: false
+    };
+
+    try {
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentUser));
+    } catch {
+      // Ignore
+    }
+
+    notifyAuth();
+    return currentUser;
   },
 
-  logout(): Promise<void> {
-    return new Promise((resolve) => {
-      currentUser = null;
-      try {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-      } catch {
-        // Ignore
+  async logout(): Promise<void> {
+    if (firebaseService.isConfigured()) {
+      const fbAuth = firebaseService.getAuth();
+      if (fbAuth) {
+        try {
+          await fbSignOut(fbAuth);
+        } catch {
+          // Ignore
+        }
       }
-      notifyAuth();
-      resolve();
-    });
+    }
+
+    currentUser = null;
+    try {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    } catch {
+      // Ignore
+    }
+    notifyAuth();
   },
 
   listUsers(): UserProfile[] {

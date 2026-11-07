@@ -20,6 +20,7 @@ import { Table, StatusBadge } from '../components/Table';
 import { GpsIssuesModal } from '../components/GpsIssuesModal';
 import { VehicleDetailsModal } from '../components/VehicleDetailsModal';
 import { showToast } from '../components/Toast';
+import { traccarService } from '../services/traccar';
 
 export default function Fleet() {
   const [activeTab, setActiveTab] = useState<'vehicles' | 'drivers' | 'sites' | 'assignments'>('vehicles');
@@ -52,6 +53,7 @@ export default function Fleet() {
   // Bulk import state (ADR-047)
   const [bulkText, setBulkText] = useState('');
   const [parseResult, setParseResult] = useState<BulkImportParseResult | null>(null);
+  const [isSyncingTraccar, setIsSyncingTraccar] = useState(false);
 
   const canManage = authService.can('users.manage');
 
@@ -159,6 +161,24 @@ export default function Fleet() {
         subtitle={`إجمالي الأسطول: ${vehicles.length} عربية مسجلة · إسناد بتواريخ واستيراد جماعي (ADR-016, ADR-047)`}
         action={
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <Button
+              variant="outline"
+              loading={isSyncingTraccar}
+              onClick={async () => {
+                setIsSyncingTraccar(true);
+                try {
+                  const res = await traccarService.runLiveFleetSync();
+                  if (res.success) {
+                    await entitiesService.syncFromRepository();
+                    refresh();
+                  }
+                } finally {
+                  setIsSyncingTraccar(false);
+                }
+              }}
+            >
+              🔄 سحب Traccar الحي
+            </Button>
             <Button
               variant="outline"
               onClick={() => {
