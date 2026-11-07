@@ -92,7 +92,12 @@ export function convertAnalysisToDailySummary(
 }
 
 export function detectGpsIssueFromAnalysis(
-  analysis: ReturnType<typeof analyzeVehicleDailyData>
+  analysis: ReturnType<typeof analyzeVehicleDailyData>,
+  driverInfo?: {
+    driverId?: string | null;
+    driverName?: string | null;
+    driverPhone?: string | null;
+  }
 ): IssueDocument | null {
   const { gpsStatus } = analysis;
   if (!gpsStatus.hasActiveIssue) {
@@ -116,8 +121,22 @@ export function detectGpsIssueFromAnalysis(
     status: 'open',
     resolvedAt: null,
     notes: gpsStatus.issueDetails || `تم رصد مشكلة ${gpsStatus.status} تلقائياً أثناء المزامنة`,
+    driverId: driverInfo?.driverId || null,
+    driverName: driverInfo?.driverName || null,
+    driverPhone: driverInfo?.driverPhone || null,
+    offlineMinutes: gpsStatus.offlineMinutes,
+    lastLocationName: analysis.stops.length > 0 ? (analysis.stops[analysis.stops.length - 1].geofenceName || 'موقع غير مسجل') : undefined,
+    openedBy: 'system',
     createdAt: now,
-    updatedAt: now
+    updatedAt: now,
+    history: [
+      {
+        status: 'open',
+        timestamp: now,
+        actor: 'system',
+        notes: gpsStatus.issueDetails
+      }
+    ]
   };
 }
 
@@ -283,7 +302,12 @@ export class IngestionManager {
 
         const summaryDoc = convertAnalysisToDailySummary(analysis, target.driverId);
         allSummaries.push(summaryDoc);
-        const issueDoc = detectGpsIssueFromAnalysis(analysis);
+        const targetDriver = target as { driverId?: string; driverName?: string; driverPhone?: string };
+        const issueDoc = detectGpsIssueFromAnalysis(analysis, {
+          driverId: targetDriver.driverId,
+          driverName: targetDriver.driverName,
+          driverPhone: targetDriver.driverPhone
+        });
 
         if (changed) {
           if (!options.dryRun) {

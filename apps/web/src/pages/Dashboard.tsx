@@ -2,9 +2,13 @@ import { useState, useEffect } from 'preact/hooks';
 import { syncHealthService } from '../services/syncHealth';
 import { webSnapshotService, type SnapshotServiceState } from '../services/snapshot';
 import { settingsService } from '../services/settings';
+import { issuesService } from '../services/issues';
+import { GpsIssuesModal } from '../components/GpsIssuesModal';
+import { VehicleDetailsModal } from '../components/VehicleDetailsModal';
 import {
   type SyncHealthEvaluation,
   type SyncStateDocument,
+  type IssueDocument,
   resolveDashboardCards
 } from '@badawi/logic';
 import { showToast } from '../components/Toast';
@@ -13,6 +17,10 @@ export default function Dashboard() {
   const [evalResult, setEvalResult] = useState<SyncHealthEvaluation>(syncHealthService.getEvaluation());
   const [doc, setDoc] = useState<SyncStateDocument | null>(syncHealthService.getDocument());
   const [snapshotState, setSnapshotState] = useState<SnapshotServiceState>(webSnapshotService.getState());
+  const [issuesList, setIssuesList] = useState<IssueDocument[]>(() => issuesService.getIssues());
+  const [showIssuesModal, setShowIssuesModal] = useState(false);
+  const [selectedVehicleForModal, setSelectedVehicleForModal] = useState<string | undefined>(undefined);
+  const [selectedVehicleForDetails, setSelectedVehicleForDetails] = useState<string | null>(null);
   const [effectiveSettings, setEffectiveSettings] = useState<Record<string, unknown>>(
     settingsService.getEffectiveValues()
   );
@@ -33,6 +41,10 @@ export default function Dashboard() {
       setEffectiveSettings(settingsService.getEffectiveValues());
     });
 
+    const unsubIssues = issuesService.subscribe((list) => {
+      setIssuesList(list);
+    });
+
     // Ensure snapshot is loaded on mount
     webSnapshotService.loadSnapshot();
 
@@ -40,6 +52,7 @@ export default function Dashboard() {
       unsubHealth();
       unsubSnapshot();
       unsubSettings();
+      unsubIssues();
     };
   }, []);
 
@@ -277,7 +290,16 @@ export default function Dashboard() {
               }
 
               if (cardMeta.id === 'gps_issues') {
-                const hasIssues = totals.activeIssuesCount > 0;
+                const activeIssues = issuesList.filter(
+                  (i) => i.status === 'open' || i.status === 'contacted'
+                );
+                const activeCount = activeIssues.length;
+                const offlineCount = activeIssues.filter((i) => i.type === 'offline').length;
+                const frozenCount = activeIssues.filter((i) => i.type === 'frozen_signal').length;
+                const hasIssues = activeCount > 0;
+                const topIssue = activeIssues[0];
+                const topContact = topIssue ? issuesService.getContactInfo(topIssue) : null;
+
                 return (
                   <div
                     key="gps_issues"
@@ -294,7 +316,7 @@ export default function Dashboard() {
                   >
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <small style={{ color: 'var(--mute)' }}>مشاكل GPS المفتوحة</small>
+                        <small style={{ color: 'var(--mute)' }}>مشاكل GPS المفتوحة (ADR-019)</small>
                         <span
                           style={{
                             fontSize: '0.75rem',
@@ -302,7 +324,7 @@ export default function Dashboard() {
                             fontWeight: 600
                           }}
                         >
-                          {hasIssues ? 'تحتاج تواصل فوري' : 'سليم 100%'}
+                          {hasIssues ? `${activeCount} تحتاج تواصل فوري` : 'سليم 100%'}
                         </span>
                       </div>
                       <b
@@ -313,66 +335,122 @@ export default function Dashboard() {
                           margin: '4px 0'
                         }}
                       >
-                        {totals.activeIssuesCount} <span style={{ fontSize: '0.9rem', color: 'var(--mute)', fontWeight: 'normal' }}>مشكلة مفتوحة</span>
+                        {activeCount} <span style={{ fontSize: '0.9rem', color: 'var(--mute)', fontWeight: 'normal' }}>مشكلة مفتوحة</span>
                       </b>
                       <div style={{ fontSize: '0.75rem', color: 'var(--mute)' }}>
-                        <span>{totals.offlineCount} غير متصلة · 0 إشارة مجمدة</span>
+                        <span>{offlineCount} غير متصلة · {frozenCount} إشارة مجمدة</span>
                       </div>
                     </div>
 
-                    {/* Driver Quick Connect Action Row (ADR-011 & Vision §2-د) */}
-                    <div
-                      style={{
-                        marginTop: '10px',
-                        paddingTop: '8px',
-                        borderTop: '1px solid var(--line)',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '6px'
-                      }}
-                    >
-                      <span style={{ fontSize: '0.73rem', color: 'var(--tx)' }}>
-                        عربية <b>114</b> (سعيد سالم)
-                      </span>
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <a
-                          href="tel:01000000000"
+                    {/* Driver Quick Connect Action Row or All-Clear State */}
+                    {topIssue && topContact ? (
+                      <div
+                        style={{
+                          marginTop: '10px',
+                          paddingTop: '8px',
+                          borderTop: '1px solid var(--line)',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                          gap: '6px'
+                        }}
+                      >
+                        <span style={{ fontSize: '0.73rem', color: 'var(--tx)' }}>
+                          عربية <b>{topIssue.vehicleId}</b> ({topContact.driverName})
+                        </span>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          {topContact.driverPhone ? (
+                            <>
+                              <a
+                                href={topContact.telUrl}
+                                style={{
+                                  fontSize: '0.72rem',
+                                  padding: '3px 8px',
+                                  borderRadius: 'var(--r-xs)',
+                                  border: '1px solid var(--line)',
+                                  background: 'var(--soft)',
+                                  color: 'var(--tx)',
+                                  textDecoration: 'none',
+                                  fontWeight: 600
+                                }}
+                                title="اتصال هاتفي مباشر بالسائق (ADR-011)"
+                              >
+                                📞 اتصال
+                              </a>
+                              <a
+                                href={topContact.whatsAppUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  fontSize: '0.72rem',
+                                  padding: '3px 8px',
+                                  borderRadius: 'var(--r-xs)',
+                                  border: '1px solid #25D366',
+                                  background: 'rgba(37,211,102,0.1)',
+                                  color: '#25D366',
+                                  textDecoration: 'none',
+                                  fontWeight: 700
+                                }}
+                                title="مراسلة السائق على واتساب (ADR-011)"
+                              >
+                                💬 واتساب
+                              </a>
+                            </>
+                          ) : null}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedVehicleForModal(topIssue.vehicleId);
+                              setShowIssuesModal(true);
+                            }}
+                            style={{
+                              fontSize: '0.72rem',
+                              padding: '3px 8px',
+                              borderRadius: 'var(--r-xs)',
+                              border: '1px solid var(--accent)',
+                              background: 'var(--accent)',
+                              color: '#fff',
+                              cursor: 'pointer',
+                              fontWeight: 600
+                            }}
+                          >
+                            إدارة ({activeCount}) ←
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          marginTop: '10px',
+                          paddingTop: '8px',
+                          borderTop: '1px solid var(--line)',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          fontSize: '0.74rem'
+                        }}
+                      >
+                        <span style={{ color: 'var(--ok)' }}>✅ جميع الأجهزة تعمل بانتظام</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedVehicleForModal(undefined);
+                            setShowIssuesModal(true);
+                          }}
                           style={{
-                            fontSize: '0.72rem',
-                            padding: '3px 8px',
-                            borderRadius: 'var(--r-xs)',
-                            border: '1px solid var(--line)',
-                            background: 'var(--soft)',
-                            color: 'var(--tx)',
-                            textDecoration: 'none',
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--accent)',
+                            cursor: 'pointer',
+                            fontSize: '0.74rem',
                             fontWeight: 600
                           }}
-                          title="اتصال هاتفي مباشر بالسائق (ADR-011)"
                         >
-                          📞 اتصال
-                        </a>
-                        <a
-                          href="https://wa.me/201000000000?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%20%D9%8A%D8%B1%D8%AC%D9%89%20%D8%A7%D9%84%D8%AA%D8%AD%D9%82%D9%82%20%D9%85%D9%86%20%D8%AC%D9%87%D8%A7%D8%B2%20GPS"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            fontSize: '0.72rem',
-                            padding: '3px 8px',
-                            borderRadius: 'var(--r-xs)',
-                            border: '1px solid #25D366',
-                            background: 'rgba(37,211,102,0.1)',
-                            color: '#25D366',
-                            textDecoration: 'none',
-                            fontWeight: 700
-                          }}
-                          title="مراسلة السائق على واتساب (ADR-011)"
-                        >
-                          💬 واتساب
-                        </a>
+                          سجل المشاكل ←
+                        </button>
                       </div>
-                    </div>
+                    )}
                   </div>
                 );
               }
@@ -616,8 +694,46 @@ export default function Dashboard() {
                 filteredVehicles.slice(0, 15).map((v) => (
                   <tr key={v.vehicleId} style={{ borderBottom: '1px solid var(--line)' }}>
                     <td style={{ padding: '10px', fontWeight: 600, color: 'var(--ink)' }}>
-                      {v.name}
-                      {v.hasIssue && <span style={{ marginLeft: '6px', color: 'var(--bad)', fontSize: '0.72rem' }}>⚠️ مشكلة</span>}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedVehicleForDetails(v.vehicleId)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: 0,
+                          cursor: 'pointer',
+                          color: 'var(--accent)',
+                          fontWeight: 700,
+                          textAlign: 'right',
+                          textDecoration: 'underline'
+                        }}
+                        title="انقر لفتح تفاصيل العربية والحالة اللحظية (T6.3)"
+                      >
+                        {v.name}
+                      </button>
+                      {v.hasIssue && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedVehicleForModal(v.vehicleId);
+                            setShowIssuesModal(true);
+                          }}
+                          style={{
+                            marginRight: '6px',
+                            color: 'var(--bad)',
+                            fontSize: '0.72rem',
+                            background: 'rgba(198, 40, 40, 0.1)',
+                            border: '1px solid var(--bad)',
+                            borderRadius: 'var(--r-xs)',
+                            padding: '1px 6px',
+                            cursor: 'pointer',
+                            fontWeight: 600
+                          }}
+                          title="انقر لإدارة ومتابعة مشكلة GPS للعربية"
+                        >
+                          ⚠️ مشكلة GPS
+                        </button>
+                      )}
                     </td>
                     <td style={{ padding: '10px', color: 'var(--tx)' }}>
                       {v.type === 'tractor' ? 'جرار (خلاطة)' : v.type === 'truck' ? 'نقل' : 'ملاكي'}
@@ -661,6 +777,23 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* GPS Issues Management Modal (ADR-019 & ADR-011) */}
+      <GpsIssuesModal
+        isOpen={showIssuesModal}
+        onClose={() => {
+          setShowIssuesModal(false);
+          setSelectedVehicleForModal(undefined);
+        }}
+        initialVehicleId={selectedVehicleForModal}
+      />
+
+      {/* Vehicle Details & Telemetry Modal (T6.3, ADR-016, ADR-019) */}
+      <VehicleDetailsModal
+        isOpen={!!selectedVehicleForDetails}
+        vehicleId={selectedVehicleForDetails}
+        onClose={() => setSelectedVehicleForDetails(null)}
+      />
     </div>
   );
 }

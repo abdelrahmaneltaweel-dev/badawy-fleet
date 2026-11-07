@@ -97,7 +97,7 @@ export function buildFleetDailySnapshot(params: BuildSnapshotParams): DailySnaps
   const activeIssues: IssueDocument[] = [];
   if (params.issues) {
     for (const iss of params.issues) {
-      if (iss.status === 'open') {
+      if (iss.status === 'open' || iss.status === 'contacted') {
         issuesByVehicle.set(iss.vehicleId, iss);
         activeIssues.push(iss);
       }
@@ -214,7 +214,13 @@ export function buildFleetDailySnapshot(params: BuildSnapshotParams): DailySnaps
     type: iss.type,
     detectedAt: iss.detectedAt,
     status: iss.status,
-    notes: iss.notes
+    notes: iss.notes,
+    driverId: iss.driverId || null,
+    driverName: iss.driverName || (iss.driverId && params.driverNames ? params.driverNames[iss.driverId] : undefined),
+    driverPhone: iss.driverPhone,
+    contactedAt: iss.contactedAt,
+    resolvedAt: iss.resolvedAt,
+    offlineMinutes: iss.offlineMinutes
   }));
 
   const fleetTotals: FleetTotals = {

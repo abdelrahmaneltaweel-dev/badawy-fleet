@@ -13,3 +13,5 @@ export * from './Popover';
 export * from './Icon';
 export * from './PWAUpdateBanner';
 export * from './SyncHealthIndicator';
+export * from './GpsIssuesModal';
+export * from './VehicleDetailsModal';
